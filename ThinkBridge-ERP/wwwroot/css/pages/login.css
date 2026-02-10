@@ -1,0 +1,551 @@
+/* ==========================================
+   ThinkBridge ERP - Login Page Styles
+   ========================================== */
+
+.login-page {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: var(--surface);
+}
+
+.login-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Left Side - Branding */
+.login-branding {
+    flex: 1;
+    background: linear-gradient(135deg, #0B3D4C 0%, #0B3D4C 50%, #1A6B8A 100%);
+    padding: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-branding::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0px;
+    height: 100%;
+    background: var(--surface);
+    border-radius: 0;
+}
+
+.branding-content {
+    position: relative;
+    z-index: 1;
+    max-width: 500px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 48px;
+}
+
+.logo .logo-icon {
+    height: 50px;
+    width: auto;
+    filter: brightness(1.1);
+    mix-blend-mode: screen;
+}
+
+.logo .logo-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.logo .logo-think {
+    color: #ffffff;
+}
+
+.logo .logo-bridge {
+    color: var(--primary-orange);
+}
+
+.branding-title {
+    font-size: 2.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    color: #ffffff;
+}
+
+.branding-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 48px;
+}
+
+/* Feature Grid */
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.feature-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.feature-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    color: var(--primary-orange);
+}
+
+.feature-card h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 4px;
+}
+
+.feature-card p {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+}
+
+/* Right Side - Form Container */
+.login-form-container {
+    width: 50%;
+    min-width: 480px;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px;
+}
+
+.login-form-wrapper {
+    width: 100%;
+    max-width: 500px;
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--border);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.login-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.login-header p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+/* Form Styles */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    background: var(--surface);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(11, 79, 108, 0.1);
+}
+
+.form-input::placeholder {
+    color: var(--text-muted);
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-wrapper .form-input {
+    padding-right: 44px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+}
+
+.password-toggle:hover {
+    color: var(--text-primary);
+}
+
+/* Form Options Row */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.checkbox-label .checkbox {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-blue);
+}
+
+.forgot-link {
+    font-size: 0.875rem;
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.forgot-link:hover {
+    text-decoration: underline;
+}
+
+/* Submit Button */
+.btn-login {
+    width: 100%;
+    padding: 14px 24px;
+    background: var(--primary-blue);
+    color: #ffffff;
+    border: none;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+}
+
+.btn-login:hover {
+    background: var(--blue-dark);
+    transform: translateY(-1px);
+}
+
+.btn-login svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Login Footer */
+.login-footer {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+}
+
+.login-footer p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.login-footer a {
+    color: var(--primary-blue);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.login-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Terms */
+.login-terms {
+    margin-top: 24px;
+    text-align: center;
+}
+
+.login-terms p {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.login-terms a {
+    color: var(--primary-blue);
+    text-decoration: none;
+}
+
+.login-terms a:hover {
+    text-decoration: underline;
+}
+
+/* Role Select Dropdown */
+.form-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 20px;
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(11, 79, 108, 0.1);
+}
+
+/* Error Message */
+.error-message {
+    background-color: var(--danger-light);
+    border: 1px solid var(--danger);
+    border-radius: 8px;
+    padding: 12px 16px;
+}
+
+.error-text {
+    color: var(--danger);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Readonly Input */
+.form-input[readonly] {
+    background-color: var(--background);
+    cursor: not-allowed;
+    color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .login-branding {
+        display: none;
+    }
+
+    .login-form-container {
+        width: 100%;
+        min-width: unset;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-form-container {
+        padding: 24px;
+    }
+
+    .login-form-wrapper {
+        padding: 24px;
+    }
+
+    .form-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}
+
+/* Legal Content Modal Styles */
+.legal-content {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.legal-content h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 24px;
+    margin-bottom: 8px;
+}
+
+.legal-content h4:first-of-type {
+    margin-top: 12px;
+}
+
+.legal-content p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.legal-content ul {
+    margin: 0 0 16px 0;
+    padding-left: 24px;
+}
+
+.legal-content ul li {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 6px;
+}
+
+.legal-content ul li strong {
+    color: var(--text-primary);
+}
+
+.legal-updated {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.legal-compliance {
+    background: rgba(16, 185, 129, 0.1);
+    border-left: 3px solid var(--success);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 16px;
+}
+
+.legal-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.legal-content::-webkit-scrollbar-track {
+    background: var(--surface-darker);
+    border-radius: 3px;
+}
+
+.legal-content::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+.legal-content::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* Mobile Logo - Hidden on desktop, shown when branding panel is hidden */
+.login-logo-mobile {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 32px;
+}
+
+.login-logo-mobile .logo-icon {
+    height: 40px;
+    width: auto;
+}
+
+.login-logo-mobile .logo-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.login-logo-mobile .logo-think {
+    color: var(--primary-blue);
+}
+
+.login-logo-mobile .logo-bridge {
+    color: var(--primary-teal);
+}
+
+@media (max-width: 1024px) {
+    .login-logo-mobile {
+        display: flex;
+    }
+}
+
+/* Forgot Password Link */
+.forgot-password-link {
+    display: block;
+    text-align: right;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--primary-blue);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.forgot-password-link:hover {
+    color: var(--primary-teal);
+    text-decoration: underline;
+}
+
+/* Forgot Password Modal */
+.forgot-password-description {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.success-message {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid var(--success);
+    border-radius: 8px;
+    color: var(--success);
+    font-size: 0.875rem;
+}
+
+.success-message svg {
+    flex-shrink: 0;
+    stroke: var(--success);
+}

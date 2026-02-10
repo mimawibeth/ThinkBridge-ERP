@@ -1,0 +1,327 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["UserRole"] = "companyadmin";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/dashboard.css" asp-append-version="true" />
+}
+
+<div class="page-dashboard companyadmin-dashboard">
+    <!-- Welcome Section -->
+    <section class="welcome-section">
+        <h1 class="welcome-title">Welcome back, John!</h1>
+        <p class="welcome-subtitle">Here's an overview of your projects and activities.</p>
+    </section>
+
+    <!-- KPI Cards Section -->
+    <section class="kpi-section">
+        <div class="kpi-card">
+            <div class="kpi-content">
+                <span class="kpi-label">Active Projects</span>
+                <span class="kpi-value">12</span>
+                <span class="kpi-change positive">+2 this week</span>
+            </div>
+            <div class="kpi-icon blue">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-content">
+                <span class="kpi-label">Tasks Completed</span>
+                <span class="kpi-value">48</span>
+                <span class="kpi-change positive">+12 this week</span>
+            </div>
+            <div class="kpi-icon green">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-content">
+                <span class="kpi-label">Products in Development</span>
+                <span class="kpi-value">5</span>
+                <span class="kpi-change neutral">3 in testing</span>
+            </div>
+            <div class="kpi-icon purple">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-content">
+                <span class="kpi-label">Knowledge Articles</span>
+                <span class="kpi-value">156</span>
+                <span class="kpi-change positive">+8 this month</span>
+            </div>
+            <div class="kpi-icon orange">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <div class="dashboard-grid">
+        <!-- Recent Projects Section -->
+        <section class="dashboard-section recent-projects">
+            <div class="section-header">
+                <h2 class="section-title">Recent Projects</h2>
+                <a href="@Url.Action("Projects", "Ui", new { role = "companyadmin" })" class="view-all-link">
+                    View all
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+            </div>
+            <div class="projects-list">
+                <div class="project-card">
+                    <div class="project-header">
+                        <span class="project-id">PRJ-001</span>
+                        <span class="badge badge-in-progress">In Progress</span>
+                    </div>
+                    <h3 class="project-name">Customer Portal Redesign</h3>
+                    <div class="project-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 65%"></div>
+                        </div>
+                        <span class="progress-text">65%</span>
+                    </div>
+                    <div class="project-footer">
+                        <div class="project-team">
+                            <span class="team-avatar">JD</span>
+                            <span class="team-avatar">SK</span>
+                            <span class="team-avatar">LM</span>
+                        </div>
+                        <div class="project-date">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            Feb 28, 2026
+                        </div>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-header">
+                        <span class="project-id">PRJ-002</span>
+                        <span class="badge badge-review">Review</span>
+                    </div>
+                    <h3 class="project-name">API Gateway v2.0</h3>
+                    <div class="project-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 90%"></div>
+                        </div>
+                        <span class="progress-text">90%</span>
+                    </div>
+                    <div class="project-footer">
+                        <div class="project-team">
+                            <span class="team-avatar">MK</span>
+                            <span class="team-avatar">AN</span>
+                        </div>
+                        <div class="project-date">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            Feb 15, 2026
+                        </div>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-header">
+                        <span class="project-id">PRJ-003</span>
+                        <span class="badge badge-planning">Planning</span>
+                    </div>
+                    <h3 class="project-name">Mobile App Analytics</h3>
+                    <div class="project-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 15%"></div>
+                        </div>
+                        <span class="progress-text">15%</span>
+                    </div>
+                    <div class="project-footer">
+                        <div class="project-team">
+                            <span class="team-avatar">JD</span>
+                            <span class="team-avatar">RW</span>
+                            <span class="team-avatar">SK</span>
+                            <span class="team-avatar-more">+1</span>
+                        </div>
+                        <div class="project-date">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            Mar 30, 2026
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Activity Section -->
+        <section class="dashboard-section recent-activity">
+            <div class="section-header">
+                <h2 class="section-title">Recent Activity</h2>
+                <a href="@Url.Action("Activity", "Ui", new { role = "companyadmin" })" class="view-all-link">
+                    View all
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+            </div>
+            <div class="activity-list">
+                <div class="activity-item">
+                    <div class="activity-avatar">SK</div>
+                    <div class="activity-content">
+                        <p><strong>Sarah Kim</strong> completed task <a href="#">Implement OAuth 2.0 flow</a></p>
+                        <span class="activity-time">5 minutes ago</span>
+                    </div>
+                    <div class="activity-icon completed">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-avatar">ML</div>
+                    <div class="activity-content">
+                        <p><strong>Michael Lee</strong> uploaded document <a href="#">API Documentation v2.1</a></p>
+                        <span class="activity-time">32 minutes ago</span>
+                    </div>
+                    <div class="activity-icon upload">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-avatar">JD</div>
+                    <div class="activity-content">
+                        <p><strong>John Doe</strong> moved product to <a href="#">Testing phase</a></p>
+                        <span class="activity-time">1 hour ago</span>
+                    </div>
+                    <div class="activity-icon lifecycle">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-avatar">AW</div>
+                    <div class="activity-content">
+                        <p><strong>Anna Wilson</strong> created project <a href="#">Mobile App Analytics</a></p>
+                        <span class="activity-time">2 hours ago</span>
+                    </div>
+                    <div class="activity-icon project">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-avatar">RC</div>
+                    <div class="activity-content">
+                        <p><strong>Robert Chen</strong> commented on <a href="#">Customer Portal Redesign</a></p>
+                        <span class="activity-time">3 hours ago</span>
+                    </div>
+                    <div class="activity-icon comment">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Lifecycle Status Overview -->
+    <section class="dashboard-section lifecycle-overview">
+        <div class="section-header">
+            <h2 class="section-title">Lifecycle Status Overview</h2>
+            <a href="@Url.Action("ProductLifecycle", "Ui", new { role = "companyadmin" })" class="view-all-link">
+                View details
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </a>
+        </div>
+        <div class="lifecycle-pipeline">
+            <div class="lifecycle-stage completed">
+                <div class="stage-indicator">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <span class="stage-name">Planning</span>
+            </div>
+            <div class="lifecycle-connector"></div>
+            <div class="lifecycle-stage active">
+                <div class="stage-indicator">2</div>
+                <span class="stage-name">Development</span>
+            </div>
+            <div class="lifecycle-connector"></div>
+            <div class="lifecycle-stage">
+                <div class="stage-indicator">3</div>
+                <span class="stage-name">Testing</span>
+            </div>
+            <div class="lifecycle-connector"></div>
+            <div class="lifecycle-stage">
+                <div class="stage-indicator">4</div>
+                <span class="stage-name">Deployment</span>
+            </div>
+            <div class="lifecycle-connector"></div>
+            <div class="lifecycle-stage">
+                <div class="stage-indicator">5</div>
+                <span class="stage-name">Completed</span>
+            </div>
+        </div>
+        <div class="lifecycle-stats">
+            <div class="lifecycle-stat-card">
+                <span class="stat-stage">Planning</span>
+                <span class="stat-count">3</span>
+            </div>
+            <div class="lifecycle-stat-card">
+                <span class="stat-stage">Development</span>
+                <span class="stat-count">4</span>
+            </div>
+            <div class="lifecycle-stat-card">
+                <span class="stat-stage">Testing</span>
+                <span class="stat-count">2</span>
+            </div>
+            <div class="lifecycle-stat-card">
+                <span class="stat-stage">Completed</span>
+                <span class="stat-count">8</span>
+            </div>
+        </div>
+    </section>
+</div>

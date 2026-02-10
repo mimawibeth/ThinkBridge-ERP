@@ -1,0 +1,579 @@
+@{
+    ViewData["Title"] = "Projects";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/projects.css" asp-append-version="true" />
+}
+
+<div class="page-projects">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-filters">
+            <div class="search-box">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" class="search-input" placeholder="Search projects..." />
+            </div>
+            <div class="filter-dropdown">
+                <button class="filter-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                    All Status
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <button class="btn btn-primary" id="new-project-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            New Project
+        </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-container">
+        <button class="tab-btn active" data-tab="all">All</button>
+        <button class="tab-btn" data-tab="active">Active</button>
+        <button class="tab-btn" data-tab="completed">Completed</button>
+        <button class="tab-btn" data-tab="archived">Archived</button>
+    </div>
+
+    <!-- Projects Grid -->
+    <div class="projects-grid">
+        <!-- Project Card 1 -->
+        <div class="project-card">
+            <div class="project-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+            </div>
+            <div class="project-content">
+                <div class="project-header">
+                    <span class="project-id">PRJ-001</span>
+                </div>
+                <h3 class="project-name">Customer Portal Redesign</h3>
+                <p class="project-description">Complete overhaul of the customer-facing portal with modern UI/UX</p>
+                <div class="project-tags">
+                    <span class="badge badge-in-progress">In Progress</span>
+                    <span class="badge badge-category">Development</span>
+                </div>
+                <div class="project-progress">
+                    <div class="progress-header">
+                        <span>Progress</span>
+                        <span class="progress-percent">65%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 65%"></div>
+                    </div>
+                </div>
+                <div class="project-footer">
+                    <div class="project-team">
+                        <span class="team-avatar">JD</span>
+                        <span class="team-avatar">SK</span>
+                        <span class="team-avatar">LM</span>
+                    </div>
+                    <div class="project-date">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Feb 28, 2026
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Card 2 -->
+        <div class="project-card">
+            <div class="project-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+            </div>
+            <div class="project-content">
+                <div class="project-header">
+                    <span class="project-id">PRJ-002</span>
+                </div>
+                <h3 class="project-name">API Gateway v2.0</h3>
+                <p class="project-description">New API gateway with improved rate limiting and caching</p>
+                <div class="project-tags">
+                    <span class="badge badge-review">Review</span>
+                    <span class="badge badge-category">Infrastructure</span>
+                </div>
+                <div class="project-progress">
+                    <div class="progress-header">
+                        <span>Progress</span>
+                        <span class="progress-percent">90%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 90%"></div>
+                    </div>
+                </div>
+                <div class="project-footer">
+                    <div class="project-team">
+                        <span class="team-avatar">MK</span>
+                        <span class="team-avatar">AN</span>
+                    </div>
+                    <div class="project-date">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Feb 15, 2026
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Card 3 -->
+        <div class="project-card">
+            <div class="project-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+            </div>
+            <div class="project-content">
+                <div class="project-header">
+                    <span class="project-id">PRJ-003</span>
+                </div>
+                <h3 class="project-name">Mobile App Analytics</h3>
+                <p class="project-description">Implement comprehensive analytics tracking for mobile applications</p>
+                <div class="project-tags">
+                    <span class="badge badge-planning">Planning</span>
+                    <span class="badge badge-category">Analytics</span>
+                </div>
+                <div class="project-progress">
+                    <div class="progress-header">
+                        <span>Progress</span>
+                        <span class="progress-percent">15%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 15%"></div>
+                    </div>
+                </div>
+                <div class="project-footer">
+                    <div class="project-team">
+                        <span class="team-avatar">JD</span>
+                        <span class="team-avatar">RW</span>
+                        <span class="team-avatar">SK</span>
+                        <span class="team-avatar-more">+1</span>
+                    </div>
+                    <div class="project-date">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Mar 30, 2026
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Card 4 -->
+        <div class="project-card">
+            <div class="project-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+            </div>
+            <div class="project-content">
+                <div class="project-header">
+                    <span class="project-id">PRJ-004</span>
+                </div>
+                <h3 class="project-name">E-commerce Platform Migration</h3>
+                <p class="project-description">Migrate legacy e-commerce system to microservices architecture</p>
+                <div class="project-tags">
+                    <span class="badge badge-in-progress">In Progress</span>
+                    <span class="badge badge-category">Development</span>
+                </div>
+                <div class="project-progress">
+                    <div class="progress-header">
+                        <span>Progress</span>
+                        <span class="progress-percent">45%</span>
+                    </div>
+                    <div class="progress-bar progress-bar-warning">
+                        <div class="progress-fill" style="width: 45%"></div>
+                    </div>
+                </div>
+                <div class="project-footer">
+                    <div class="project-team">
+                        <span class="team-avatar">EC</span>
+                        <span class="team-avatar">DP</span>
+                    </div>
+                    <div class="project-date">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Apr 15, 2026
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Card 5 -->
+        <div class="project-card">
+            <div class="project-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+            </div>
+            <div class="project-content">
+                <div class="project-header">
+                    <span class="project-id">PRJ-005</span>
+                </div>
+                <h3 class="project-name">Security Audit 2026</h3>
+                <p class="project-description">Annual security assessment and vulnerability remediation</p>
+                <div class="project-tags">
+                    <span class="badge badge-completed">Completed</span>
+                    <span class="badge badge-category">Security</span>
+                </div>
+                <div class="project-progress">
+                    <div class="progress-header">
+                        <span>Progress</span>
+                        <span class="progress-percent">100%</span>
+                    </div>
+                    <div class="progress-bar progress-bar-success">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="project-footer">
+                    <div class="project-team">
+                        <span class="team-avatar">ST</span>
+                    </div>
+                    <div class="project-date">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Jan 31, 2026
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Card 6 -->
+        <div class="project-card">
+            <div class="project-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+            </div>
+            <div class="project-content">
+                <div class="project-header">
+                    <span class="project-id">PRJ-006</span>
+                </div>
+                <h3 class="project-name">Documentation Revamp</h3>
+                <p class="project-description">Update all technical documentation and create interactive guides</p>
+                <div class="project-tags">
+                    <span class="badge badge-delayed">Delayed</span>
+                    <span class="badge badge-category">Documentation</span>
+                </div>
+                <div class="project-progress">
+                    <div class="progress-header">
+                        <span>Progress</span>
+                        <span class="progress-percent">30%</span>
+                    </div>
+                    <div class="progress-bar progress-bar-danger">
+                        <div class="progress-fill" style="width: 30%"></div>
+                    </div>
+                </div>
+                <div class="project-footer">
+                    <div class="project-team">
+                        <span class="team-avatar">TW</span>
+                        <span class="team-avatar">JD</span>
+                    </div>
+                    <div class="project-date">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Feb 01, 2026
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Project Modal -->
+<div class="modal-overlay" id="new-project-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h2>Create New Project</h2>
+            <button class="modal-close" id="modal-close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form class="project-form">
+                <div class="form-group">
+                    <label for="project-name">Project Name</label>
+                    <input type="text" id="project-name" class="form-input" placeholder="Enter project name" />
+                </div>
+                <div class="form-group">
+                    <label for="project-description">Description</label>
+                    <textarea id="project-description" class="form-textarea" rows="3" placeholder="Enter project description"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="start-date">Start Date</label>
+                        <input type="date" id="start-date" class="form-input" />
+                    </div>
+                    <div class="form-group">
+                        <label for="due-date">Due Date</label>
+                        <input type="date" id="due-date" class="form-input" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="project-status">Status</label>
+                        <select id="project-status" class="form-select">
+                            <option value="planning">Planning</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="review">Review</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="project-category">Category</label>
+                        <select id="project-category" class="form-select">
+                            <option value="development">Development</option>
+                            <option value="infrastructure">Infrastructure</option>
+                            <option value="analytics">Analytics</option>
+                            <option value="security">Security</option>
+                            <option value="documentation">Documentation</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="team-members">Assign Team Members</label>
+                    <select id="team-members" class="form-select" multiple>
+                        <option value="jd">John Doe</option>
+                        <option value="sk">Sarah Kim</option>
+                        <option value="mk">Michael Kim</option>
+                        <option value="lm">Lisa Moore</option>
+                        <option value="an">Alex Nguyen</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+            <button class="btn btn-primary">Create Project</button>
+        </div>
+    </div>
+</div>
+
+<!-- View Project Modal -->
+<div class="modal-overlay" id="view-project-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header modal-header-primary">
+            <div>
+                <h2>Customer Portal Redesign</h2>
+                <p class="modal-subtitle">PRJ-001</p>
+            </div>
+            <button class="modal-close" data-modal-close>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="detail-section">
+                <h4 class="detail-section-title">Project Information</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Status</span>
+                        <span class="badge badge-in-progress">In Progress</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Category</span>
+                        <span class="badge badge-category">Development</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Start Date</span>
+                        <span class="detail-value">Jan 15, 2026</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Due Date</span>
+                        <span class="detail-value">Feb 28, 2026</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h4 class="detail-section-title">Description</h4>
+                <p class="detail-description">Complete overhaul of the customer-facing portal with modern UI/UX. This includes redesigning the dashboard, implementing new navigation patterns, and improving overall user experience based on customer feedback.</p>
+            </div>
+
+            <div class="detail-section">
+                <h4 class="detail-section-title">Progress</h4>
+                <div class="detail-progress">
+                    <div class="detail-progress-header">
+                        <span class="detail-progress-label">Overall Completion</span>
+                        <span class="detail-progress-value">65%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 65%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h4 class="detail-section-title">Team Members</h4>
+                <div class="detail-team">
+                    <div class="detail-team-member">
+                        <span class="member-avatar">JD</span>
+                        <span class="member-name">John Doe</span>
+                    </div>
+                    <div class="detail-team-member">
+                        <span class="member-avatar">SK</span>
+                        <span class="member-name">Sarah Kim</span>
+                    </div>
+                    <div class="detail-team-member">
+                        <span class="member-avatar">LM</span>
+                        <span class="member-name">Lisa Moore</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h4 class="detail-section-title">Recent Activity</h4>
+                <div class="detail-timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <span class="timeline-date">Feb 10, 2026 - 10:30 AM</span>
+                            <p class="timeline-text">Sarah Kim completed task "Design homepage layout"</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <span class="timeline-date">Feb 09, 2026 - 3:45 PM</span>
+                            <p class="timeline-text">John Doe uploaded document "UI Specifications v2"</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <span class="timeline-date">Feb 08, 2026 - 11:00 AM</span>
+                            <p class="timeline-text">Project milestone "Phase 1" completed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-modal-close>Close</button>
+            <button class="btn btn-primary" id="edit-project-from-view">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                Edit Project
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Project Modal -->
+<div class="modal-overlay" id="edit-project-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <div>
+                <h2>Edit Project</h2>
+                <p class="modal-subtitle">PRJ-001</p>
+            </div>
+            <button class="modal-close" data-modal-close>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form class="project-form">
+                <div class="form-group">
+                    <label for="edit-project-name">Project Name</label>
+                    <input type="text" id="edit-project-name" class="form-input" value="Customer Portal Redesign" />
+                </div>
+                <div class="form-group">
+                    <label for="edit-project-description">Description</label>
+                    <textarea id="edit-project-description" class="form-textarea" rows="3">Complete overhaul of the customer-facing portal with modern UI/UX</textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-start-date">Start Date</label>
+                        <input type="date" id="edit-start-date" class="form-input" value="2026-01-15" />
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-due-date">Due Date</label>
+                        <input type="date" id="edit-due-date" class="form-input" value="2026-02-28" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-project-status">Status</label>
+                        <select id="edit-project-status" class="form-select">
+                            <option value="planning">Planning</option>
+                            <option value="in-progress" selected>In Progress</option>
+                            <option value="review">Review</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-project-category">Category</label>
+                        <select id="edit-project-category" class="form-select">
+                            <option value="development" selected>Development</option>
+                            <option value="infrastructure">Infrastructure</option>
+                            <option value="analytics">Analytics</option>
+                            <option value="security">Security</option>
+                            <option value="documentation">Documentation</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="edit-team-members">Team Members</label>
+                    <select id="edit-team-members" class="form-select" multiple>
+                        <option value="jd" selected>John Doe</option>
+                        <option value="sk" selected>Sarah Kim</option>
+                        <option value="mk">Michael Kim</option>
+                        <option value="lm" selected>Lisa Moore</option>
+                        <option value="an">Alex Nguyen</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-modal-close>Cancel</button>
+            <button class="btn btn-primary">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+@section PageScripts {
+    <script src="~/js/pages/projects.js" asp-append-version="true"></script>
+}

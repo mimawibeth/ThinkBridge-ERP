@@ -1,0 +1,258 @@
+/* ==========================================
+   ThinkBridge ERP - Tasks Page Styles
+   ========================================== */
+
+/* Page Container */
+.page-tasks {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Tasks Table Container */
+.table-container {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.tasks-table {
+    width: 100%;
+}
+
+.tasks-table th {
+    background: var(--background);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    padding: var(--spacing-md);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.tasks-table td {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--border-light);
+    vertical-align: middle;
+}
+
+.tasks-table tr:hover {
+    background: var(--background);
+}
+
+/* Task Cell */
+.task-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.task-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-blue);
+    cursor: pointer;
+}
+
+.task-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.task-name {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.task-id {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+/* Project Cell */
+.project-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.project-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+}
+
+.project-dot.blue {
+    background: var(--primary-blue);
+}
+
+.project-dot.orange {
+    background: var(--primary-orange);
+}
+
+.project-dot.green {
+    background: var(--success);
+}
+
+.project-dot.purple {
+    background: #7C3AED;
+}
+
+.project-link {
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.project-link:hover {
+    color: var(--primary-blue);
+}
+
+/* Priority Badge */
+.priority-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+}
+
+.priority-badge.critical {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+.priority-badge.high {
+    background: var(--warning-light);
+    color: #B45309;
+}
+
+.priority-badge.medium {
+    background: var(--info-light);
+    color: var(--info);
+}
+
+.priority-badge.low {
+    background: var(--border-light);
+    color: var(--text-secondary);
+}
+
+.priority-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+}
+
+.priority-badge.critical .priority-dot {
+    background: var(--danger);
+}
+
+.priority-badge.high .priority-dot {
+    background: var(--warning);
+}
+
+.priority-badge.medium .priority-dot {
+    background: var(--info);
+}
+
+.priority-badge.low .priority-dot {
+    background: var(--text-muted);
+}
+
+/* Due Date */
+.due-date {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.due-date.overdue {
+    color: var(--danger);
+}
+
+.due-date.soon {
+    color: var(--warning);
+}
+
+.due-date svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Assignees */
+.assignees-cell {
+    display: flex;
+    align-items: center;
+}
+
+/* Stage Badge */
+.stage-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+}
+
+.stage-badge.development {
+    background: var(--info-light);
+    color: var(--info);
+}
+
+.stage-badge.design {
+    background: #E9D5FF;
+    color: #7C3AED;
+}
+
+.stage-badge.planning {
+    background: var(--border-light);
+    color: var(--text-secondary);
+}
+
+.stage-badge.testing {
+    background: var(--warning-light);
+    color: #B45309;
+}
+
+.stage-badge.review {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+/* Actions */
+.actions-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.action-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.action-btn:hover {
+    background: var(--background);
+    color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .tasks-table {
+        display: block;
+        overflow-x: auto;
+    }
+}

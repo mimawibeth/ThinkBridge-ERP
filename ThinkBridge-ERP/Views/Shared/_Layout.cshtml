@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ThinkBridge ERP</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono&display=swap"
+          rel="stylesheet">
+
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <!-- Page-specific CSS -->
+    @await RenderSectionAsync("PageStyles", required: false)
+</head>
+<body class="@ViewData["BodyClass"]">
+    @{
+        var hideLayout = ViewData["HideLayout"] as bool? ?? false;
+    }
+    @if (hideLayout)
+    {
+        @RenderBody()
+    }
+    else
+    {
+        <!-- Sidebar Overlay (for mobile) -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Mobile Toggle Button -->
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+
+        <div class="app-container">
+            <!-- Sidebar (Role-specific) -->
+            @{
+                var userRole = ViewData["UserRole"]?.ToString() ?? "";
+                var sidebarPartial = userRole switch
+                {
+                    "superadmin" => "_SidebarSuperAdmin",
+                    "projectmanager" => "_SidebarProjectManager",
+                    "teammember" => "_SidebarTeamMember",
+                    _ => "_Sidebar" // Default for companyadmin
+                };
+            }
+            @await Html.PartialAsync(sidebarPartial)
+
+            <!-- Main Content Wrapper -->
+            <div class="main-wrapper">
+                <!-- Topbar -->
+                @await Html.PartialAsync("_Topbar")
+
+                <!-- Page Content -->
+                <main class="main-content">
+                    @RenderBody()
+                </main>
+            </div>
+        </div>
+
+        <!-- Modals Container -->
+        <div id="modal-container"></div>
+    }
+
+    <!-- Global JS -->
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- Page-specific JS -->
+    @await RenderSectionAsync("PageScripts", required: false)
+</body>
+
+</html>

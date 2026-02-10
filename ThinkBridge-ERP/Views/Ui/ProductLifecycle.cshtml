@@ -1,0 +1,644 @@
+@{
+    ViewData["Title"] = "Product Lifecycle";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/product-lifecycle.css" asp-append-version="true" />
+}
+
+<div class="page-product-lifecycle">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-filters">
+            <div class="search-box">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" class="search-input" placeholder="Search products..." />
+            </div>
+            <div class="filter-dropdown">
+                <button class="filter-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                    All Stages
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lifecycle Pipeline Overview -->
+    <section class="pipeline-section">
+        <h2 class="section-title">Lifecycle Pipeline</h2>
+        <div class="pipeline-stages">
+            <div class="pipeline-stage">
+                <div class="stage-box">
+                    <span class="stage-name">Planning</span>
+                    <span class="stage-count">2</span>
+                    <span class="stage-label">products</span>
+                </div>
+            </div>
+            <div class="pipeline-connector">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </div>
+            <div class="pipeline-stage">
+                <div class="stage-box">
+                    <span class="stage-name">Development</span>
+                    <span class="stage-count">2</span>
+                    <span class="stage-label">products</span>
+                </div>
+            </div>
+            <div class="pipeline-connector">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </div>
+            <div class="pipeline-stage">
+                <div class="stage-box">
+                    <span class="stage-name">Testing</span>
+                    <span class="stage-count">2</span>
+                    <span class="stage-label">products</span>
+                </div>
+            </div>
+            <div class="pipeline-connector">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </div>
+            <div class="pipeline-stage">
+                <div class="stage-box">
+                    <span class="stage-name">Deployment</span>
+                    <span class="stage-count">1</span>
+                    <span class="stage-label">products</span>
+                </div>
+            </div>
+            <div class="pipeline-connector">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </div>
+            <div class="pipeline-stage completed">
+                <div class="stage-box">
+                    <span class="stage-name">Completed</span>
+                    <span class="stage-count">1</span>
+                    <span class="stage-label">products</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- View Toggle -->
+    <div class="view-toggle">
+        <button class="view-btn active" data-view="kanban">Kanban View</button>
+        <button class="view-btn" data-view="list">List View</button>
+    </div>
+
+    <!-- Kanban Board -->
+    <div class="kanban-board" id="kanban-view">
+        <!-- Planning Column -->
+        <div class="kanban-column">
+            <div class="column-header">
+                <h3 class="column-title">Planning</h3>
+                <span class="column-count">2 items</span>
+            </div>
+            <div class="column-content">
+                <div class="product-card">
+                    <div class="product-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-id">PLM-006</span>
+                        <h4 class="product-name">CRM Integration Module</h4>
+                        <p class="product-description">Salesforce and HubSpot integration module for customer data sync
+                        </p>
+                        <div class="product-meta">
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M9 11l3 3L22 4"></path>
+                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                                </svg>
+                                2/8
+                            </span>
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                4
+                            </span>
+                            <span class="meta-time">1 day ago</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-id">PLM-008</span>
+                        <h4 class="product-name">IoT Data Hub</h4>
+                        <p class="product-description">Real-time IoT data ingestion and processing platform</p>
+                        <div class="product-meta">
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M9 11l3 3L22 4"></path>
+                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                                </svg>
+                                0/5
+                            </span>
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                3
+                            </span>
+                            <span class="meta-time">2 days ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Development Column -->
+        <div class="kanban-column">
+            <div class="column-header">
+                <h3 class="column-title">Development</h3>
+                <span class="column-count">2 items</span>
+            </div>
+            <div class="column-content">
+                <div class="product-card">
+                    <div class="product-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-id">PLM-001</span>
+                        <h4 class="product-name">Customer Analytics Dashboard</h4>
+                        <p class="product-description">Real-time analytics dashboard for customer behavior tracking</p>
+                        <div class="product-meta">
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M9 11l3 3L22 4"></path>
+                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                                </svg>
+                                5/12
+                            </span>
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                8
+                            </span>
+                            <span class="meta-time">2 hours ago</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-id">PLM-005</span>
+                        <h4 class="product-name">Reporting Engine v2</h4>
+                        <p class="product-description">Advanced reporting with custom dashboards and scheduled exports
+                        </p>
+                        <div class="product-meta">
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M9 11l3 3L22 4"></path>
+                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                                </svg>
+                                8/20
+                            </span>
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                10
+                            </span>
+                            <span class="meta-time">3 hours ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Testing Column -->
+        <div class="kanban-column">
+            <div class="column-header">
+                <h3 class="column-title">Testing</h3>
+                <span class="column-count">2 items</span>
+            </div>
+            <div class="column-content">
+                <div class="product-card">
+                    <div class="product-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-id">PLM-002</span>
+                        <h4 class="product-name">API Gateway Service</h4>
+                        <p class="product-description">High-performance API gateway with advanced routing and caching
+                        </p>
+                        <div class="product-meta">
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M9 11l3 3L22 4"></path>
+                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                                </svg>
+                                16/18
+                            </span>
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                15
+                            </span>
+                            <span class="meta-time">30 minutes ago</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-id">PLM-004</span>
+                        <h4 class="product-name">Notification Engine</h4>
+                        <p class="product-description">Multi-channel notification system supporting email, SMS, and push
+                        </p>
+                        <div class="product-meta">
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M9 11l3 3L22 4"></path>
+                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                                </svg>
+                                12/15
+                            </span>
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                6
+                            </span>
+                            <span class="meta-time">4 hours ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deployment Column -->
+        <div class="kanban-column">
+            <div class="column-header">
+                <h3 class="column-title">Deployment</h3>
+                <span class="column-count">1 items</span>
+            </div>
+            <div class="column-content">
+                <div class="product-card">
+                    <div class="product-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="product-content">
+                        <span class="product-id">PLM-003</span>
+                        <h4 class="product-name">Auth Service v3</h4>
+                        <p class="product-description">OAuth 2.0 and SAML authentication service with MFA support</p>
+                        <div class="product-meta">
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M9 11l3 3L22 4"></path>
+                                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                                </svg>
+                                20/20
+                            </span>
+                            <span class="meta-item">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                </svg>
+                                12
+                            </span>
+                            <span class="meta-time">1 hour ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Detail Panel -->
+        <div class="product-detail-panel">
+            <div class="panel-placeholder">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <h3>No Product Selected</h3>
+                <p>Select a product to view its lifecycle details</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Product Modal -->
+<div class="modal-overlay" id="new-product-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h2>Add New Product</h2>
+            <button class="modal-close" data-modal-close>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form class="product-form">
+                <div class="form-group">
+                    <label for="product-name">Product Name</label>
+                    <input type="text" id="product-name" class="form-input" placeholder="Enter product name" />
+                </div>
+                <div class="form-group">
+                    <label for="product-description">Description</label>
+                    <textarea id="product-description" class="form-textarea" rows="3"
+                              placeholder="Enter product description"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-stage">Initial Stage</label>
+                        <select id="product-stage" class="form-select">
+                            <option value="planning">Planning</option>
+                            <option value="development">Development</option>
+                            <option value="testing">Testing</option>
+                            <option value="deployment">Deployment</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-priority">Priority</label>
+                        <select id="product-priority" class="form-select">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="product-start-date">Start Date</label>
+                        <input type="date" id="product-start-date" class="form-input" />
+                    </div>
+                    <div class="form-group">
+                        <label for="product-target-date">Target Completion</label>
+                        <input type="date" id="product-target-date" class="form-input" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="product-owner">Product Owner</label>
+                    <select id="product-owner" class="form-select">
+                        <option value="">Select Owner</option>
+                        <option value="jd">John Doe</option>
+                        <option value="sk">Sarah Kim</option>
+                        <option value="mk">Michael Kim</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-modal-close>Cancel</button>
+            <button class="btn btn-primary">Create Product</button>
+        </div>
+    </div>
+</div>
+
+<!-- View Product Modal -->
+<div class="modal-overlay" id="view-product-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header modal-header-primary">
+            <div>
+                <h2>Customer Analytics Dashboard</h2>
+                <p class="modal-subtitle">PLM-001</p>
+            </div>
+            <button class="modal-close" data-modal-close>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="detail-section">
+                <h4 class="detail-section-title">Product Information</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Current Stage</span>
+                        <span class="badge badge-in-progress">Development</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Priority</span>
+                        <span class="priority priority-high">High</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Start Date</span>
+                        <span class="detail-value">Jan 10, 2026</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Target Date</span>
+                        <span class="detail-value">Mar 15, 2026</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Product Owner</span>
+                        <span class="detail-value">John Doe</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Documents</span>
+                        <span class="detail-value">8 files</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h4 class="detail-section-title">Description</h4>
+                <p class="detail-description">Real-time analytics dashboard for customer behavior tracking. This product
+                    includes data visualization components, report generation, and integration with existing CRM
+                    systems.</p>
+                </div>
+
+                <div class="detail-section">
+                    <h4 class="detail-section-title">Task Progress</h4>
+                    <div class="detail-progress">
+                        <div class="detail-progress-header">
+                            <span class="detail-progress-label">Tasks Completed</span>
+                            <span class="detail-progress-value">5 of 12 (42%)</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 42%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4 class="detail-section-title">Lifecycle History</h4>
+                    <div class="detail-timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <span class="timeline-date">Feb 05, 2026</span>
+                                <p class="timeline-text">Moved to Development stage</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <span class="timeline-date">Jan 20, 2026</span>
+                                <p class="timeline-text">Planning phase completed</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <span class="timeline-date">Jan 10, 2026</span>
+                                <p class="timeline-text">Product created by John Doe</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-modal-close>Close</button>
+                <button class="btn btn-primary" id="edit-product-from-view">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    Edit Product
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div class="modal-overlay" id="edit-product-modal">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <div>
+                    <h2>Edit Product</h2>
+                    <p class="modal-subtitle">PLM-001</p>
+                </div>
+                <button class="modal-close" data-modal-close>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="product-form">
+                    <div class="form-group">
+                        <label for="edit-product-name">Product Name</label>
+                        <input type="text" id="edit-product-name" class="form-input" value="Customer Analytics Dashboard" />
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-product-description">Description</label>
+                        <textarea id="edit-product-description" class="form-textarea"
+                                  rows="3">Real-time analytics dashboard for customer behavior tracking</textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-product-stage">Current Stage</label>
+                            <select id="edit-product-stage" class="form-select">
+                                <option value="planning">Planning</option>
+                                <option value="development" selected>Development</option>
+                                <option value="testing">Testing</option>
+                                <option value="deployment">Deployment</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-product-priority">Priority</label>
+                            <select id="edit-product-priority" class="form-select">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high" selected>High</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-product-start-date">Start Date</label>
+                            <input type="date" id="edit-product-start-date" class="form-input" value="2026-01-10" />
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-product-target-date">Target Completion</label>
+                            <input type="date" id="edit-product-target-date" class="form-input" value="2026-03-15" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-product-owner">Product Owner</label>
+                        <select id="edit-product-owner" class="form-select">
+                            <option value="jd" selected>John Doe</option>
+                            <option value="sk">Sarah Kim</option>
+                            <option value="mk">Michael Kim</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-modal-close>Cancel</button>
+                <button class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    @section PageScripts {
+        <script src="~/js/pages/product-lifecycle.js" asp-append-version="true"></script>
+    }

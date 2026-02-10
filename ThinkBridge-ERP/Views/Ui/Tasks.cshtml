@@ -1,0 +1,621 @@
+@{
+    ViewData["Title"] = "Tasks";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/tasks.css" asp-append-version="true" />
+}
+
+<div class="page-tasks">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-filters">
+            <div class="search-box">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" class="search-input" placeholder="Search tasks..." />
+            </div>
+            <div class="filter-dropdown">
+                <button class="filter-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                    All Status
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <button class="btn btn-primary" id="new-task-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            New Task
+        </button>
+    </div>
+
+    <!-- Tasks Table -->
+    <div class="table-container">
+        <table class="tasks-table">
+            <thead>
+                <tr>
+                    <th class="th-checkbox">
+                        <input type="checkbox" class="checkbox" id="select-all" />
+                    </th>
+                    <th class="th-task">
+                        Task
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <polyline points="19 12 12 19 5 12"></polyline>
+                        </svg>
+                    </th>
+                    <th>Project</th>
+                    <th>Status</th>
+                    <th>Priority</th>
+                    <th>Due Date</th>
+                    <th>Assignees</th>
+                    <th>Stage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="td-checkbox">
+                        <input type="checkbox" class="checkbox task-checkbox" />
+                    </td>
+                    <td class="td-task">
+                        <div class="task-info">
+                            <span class="task-id">TSK-001</span>
+                            <span class="task-name">Implement OAuth 2.0 authentication flow</span>
+                        </div>
+                    </td>
+                    <td class="td-project">Customer Portal Redesign</td>
+                    <td class="td-status">
+                        <span class="badge badge-in-progress">In Progress</span>
+                    </td>
+                    <td class="td-priority">
+                        <span class="priority priority-high">High</span>
+                    </td>
+                    <td class="td-date">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Feb 10, 2026
+                    </td>
+                    <td class="td-assignees">
+                        <div class="assignee-list">
+                            <span class="assignee-avatar">SK</span>
+                        </div>
+                    </td>
+                    <td class="td-stage">
+                        <span class="stage-tag">Development</span>
+                    </td>
+                </tr>
+                <tr class="row-completed">
+                    <td class="td-checkbox">
+                        <input type="checkbox" class="checkbox task-checkbox" checked />
+                    </td>
+                    <td class="td-task">
+                        <div class="task-info">
+                            <span class="task-id">TSK-002</span>
+                            <span class="task-name">Design dashboard wireframes</span>
+                        </div>
+                    </td>
+                    <td class="td-project">Customer Portal Redesign</td>
+                    <td class="td-status">
+                        <span class="badge badge-completed">Done</span>
+                    </td>
+                    <td class="td-priority">
+                        <span class="priority priority-medium">Medium</span>
+                    </td>
+                    <td class="td-date">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Feb 05, 2026
+                    </td>
+                    <td class="td-assignees">
+                        <div class="assignee-list">
+                            <span class="assignee-avatar">LM</span>
+                        </div>
+                    </td>
+                    <td class="td-stage">
+                        <span class="stage-tag">Planning</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-checkbox">
+                        <input type="checkbox" class="checkbox task-checkbox" />
+                    </td>
+                    <td class="td-task">
+                        <div class="task-info">
+                            <span class="task-id">TSK-003</span>
+                            <span class="task-name">API rate limiting implementation</span>
+                        </div>
+                    </td>
+                    <td class="td-project">API Gateway v2.0</td>
+                    <td class="td-status">
+                        <span class="badge badge-review">Review</span>
+                    </td>
+                    <td class="td-priority">
+                        <span class="priority priority-high">High</span>
+                    </td>
+                    <td class="td-date">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Feb 08, 2026
+                    </td>
+                    <td class="td-assignees">
+                        <div class="assignee-list">
+                            <span class="assignee-avatar">MK</span>
+                            <span class="assignee-avatar">AN</span>
+                        </div>
+                    </td>
+                    <td class="td-stage">
+                        <span class="stage-tag">Testing</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-checkbox">
+                        <input type="checkbox" class="checkbox task-checkbox" />
+                    </td>
+                    <td class="td-task">
+                        <div class="task-info">
+                            <span class="task-id">TSK-004</span>
+                            <span class="task-name">Write unit tests for auth module</span>
+                        </div>
+                    </td>
+                    <td class="td-project">Customer Portal Redesign</td>
+                    <td class="td-status">
+                        <span class="badge badge-todo">To Do</span>
+                    </td>
+                    <td class="td-priority">
+                        <span class="priority priority-medium">Medium</span>
+                    </td>
+                    <td class="td-date">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Feb 12, 2026
+                    </td>
+                    <td class="td-assignees">
+                        <div class="assignee-list">
+                            <span class="assignee-avatar">JD</span>
+                        </div>
+                    </td>
+                    <td class="td-stage">
+                        <span class="stage-tag">Testing</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-checkbox">
+                        <input type="checkbox" class="checkbox task-checkbox" />
+                    </td>
+                    <td class="td-task">
+                        <div class="task-info">
+                            <span class="task-id">TSK-005</span>
+                            <span class="task-name">Configure CI/CD pipeline</span>
+                        </div>
+                    </td>
+                    <td class="td-project">API Gateway v2.0</td>
+                    <td class="td-status">
+                        <span class="badge badge-in-progress">In Progress</span>
+                    </td>
+                    <td class="td-priority">
+                        <span class="priority priority-urgent">Urgent</span>
+                    </td>
+                    <td class="td-date">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Feb 07, 2026
+                    </td>
+                    <td class="td-assignees">
+                        <div class="assignee-list">
+                            <span class="assignee-avatar">AN</span>
+                        </div>
+                    </td>
+                    <td class="td-stage">
+                        <span class="stage-tag">Deployment</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-checkbox">
+                        <input type="checkbox" class="checkbox task-checkbox" />
+                    </td>
+                    <td class="td-task">
+                        <div class="task-info">
+                            <span class="task-id">TSK-006</span>
+                            <span class="task-name">Create analytics tracking plan</span>
+                        </div>
+                    </td>
+                    <td class="td-project">Mobile App Analytics</td>
+                    <td class="td-status">
+                        <span class="badge badge-todo">To Do</span>
+                    </td>
+                    <td class="td-priority">
+                        <span class="priority priority-low">Low</span>
+                    </td>
+                    <td class="td-date">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Feb 20, 2026
+                    </td>
+                    <td class="td-assignees">
+                        <div class="assignee-list">
+                            <span class="assignee-avatar">RW</span>
+                            <span class="assignee-avatar">SK</span>
+                        </div>
+                    </td>
+                    <td class="td-stage">
+                        <span class="stage-tag">Planning</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-checkbox">
+                        <input type="checkbox" class="checkbox task-checkbox" />
+                    </td>
+                    <td class="td-task">
+                        <div class="task-info">
+                            <span class="task-id">TSK-007</span>
+                            <span class="task-name">Database schema migration</span>
+                        </div>
+                    </td>
+                    <td class="td-project">E-commerce Platform Migration</td>
+                    <td class="td-status">
+                        <span class="badge badge-blocked">Blocked</span>
+                    </td>
+                    <td class="td-priority">
+                        <span class="priority priority-high">High</span>
+                    </td>
+                    <td class="td-date">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Feb 15, 2026
+                    </td>
+                    <td class="td-assignees">
+                        <div class="assignee-list">
+                            <span class="assignee-avatar">EC</span>
+                        </div>
+                    </td>
+                    <td class="td-stage">
+                        <span class="stage-tag">Development</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="td-checkbox">
+                        <input type="checkbox" class="checkbox task-checkbox" />
+                    </td>
+                    <td class="td-task">
+                        <div class="task-info">
+                            <span class="task-id">TSK-008</span>
+                            <span class="task-name">Performance optimization review</span>
+                        </div>
+                    </td>
+                    <td class="td-project">API Gateway v2.0</td>
+                    <td class="td-status">
+                        <span class="badge badge-review">Review</span>
+                    </td>
+                    <td class="td-priority">
+                        <span class="priority priority-medium">Medium</span>
+                    </td>
+                    <td class="td-date">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Feb 10, 2026
+                    </td>
+                    <td class="td-assignees">
+                        <div class="assignee-list">
+                            <span class="assignee-avatar">MK</span>
+                        </div>
+                    </td>
+                    <td class="td-stage">
+                        <span class="stage-tag">Testing</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- New Task Modal -->
+<div class="modal-overlay" id="new-task-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h2>Create New Task</h2>
+            <button class="modal-close" id="task-modal-close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form class="task-form">
+                <div class="form-group">
+                    <label for="task-name">Task Name</label>
+                    <input type="text" id="task-name" class="form-input" placeholder="Enter task name" />
+                </div>
+                <div class="form-group">
+                    <label for="task-description">Description</label>
+                    <textarea id="task-description" class="form-textarea" rows="3"
+                              placeholder="Enter task description"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="task-project">Project</label>
+                        <select id="task-project" class="form-select">
+                            <option value="">Select Project</option>
+                            <option value="prj-001">Customer Portal Redesign</option>
+                            <option value="prj-002">API Gateway v2.0</option>
+                            <option value="prj-003">Mobile App Analytics</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-status">Status</label>
+                        <select id="task-status" class="form-select">
+                            <option value="todo">To Do</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="review">Review</option>
+                            <option value="done">Done</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="task-priority">Priority</label>
+                        <select id="task-priority" class="form-select">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-due-date">Due Date</label>
+                        <input type="date" id="task-due-date" class="form-input" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="task-assignees">Assignees</label>
+                    <select id="task-assignees" class="form-select" multiple>
+                        <option value="jd">John Doe</option>
+                        <option value="sk">Sarah Kim</option>
+                        <option value="mk">Michael Kim</option>
+                        <option value="lm">Lisa Moore</option>
+                        <option value="an">Alex Nguyen</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="task-modal-cancel">Cancel</button>
+            <button class="btn btn-primary">Create Task</button>
+        </div>
+    </div>
+</div>
+
+<!-- View Task Modal -->
+<div class="modal-overlay" id="view-task-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header modal-header-primary">
+            <div>
+                <h2>Implement OAuth 2.0 authentication flow</h2>
+                <p class="modal-subtitle">TSK-001</p>
+            </div>
+            <button class="modal-close" data-modal-close>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="detail-section">
+                <h4 class="detail-section-title">Task Information</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Status</span>
+                        <span class="badge badge-in-progress">In Progress</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Priority</span>
+                        <span class="priority priority-high">High</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Project</span>
+                        <span class="detail-value">Customer Portal Redesign</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Due Date</span>
+                        <span class="detail-value">Feb 10, 2026</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Stage</span>
+                        <span class="stage-tag">Development</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Created</span>
+                        <span class="detail-value">Feb 01, 2026</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h4 class="detail-section-title">Description</h4>
+                <p class="detail-description">Implement OAuth 2.0 authentication flow for the customer portal. This
+                    includes setting up the authorization server, implementing token-based authentication, and
+                    integrating with existing user management system.</p>
+                </div>
+
+                <div class="detail-section">
+                    <h4 class="detail-section-title">Assignees</h4>
+                    <div class="detail-team">
+                        <div class="detail-team-member">
+                            <span class="member-avatar">SK</span>
+                            <span class="member-name">Sarah Kim</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h4 class="detail-section-title">Activity</h4>
+                    <div class="detail-timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <span class="timeline-date">Feb 10, 2026 - 9:15 AM</span>
+                                <p class="timeline-text">Sarah Kim added a comment</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <span class="timeline-date">Feb 08, 2026 - 2:30 PM</span>
+                                <p class="timeline-text">Status changed to "In Progress"</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-content">
+                                <span class="timeline-date">Feb 01, 2026 - 10:00 AM</span>
+                                <p class="timeline-text">Task created by John Doe</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-modal-close>Close</button>
+                <button class="btn btn-primary" id="edit-task-from-view">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    Edit Task
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Task Modal -->
+    <div class="modal-overlay" id="edit-task-modal">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <div>
+                    <h2>Edit Task</h2>
+                    <p class="modal-subtitle">TSK-001</p>
+                </div>
+                <button class="modal-close" data-modal-close>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="task-form">
+                    <div class="form-group">
+                        <label for="edit-task-name">Task Name</label>
+                        <input type="text" id="edit-task-name" class="form-input"
+                               value="Implement OAuth 2.0 authentication flow" />
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-task-description">Description</label>
+                        <textarea id="edit-task-description" class="form-textarea"
+                                  rows="3">Implement OAuth 2.0 authentication flow for the customer portal.</textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-task-project">Project</label>
+                            <select id="edit-task-project" class="form-select">
+                                <option value="prj-001" selected>Customer Portal Redesign</option>
+                                <option value="prj-002">API Gateway v2.0</option>
+                                <option value="prj-003">Mobile App Analytics</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-task-status">Status</label>
+                            <select id="edit-task-status" class="form-select">
+                                <option value="todo">To Do</option>
+                                <option value="in-progress" selected>In Progress</option>
+                                <option value="review">Review</option>
+                                <option value="done">Done</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-task-priority">Priority</label>
+                            <select id="edit-task-priority" class="form-select">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high" selected>High</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-task-due-date">Due Date</label>
+                            <input type="date" id="edit-task-due-date" class="form-input" value="2026-02-10" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-task-assignees">Assignees</label>
+                        <select id="edit-task-assignees" class="form-select" multiple>
+                            <option value="jd">John Doe</option>
+                            <option value="sk" selected>Sarah Kim</option>
+                            <option value="mk">Michael Kim</option>
+                            <option value="lm">Lisa Moore</option>
+                            <option value="an">Alex Nguyen</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-modal-close>Cancel</button>
+                <button class="btn btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    @section PageScripts {
+        <script src="~/js/pages/tasks.js" asp-append-version="true"></script>
+    }

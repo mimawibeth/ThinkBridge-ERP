@@ -1,0 +1,670 @@
+@{
+    ViewData["Title"] = "Team";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/team.css" asp-append-version="true" />
+}
+
+<div class="page-team">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-filters">
+            <div class="search-box">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" class="search-input" placeholder="Search team members..." />
+            </div>
+            <div class="filter-dropdown">
+                <button class="filter-btn">
+                    All Roles
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <button class="btn btn-primary" id="add-member-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="8.5" cy="7" r="4"></circle>
+                <line x1="20" y1="8" x2="20" y2="14"></line>
+                <line x1="23" y1="11" x2="17" y2="11"></line>
+            </svg>
+            Add Member
+        </button>
+    </div>
+
+    <!-- Team Stats -->
+    <div class="team-stats">
+        <div class="stat-card">
+            <span class="stat-label">Total Members</span>
+            <span class="stat-value">10</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Active Now</span>
+            <span class="stat-value">7</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Project Managers</span>
+            <span class="stat-value">2</span>
+        </div>
+    </div>
+
+    <!-- Team Grid -->
+    <div class="team-grid">
+        <!-- Team Member 1 -->
+        <div class="team-card">
+            <div class="member-header">
+                <div class="member-avatar large">
+                    <span>JD</span>
+                    <span class="status-indicator online"></span>
+                </div>
+                <button class="card-menu-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="12" cy="5" r="1"></circle>
+                        <circle cx="12" cy="19" r="1"></circle>
+                    </svg>
+                </button>
+            </div>
+            <div class="member-info">
+                <h3 class="member-name">John Doe</h3>
+                <span class="member-department">Engineering</span>
+                <span class="badge badge-role-manager">Project Manager</span>
+            </div>
+            <div class="member-contact">
+                <div class="contact-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <span>john.doe@thinkbridge.com</span>
+                </div>
+                <div class="contact-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                        </path>
+                    </svg>
+                    <span>+1 (555) 123-4567</span>
+                </div>
+            </div>
+            <div class="member-projects">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>5 assigned projects</span>
+            </div>
+        </div>
+
+        <!-- Team Member 2 -->
+        <div class="team-card">
+            <div class="member-header">
+                <div class="member-avatar large">
+                    <span>SK</span>
+                    <span class="status-indicator online"></span>
+                </div>
+                <button class="card-menu-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="12" cy="5" r="1"></circle>
+                        <circle cx="12" cy="19" r="1"></circle>
+                    </svg>
+                </button>
+            </div>
+            <div class="member-info">
+                <h3 class="member-name">Sarah Kim</h3>
+                <span class="member-department">Development</span>
+                <span class="badge badge-role-member">Team Member</span>
+            </div>
+            <div class="member-contact">
+                <div class="contact-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <span>sarah.kim@thinkbridge.com</span>
+                </div>
+                <div class="contact-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                        </path>
+                    </svg>
+                    <span>+1 (555) 234-5678</span>
+                </div>
+            </div>
+            <div class="member-projects">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>3 assigned projects</span>
+            </div>
+        </div>
+
+        <!-- Team Member 3 -->
+        <div class="team-card">
+            <div class="member-header">
+                <div class="member-avatar large">
+                    <span>MK</span>
+                    <span class="status-indicator away"></span>
+                </div>
+                <button class="card-menu-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="12" cy="5" r="1"></circle>
+                        <circle cx="12" cy="19" r="1"></circle>
+                    </svg>
+                </button>
+            </div>
+            <div class="member-info">
+                <h3 class="member-name">Michael Kim</h3>
+                <span class="member-department">Development</span>
+                <span class="badge badge-role-member">Team Member</span>
+            </div>
+            <div class="member-contact">
+                <div class="contact-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <span>michael.kim@thinkbridge.com</span>
+                </div>
+                <div class="contact-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                        </path>
+                    </svg>
+                    <span>+1 (555) 345-6789</span>
+                </div>
+            </div>
+            <div class="member-projects">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>2 assigned projects</span>
+            </div>
+        </div>
+
+        <!-- Team Member 4 -->
+        <div class="team-card">
+            <div class="member-header">
+                <div class="member-avatar large">
+                    <span>LM</span>
+                    <span class="status-indicator online"></span>
+                </div>
+                <button class="card-menu-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="12" cy="5" r="1"></circle>
+                        <circle cx="12" cy="19" r="1"></circle>
+                    </svg>
+                </button>
+            </div>
+            <div class="member-info">
+                <h3 class="member-name">Lisa Moore</h3>
+                <span class="member-department">Design</span>
+                <span class="badge badge-role-member">Team Member</span>
+            </div>
+            <div class="member-contact">
+                <div class="contact-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <span>lisa.moore@thinkbridge.com</span>
+                </div>
+                <div class="contact-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                        </path>
+                    </svg>
+                    <span>+1 (555) 456-7890</span>
+                </div>
+            </div>
+            <div class="member-projects">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>4 assigned projects</span>
+            </div>
+        </div>
+
+        <!-- Team Member 5 -->
+        <div class="team-card">
+            <div class="member-header">
+                <div class="member-avatar large">
+                    <span>AN</span>
+                    <span class="status-indicator online"></span>
+                </div>
+                <button class="card-menu-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="12" cy="5" r="1"></circle>
+                        <circle cx="12" cy="19" r="1"></circle>
+                    </svg>
+                </button>
+            </div>
+            <div class="member-info">
+                <h3 class="member-name">Alex Nguyen</h3>
+                <span class="member-department">DevOps</span>
+                <span class="badge badge-role-member">Team Member</span>
+            </div>
+            <div class="member-contact">
+                <div class="contact-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <span>alex.nguyen@thinkbridge.com</span>
+                </div>
+                <div class="contact-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                        </path>
+                    </svg>
+                    <span>+1 (555) 567-8901</span>
+                </div>
+            </div>
+            <div class="member-projects">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>2 assigned projects</span>
+            </div>
+        </div>
+
+        <!-- Team Member 6 -->
+        <div class="team-card">
+            <div class="member-header">
+                <div class="member-avatar large">
+                    <span>EC</span>
+                    <span class="status-indicator offline"></span>
+                </div>
+                <button class="card-menu-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="12" cy="5" r="1"></circle>
+                        <circle cx="12" cy="19" r="1"></circle>
+                    </svg>
+                </button>
+            </div>
+            <div class="member-info">
+                <h3 class="member-name">Emma Chen</h3>
+                <span class="member-department">Development</span>
+                <span class="badge badge-role-member">Team Member</span>
+            </div>
+            <div class="member-contact">
+                <div class="contact-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <span>emma.chen@thinkbridge.com</span>
+                </div>
+                <div class="contact-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                        </path>
+                    </svg>
+                    <span>+1 (555) 678-9012</span>
+                </div>
+            </div>
+            <div class="member-projects">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>1 assigned project</span>
+            </div>
+        </div>
+
+        <!-- Team Member 7 -->
+        <div class="team-card">
+            <div class="member-header">
+                <div class="member-avatar large">
+                    <span>RW</span>
+                    <span class="status-indicator online"></span>
+                </div>
+                <button class="card-menu-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="12" cy="5" r="1"></circle>
+                        <circle cx="12" cy="19" r="1"></circle>
+                    </svg>
+                </button>
+            </div>
+            <div class="member-info">
+                <h3 class="member-name">Robert Wilson</h3>
+                <span class="member-department">Analytics</span>
+                <span class="badge badge-role-member">Team Member</span>
+            </div>
+            <div class="member-contact">
+                <div class="contact-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <span>robert.wilson@thinkbridge.com</span>
+                </div>
+            </div>
+            <div class="member-projects">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>3 assigned projects</span>
+            </div>
+        </div>
+
+        <!-- Team Member 8 -->
+        <div class="team-card">
+            <div class="member-header">
+                <div class="member-avatar large">
+                    <span>AW</span>
+                    <span class="status-indicator online"></span>
+                </div>
+                <button class="card-menu-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="12" cy="5" r="1"></circle>
+                        <circle cx="12" cy="19" r="1"></circle>
+                    </svg>
+                </button>
+            </div>
+            <div class="member-info">
+                <h3 class="member-name">Anna Wilson</h3>
+                <span class="member-department">Product</span>
+                <span class="badge badge-role-manager">Project Manager</span>
+            </div>
+            <div class="member-contact">
+                <div class="contact-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <span>anna.wilson@thinkbridge.com</span>
+                </div>
+            </div>
+            <div class="member-projects">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>4 assigned projects</span>
+            </div>
+        </div>
+
+        <!-- Team Member 9 -->
+        <div class="team-card">
+            <div class="member-header">
+                <div class="member-avatar large">
+                    <span>DP</span>
+                    <span class="status-indicator away"></span>
+                </div>
+                <button class="card-menu-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="12" cy="5" r="1"></circle>
+                        <circle cx="12" cy="19" r="1"></circle>
+                    </svg>
+                </button>
+            </div>
+            <div class="member-info">
+                <h3 class="member-name">David Park</h3>
+                <span class="member-department">Development</span>
+                <span class="badge badge-role-member">Team Member</span>
+            </div>
+            <div class="member-contact">
+                <div class="contact-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <span>david.park@thinkbridge.com</span>
+                </div>
+            </div>
+            <div class="member-projects">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>2 assigned projects</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Member Modal -->
+<div class="modal-overlay" id="add-member-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h2>Add Team Member</h2>
+            <button class="modal-close" id="member-modal-close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form class="member-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="first-name">First Name</label>
+                        <input type="text" id="first-name" class="form-input" placeholder="Enter first name" />
+                    </div>
+                    <div class="form-group">
+                        <label for="last-name">Last Name</label>
+                        <input type="text" id="last-name" class="form-input" placeholder="Enter last name" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="member-email">Email</label>
+                    <input type="email" id="member-email" class="form-input" placeholder="Enter email address" />
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="member-department">Department</label>
+                        <select id="member-department" class="form-select">
+                            <option value="">Select Department</option>
+                            <option value="engineering">Engineering</option>
+                            <option value="development">Development</option>
+                            <option value="design">Design</option>
+                            <option value="devops">DevOps</option>
+                            <option value="analytics">Analytics</option>
+                            <option value="product">Product</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="member-role">Role</label>
+                        <select id="member-role" class="form-select">
+                            <option value="member">Team Member</option>
+                            <option value="manager">Project Manager</option>
+                            <option value="admin">System Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="member-phone">Phone Number</label>
+                    <input type="tel" id="member-phone" class="form-input" placeholder="+1 (555) 000-0000" />
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="member-modal-cancel">Cancel</button>
+            <button class="btn btn-primary">Add Member</button>
+        </div>
+    </div>
+</div>
+
+<!-- View Member Modal -->
+<div class="modal-overlay" id="view-member-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header modal-header-primary">
+            <div>
+                <h2>John Doe</h2>
+                <p class="modal-subtitle">Project Manager</p>
+            </div>
+            <button class="modal-close" data-modal-close>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="detail-section">
+                <h4 class="detail-section-title">Contact Information</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Email</span>
+                        <span class="detail-value">john.doe@thinkbridge.com</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Phone</span>
+                        <span class="detail-value">+1 (555) 123-4567</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Department</span>
+                        <span class="detail-value">Engineering</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Role</span>
+                        <span class="badge badge-role-manager">Project Manager</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status</span>
+                        <span class="badge badge-success">Active</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Joined</span>
+                        <span class="detail-value">Jan 15, 2024</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h4 class="detail-section-title">Assigned Projects (5)</h4>
+                <div class="detail-tags">
+                    <span class="badge badge-category">Customer Portal Redesign</span>
+                    <span class="badge badge-category">API Gateway v2.0</span>
+                    <span class="badge badge-category">Mobile App Analytics</span>
+                    <span class="badge badge-category">E-commerce Platform</span>
+                    <span class="badge badge-category">Security Audit 2026</span>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h4 class="detail-section-title">Recent Activity</h4>
+                <div class="detail-timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <span class="timeline-date">Feb 10, 2026 - 10:30 AM</span>
+                            <p class="timeline-text">Completed task "Review API specifications"</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <span class="timeline-date">Feb 09, 2026 - 3:45 PM</span>
+                            <p class="timeline-text">Assigned to project "API Gateway v2.0"</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-content">
+                            <span class="timeline-date">Feb 08, 2026 - 11:00 AM</span>
+                            <p class="timeline-text">Created task "Implement login flow"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-modal-close>Close</button>
+            <button class="btn btn-primary" id="edit-member-from-view">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                Edit Member
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Member Modal -->
+<div class="modal-overlay" id="edit-member-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h2>Edit Team Member</h2>
+            <button class="modal-close" data-modal-close>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form class="member-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-first-name">First Name</label>
+                        <input type="text" id="edit-first-name" class="form-input" value="John" />
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-last-name">Last Name</label>
+                        <input type="text" id="edit-last-name" class="form-input" value="Doe" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="edit-member-email">Email</label>
+                    <input type="email" id="edit-member-email" class="form-input" value="john.doe@thinkbridge.com" />
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-member-department">Department</label>
+                        <select id="edit-member-department" class="form-select">
+                            <option value="engineering" selected>Engineering</option>
+                            <option value="development">Development</option>
+                            <option value="design">Design</option>
+                            <option value="devops">DevOps</option>
+                            <option value="analytics">Analytics</option>
+                            <option value="product">Product</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-member-role">Role</label>
+                        <select id="edit-member-role" class="form-select">
+                            <option value="member">Team Member</option>
+                            <option value="manager" selected>Project Manager</option>
+                            <option value="admin">System Admin</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="edit-member-phone">Phone Number</label>
+                    <input type="tel" id="edit-member-phone" class="form-input" value="+1 (555) 123-4567" />
+                </div>
+                <div class="form-group">
+                    <label for="edit-member-status">Status</label>
+                    <select id="edit-member-status" class="form-select">
+                        <option value="active" selected>Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-modal-close>Cancel</button>
+            <button class="btn btn-primary">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+@section PageScripts {
+    <script src="~/js/pages/team.js" asp-append-version="true"></script>
+}

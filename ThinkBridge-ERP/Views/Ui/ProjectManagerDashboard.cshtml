@@ -1,0 +1,399 @@
+@{
+    ViewData["Title"] = "Project Manager Dashboard";
+    ViewData["UserRole"] = "projectmanager";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/dashboard.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/projectmanager.css" asp-append-version="true" />
+}
+
+<div class="page-dashboard pm-dashboard">
+    <!-- Welcome Section -->
+    <section class="welcome-section">
+        <h1 class="welcome-title">Welcome back, Manager!</h1>
+        <p class="welcome-subtitle">Here's your project overview for today.</p>
+    </section>
+
+    <!-- KPI Cards Section -->
+    <section class="kpi-section">
+        <div class="kpi-card">
+            <div class="kpi-content">
+                <span class="kpi-label">Active Projects</span>
+                <span class="kpi-value">8</span>
+                <span class="kpi-change positive">3 on track</span>
+            </div>
+            <div class="kpi-icon blue">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-content">
+                <span class="kpi-label">Open Tasks</span>
+                <span class="kpi-value">47</span>
+                <span class="kpi-change warning">12 due this week</span>
+            </div>
+            <div class="kpi-icon orange">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 11l3 3L22 4"></path>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-content">
+                <span class="kpi-label">Team Members</span>
+                <span class="kpi-value">24</span>
+                <span class="kpi-change neutral">Across all projects</span>
+            </div>
+            <div class="kpi-icon purple">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-content">
+                <span class="kpi-label">Completion Rate</span>
+                <span class="kpi-value">78%</span>
+                <span class="kpi-change positive">+5% vs last month</span>
+            </div>
+            <div class="kpi-icon green">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <div class="dashboard-grid">
+        <!-- My Projects Section -->
+        <section class="dashboard-section my-projects">
+            <div class="section-header">
+                <h2 class="section-title">My Projects</h2>
+                <a href="@Url.Action("Projects", "Ui", new { role = "projectmanager" })" class="view-all-link">
+                    View all
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+            </div>
+            <div class="projects-list">
+                <div class="project-card">
+                    <div class="project-header">
+                        <span class="project-id">PRJ-001</span>
+                        <span class="badge badge-in-progress">In Progress</span>
+                    </div>
+                    <h3 class="project-name">Customer Portal Redesign</h3>
+                    <div class="project-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 65%"></div>
+                        </div>
+                        <span class="progress-text">65%</span>
+                    </div>
+                    <div class="project-footer">
+                        <div class="project-team">
+                            <span class="team-avatar">JD</span>
+                            <span class="team-avatar">SK</span>
+                            <span class="team-avatar">LM</span>
+                            <span class="team-more">+2</span>
+                        </div>
+                        <div class="project-date">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            Feb 28, 2026
+                        </div>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-header">
+                        <span class="project-id">PRJ-002</span>
+                        <span class="badge badge-review">Review</span>
+                    </div>
+                    <h3 class="project-name">API Gateway v2.0</h3>
+                    <div class="project-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 90%"></div>
+                        </div>
+                        <span class="progress-text">90%</span>
+                    </div>
+                    <div class="project-footer">
+                        <div class="project-team">
+                            <span class="team-avatar">MK</span>
+                            <span class="team-avatar">AN</span>
+                        </div>
+                        <div class="project-date">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            Feb 15, 2026
+                        </div>
+                    </div>
+                </div>
+                <div class="project-card at-risk">
+                    <div class="project-header">
+                        <span class="project-id">PRJ-005</span>
+                        <span class="badge badge-at-risk">At Risk</span>
+                    </div>
+                    <h3 class="project-name">Data Migration Tool</h3>
+                    <div class="project-progress">
+                        <div class="progress-bar warning">
+                            <div class="progress-fill" style="width: 35%"></div>
+                        </div>
+                        <span class="progress-text">35%</span>
+                    </div>
+                    <div class="project-footer">
+                        <div class="project-team">
+                            <span class="team-avatar">RB</span>
+                            <span class="team-avatar">TC</span>
+                            <span class="team-avatar">DS</span>
+                        </div>
+                        <div class="project-date overdue">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            Feb 5, 2026
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tasks Due Soon -->
+        <section class="dashboard-section tasks-due">
+            <div class="section-header">
+                <h2 class="section-title">Tasks Due This Week</h2>
+                <a href="@Url.Action("Tasks", "Ui", new { role = "projectmanager" })" class="view-all-link">
+                    View all
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+            </div>
+            <div class="tasks-list">
+                <div class="task-item priority-high">
+                    <div class="task-checkbox">
+                        <input type="checkbox" id="task1" />
+                        <label for="task1"></label>
+                    </div>
+                    <div class="task-content">
+                        <span class="task-name">Review API documentation</span>
+                        <div class="task-meta">
+                            <span class="task-project">PRJ-002</span>
+                            <span class="task-assignee">
+                                <span class="mini-avatar">MK</span>
+                                Mike K.
+                            </span>
+                        </div>
+                    </div>
+                    <span class="task-due today">Today</span>
+                </div>
+                <div class="task-item priority-high">
+                    <div class="task-checkbox">
+                        <input type="checkbox" id="task2" />
+                        <label for="task2"></label>
+                    </div>
+                    <div class="task-content">
+                        <span class="task-name">Fix migration script errors</span>
+                        <div class="task-meta">
+                            <span class="task-project">PRJ-005</span>
+                            <span class="task-assignee">
+                                <span class="mini-avatar">RB</span>
+                                Robert B.
+                            </span>
+                        </div>
+                    </div>
+                    <span class="task-due today">Today</span>
+                </div>
+                <div class="task-item priority-medium">
+                    <div class="task-checkbox">
+                        <input type="checkbox" id="task3" />
+                        <label for="task3"></label>
+                    </div>
+                    <div class="task-content">
+                        <span class="task-name">Update user authentication flow</span>
+                        <div class="task-meta">
+                            <span class="task-project">PRJ-001</span>
+                            <span class="task-assignee">
+                                <span class="mini-avatar">SK</span>
+                                Sarah K.
+                            </span>
+                        </div>
+                    </div>
+                    <span class="task-due tomorrow">Tomorrow</span>
+                </div>
+                <div class="task-item priority-medium">
+                    <div class="task-checkbox">
+                        <input type="checkbox" id="task4" />
+                        <label for="task4"></label>
+                    </div>
+                    <div class="task-content">
+                        <span class="task-name">Design new dashboard widgets</span>
+                        <div class="task-meta">
+                            <span class="task-project">PRJ-001</span>
+                            <span class="task-assignee">
+                                <span class="mini-avatar">LM</span>
+                                Lisa M.
+                            </span>
+                        </div>
+                    </div>
+                    <span class="task-due">Feb 12</span>
+                </div>
+                <div class="task-item priority-low">
+                    <div class="task-checkbox">
+                        <input type="checkbox" id="task5" />
+                        <label for="task5"></label>
+                    </div>
+                    <div class="task-content">
+                        <span class="task-name">Update project documentation</span>
+                        <div class="task-meta">
+                            <span class="task-project">PRJ-002</span>
+                            <span class="task-assignee">
+                                <span class="mini-avatar">AN</span>
+                                Alex N.
+                            </span>
+                        </div>
+                    </div>
+                    <span class="task-due">Feb 14</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Team Workload -->
+        <section class="dashboard-section team-workload">
+            <div class="section-header">
+                <h2 class="section-title">Team Workload</h2>
+            </div>
+            <div class="workload-list">
+                <div class="workload-item">
+                    <div class="member-info">
+                        <span class="member-avatar">SK</span>
+                        <span class="member-name">Sarah Kim</span>
+                    </div>
+                    <div class="workload-bar">
+                        <div class="bar-fill optimal" style="width: 75%"></div>
+                    </div>
+                    <span class="task-count">6 tasks</span>
+                </div>
+                <div class="workload-item">
+                    <div class="member-info">
+                        <span class="member-avatar">MK</span>
+                        <span class="member-name">Mike Kennedy</span>
+                    </div>
+                    <div class="workload-bar">
+                        <div class="bar-fill overloaded" style="width: 95%"></div>
+                    </div>
+                    <span class="task-count">9 tasks</span>
+                </div>
+                <div class="workload-item">
+                    <div class="member-info">
+                        <span class="member-avatar">LM</span>
+                        <span class="member-name">Lisa Martinez</span>
+                    </div>
+                    <div class="workload-bar">
+                        <div class="bar-fill light" style="width: 40%"></div>
+                    </div>
+                    <span class="task-count">3 tasks</span>
+                </div>
+                <div class="workload-item">
+                    <div class="member-info">
+                        <span class="member-avatar">RB</span>
+                        <span class="member-name">Robert Brown</span>
+                    </div>
+                    <div class="workload-bar">
+                        <div class="bar-fill optimal" style="width: 70%"></div>
+                    </div>
+                    <span class="task-count">5 tasks</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Activity -->
+        <section class="dashboard-section recent-activity">
+            <div class="section-header">
+                <h2 class="section-title">Recent Activity</h2>
+            </div>
+            <div class="activity-list">
+                <div class="activity-item">
+                    <div class="activity-icon task-complete">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    </div>
+                    <div class="activity-content">
+                        <span class="activity-text"><strong>Sarah Kim</strong> completed "Implement login UI"</span>
+                        <span class="activity-time">30 min ago</span>
+                    </div>
+                </div>
+                <div class="activity-item">
+                    <div class="activity-icon comment">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="activity-content">
+                        <span class="activity-text"><strong>Mike Kennedy</strong> commented on "API
+                            Documentation"</span>
+                            <span class="activity-time">1 hour ago</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon upload">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                        </div>
+                        <div class="activity-content">
+                            <span class="activity-text"><strong>Lisa Martinez</strong> uploaded "Design_v3.fig"</span>
+                            <span class="activity-time">2 hours ago</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon task-assign">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="8.5" cy="7" r="4"></circle>
+                                <line x1="20" y1="8" x2="20" y2="14"></line>
+                                <line x1="23" y1="11" x2="17" y2="11"></line>
+                            </svg>
+                        </div>
+                        <div class="activity-content">
+                            <span class="activity-text">You assigned "Fix migration errors" to <strong>Robert
+                                Brown</strong></span>
+                                <span class="activity-time">3 hours ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>

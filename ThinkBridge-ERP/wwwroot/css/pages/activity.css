@@ -1,0 +1,227 @@
+/* ==========================================
+   ThinkBridge ERP - Activity Page Styles
+   ========================================== */
+
+/* Page Container */
+.page-activity {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Activity Timeline */
+.activity-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    position: relative;
+    padding-left: var(--spacing-lg);
+}
+
+.activity-timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+}
+
+/* Timeline Date */
+.timeline-date {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    background: var(--background);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-md);
+    margin-left: calc(-1 * var(--spacing-lg));
+    margin-bottom: var(--spacing-sm);
+    position: relative;
+    z-index: 1;
+}
+
+.timeline-date svg {
+    color: var(--text-muted);
+}
+
+/* Activity Item */
+.activity-item {
+    display: flex;
+    gap: var(--spacing-md);
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    padding: var(--spacing-lg);
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.activity-item:hover {
+    box-shadow: var(--shadow-md);
+}
+
+/* Activity Icon */
+.activity-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.activity-icon.completed {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.activity-icon.upload {
+    background: var(--info-light);
+    color: var(--info);
+}
+
+.activity-icon.lifecycle {
+    background: #E9D5FF;
+    color: #7C3AED;
+}
+
+.activity-icon.comment {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.activity-icon.project {
+    background: var(--blue-lightest);
+    color: var(--primary-blue);
+}
+
+.activity-icon.team {
+    background: #FFF2E8;
+    color: var(--primary-orange);
+}
+
+/* Activity Content */
+.activity-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.activity-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+}
+
+.activity-text {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.activity-text strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.activity-link {
+    color: var(--primary-blue);
+    text-decoration: none;
+}
+
+.activity-link:hover {
+    text-decoration: underline;
+}
+
+.activity-avatar {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--primary-blue), var(--blue-light));
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-light);
+    flex-shrink: 0;
+}
+
+/* Activity Meta */
+.activity-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+}
+
+.activity-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.activity-type {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    background: var(--border-light);
+    color: var(--text-secondary);
+    border-radius: var(--radius-full);
+}
+
+.activity-description {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.activity-comments {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-sm);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Attachments */
+.activity-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+}
+
+.attachment-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--background);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-activity {
+        padding: 0 var(--spacing-sm);
+    }
+
+    .activity-header {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .activity-avatar {
+        order: -1;
+    }
+}

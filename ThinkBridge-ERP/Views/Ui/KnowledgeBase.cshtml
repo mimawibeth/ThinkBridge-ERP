@@ -1,0 +1,605 @@
+@{
+    ViewData["Title"] = "Knowledge Base";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/knowledge-base.css" asp-append-version="true" />
+}
+
+<div class="page-knowledge-base">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-filters">
+            <div class="search-box">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" class="search-input" placeholder="Search knowledge base..." />
+            </div>
+        </div>
+        <button class="btn btn-primary" id="new-article-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            New Article
+        </button>
+    </div>
+
+    <!-- Knowledge Base Layout -->
+    <div class="kb-layout">
+        <!-- Categories Sidebar -->
+        <aside class="kb-sidebar">
+            <h3 class="sidebar-title">Categories</h3>
+            <ul class="category-list">
+                <li class="category-item active">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>All Articles</span>
+                    <span class="category-count">6</span>
+                </li>
+                <li class="category-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span>Getting Started</span>
+                    <span class="category-count">1</span>
+                </li>
+                <li class="category-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span>Projects</span>
+                    <span class="category-count">1</span>
+                </li>
+                <li class="category-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                    <span>Developer</span>
+                    <span class="category-count">2</span>
+                </li>
+                <li class="category-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
+                    </svg>
+                    <span>Analytics</span>
+                    <span class="category-count">1</span>
+                </li>
+                <li class="category-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    <span>Security</span>
+                    <span class="category-count">1</span>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Articles Grid -->
+        <div class="kb-content">
+            <div class="articles-grid">
+                <!-- Article 1 -->
+                <article class="article-card">
+                    <div class="article-header">
+                        <span class="article-category getting-started">Getting Started</span>
+                    </div>
+                    <div class="article-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                    </div>
+                    <h3 class="article-title">Getting Started with ThinkBridge ERP</h3>
+                    <p class="article-description">A comprehensive guide to navigating and using the ThinkBridge ERP
+                        system effectively.</p>
+                        <div class="article-meta">
+                            <div class="meta-author">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                <span>System Admin</span>
+                            </div>
+                            <div class="meta-date">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                                <span>Jan 15, 2026</span>
+                            </div>
+                            <div class="meta-views">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                                <span>1247</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Article 2 -->
+                    <article class="article-card">
+                        <div class="article-header">
+                            <span class="article-category developer">Developer</span>
+                        </div>
+                        <div class="article-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </div>
+                        <h3 class="article-title">API Gateway Integration Guide</h3>
+                        <p class="article-description">Technical documentation for integrating with the API Gateway v2.0
+                            service.</p>
+                            <div class="article-meta">
+                                <div class="meta-author">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2">
+                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="12" cy="7" r="4"></circle>
+                                    </svg>
+                                    <span>Michael Kim</span>
+                                </div>
+                                <div class="meta-date">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                    </svg>
+                                    <span>Feb 01, 2026</span>
+                                </div>
+                                <div class="meta-views">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                    <span>856</span>
+                                </div>
+                            </div>
+                        </article>
+
+                        <!-- Article 3 -->
+                        <article class="article-card">
+                            <div class="article-header">
+                                <span class="article-category developer">Developer</span>
+                            </div>
+                            <div class="article-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                            </div>
+                            <h3 class="article-title">Customer Portal Authentication Flow</h3>
+                            <p class="article-description">Detailed documentation of OAuth 2.0 implementation in the customer
+                                portal.</p>
+                                <div class="article-meta">
+                                    <div class="meta-author">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                             stroke-width="2">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="12" cy="7" r="4"></circle>
+                                        </svg>
+                                        <span>Sarah Kim</span>
+                                    </div>
+                                    <div class="meta-date">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                             stroke-width="2">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                                        </svg>
+                                        <span>Feb 03, 2026</span>
+                                    </div>
+                                    <div class="meta-views">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                             stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                            <circle cx="12" cy="12" r="3"></circle>
+                                        </svg>
+                                        <span>432</span>
+                                    </div>
+                                </div>
+                            </article>
+
+                            <!-- Article 4 -->
+                            <article class="article-card">
+                                <div class="article-header">
+                                    <span class="article-category projects">Projects</span>
+                                </div>
+                                <div class="article-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                        <polyline points="10 9 9 9 8 9"></polyline>
+                                    </svg>
+                                </div>
+                                <h3 class="article-title">Project Lifecycle Best Practices</h3>
+                                <p class="article-description">Guidelines for managing project lifecycles from planning to
+                                    deployment.</p>
+                                    <div class="article-meta">
+                                        <div class="meta-author">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="2">
+                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                                <circle cx="12" cy="7" r="4"></circle>
+                                            </svg>
+                                            <span>John Doe</span>
+                                        </div>
+                                        <div class="meta-date">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="2">
+                                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                                            </svg>
+                                            <span>Jan 28, 2026</span>
+                                        </div>
+                                        <div class="meta-views">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="2">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                            </svg>
+                                            <span>678</span>
+                                        </div>
+                                    </div>
+                                </article>
+
+                                <!-- Article 5 -->
+                                <article class="article-card">
+                                    <div class="article-header">
+                                        <span class="article-category security">Security</span>
+                                    </div>
+                                    <div class="article-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                             stroke-width="2">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+                                    </div>
+                                    <h3 class="article-title">Security Compliance Guidelines</h3>
+                                    <p class="article-description">Organization-wide security policies and compliance requirements.</p>
+                                    <div class="article-meta">
+                                        <div class="meta-author">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="2">
+                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                                <circle cx="12" cy="7" r="4"></circle>
+                                            </svg>
+                                            <span>Security Team</span>
+                                        </div>
+                                        <div class="meta-date">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="2">
+                                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                                            </svg>
+                                            <span>Jan 31, 2026</span>
+                                        </div>
+                                        <div class="meta-views">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="2">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                            </svg>
+                                            <span>523</span>
+                                        </div>
+                                    </div>
+                                </article>
+
+                                <!-- Article 6 -->
+                                <article class="article-card">
+                                    <div class="article-header">
+                                        <span class="article-category analytics">Analytics</span>
+                                    </div>
+                                    <div class="article-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                             stroke-width="2">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+                                    </div>
+                                    <h3 class="article-title">Analytics Dashboard User Guide</h3>
+                                    <p class="article-description">How to use and customize the analytics dashboard for data insights.
+                                    </p>
+                                    <div class="article-meta">
+                                        <div class="meta-author">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="2">
+                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                                <circle cx="12" cy="7" r="4"></circle>
+                                            </svg>
+                                            <span>Robert Wilson</span>
+                                        </div>
+                                        <div class="meta-date">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="2">
+                                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                                            </svg>
+                                            <span>Feb 02, 2026</span>
+                                        </div>
+                                        <div class="meta-views">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="2">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                            </svg>
+                                            <span>312</span>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- New Article Modal -->
+                <div class="modal-overlay" id="new-article-modal">
+                    <div class="modal modal-lg">
+                        <div class="modal-header">
+                            <h2>Create New Article</h2>
+                            <button class="modal-close" data-modal-close>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form class="article-form">
+                                <div class="form-group">
+                                    <label for="article-title">Article Title</label>
+                                    <input type="text" id="article-title" class="form-input" placeholder="Enter article title" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="article-category">Category</label>
+                                    <select id="article-category" class="form-select">
+                                        <option value="">Select Category</option>
+                                        <option value="getting-started">Getting Started</option>
+                                        <option value="projects">Projects</option>
+                                        <option value="developer">Developer</option>
+                                        <option value="analytics">Analytics</option>
+                                        <option value="security">Security</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="article-summary">Summary</label>
+                                    <textarea id="article-summary" class="form-textarea" rows="2"
+                                              placeholder="Brief description of the article"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="article-content">Content</label>
+                                    <textarea id="article-content" class="form-textarea" rows="8"
+                                              placeholder="Write your article content here..."></textarea>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="article-tags">Tags</label>
+                                        <input type="text" id="article-tags" class="form-input"
+                                               placeholder="e.g. api, integration, tutorial" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="article-visibility">Visibility</label>
+                                        <select id="article-visibility" class="form-select">
+                                            <option value="public">Public</option>
+                                            <option value="internal">Internal Only</option>
+                                            <option value="draft">Draft</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary" data-modal-close>Cancel</button>
+                            <button class="btn btn-primary">Publish Article</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View Article Modal -->
+                <div class="modal-overlay" id="view-article-modal">
+                    <div class="modal modal-lg">
+                        <div class="modal-header modal-header-primary">
+                            <div>
+                                <h2>Getting Started with ThinkBridge ERP</h2>
+                                <p class="modal-subtitle">Getting Started</p>
+                            </div>
+                            <button class="modal-close" data-modal-close>
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="detail-section">
+                                <h4 class="detail-section-title">Article Information</h4>
+                                <div class="detail-grid">
+                                    <div class="detail-item">
+                                        <span class="detail-label">Author</span>
+                                        <span class="detail-value">System Admin</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Published</span>
+                                        <span class="detail-value">Jan 15, 2026</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Views</span>
+                                        <span class="detail-value">1,247</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Visibility</span>
+                                        <span class="badge badge-success">Public</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="detail-section">
+                                <h4 class="detail-section-title">Summary</h4>
+                                <p class="detail-description">A comprehensive guide to navigating and using the ThinkBridge ERP system
+                                    effectively.</p>
+                                </div>
+
+                                <div class="detail-section">
+                                    <h4 class="detail-section-title">Content</h4>
+                                    <div class="article-content-preview">
+                                        <p>Welcome to ThinkBridge ERP! This guide will help you get started with the system and understand
+                                            its core features.</p>
+                                            <h5>1. Dashboard Overview</h5>
+                                            <p>The dashboard provides a quick overview of your projects, tasks, and team activity. You can
+                                                customize widgets to show the information most relevant to you.</p>
+                                                <h5>2. Navigation</h5>
+                                                <p>Use the sidebar to navigate between different modules. The main sections include Projects, Tasks,
+                                                    Team, Documents, and Reports.</p>
+                                                    <h5>3. Getting Help</h5>
+                                                    <p>If you need assistance, check the Knowledge Base or contact your system administrator.</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="detail-section">
+                                                <h4 class="detail-section-title">Tags</h4>
+                                                <div class="tag-list">
+                                                    <span class="tag">getting started</span>
+                                                    <span class="tag">tutorial</span>
+                                                    <span class="tag">beginner</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-secondary" data-modal-close>Close</button>
+                                            <button class="btn btn-primary" id="edit-article-from-view">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                                </svg>
+                                                Edit Article
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Edit Article Modal -->
+                                <div class="modal-overlay" id="edit-article-modal">
+                                    <div class="modal modal-lg">
+                                        <div class="modal-header">
+                                            <div>
+                                                <h2>Edit Article</h2>
+                                                <p class="modal-subtitle">Getting Started with ThinkBridge ERP</p>
+                                            </div>
+                                            <button class="modal-close" data-modal-close>
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form class="article-form">
+                                                <div class="form-group">
+                                                    <label for="edit-article-title">Article Title</label>
+                                                    <input type="text" id="edit-article-title" class="form-input"
+                                                           value="Getting Started with ThinkBridge ERP" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="edit-article-category">Category</label>
+                                                    <select id="edit-article-category" class="form-select">
+                                                        <option value="getting-started" selected>Getting Started</option>
+                                                        <option value="projects">Projects</option>
+                                                        <option value="developer">Developer</option>
+                                                        <option value="analytics">Analytics</option>
+                                                        <option value="security">Security</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="edit-article-summary">Summary</label>
+                                                    <textarea id="edit-article-summary" class="form-textarea"
+                                                              rows="2">A comprehensive guide to navigating and using the ThinkBridge ERP system effectively.</textarea>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="edit-article-content">Content</label>
+                                                    <textarea id="edit-article-content" class="form-textarea" rows="8">Welcome to ThinkBridge ERP! This guide will help you get started with the system and understand its core features.
+
+1. Dashboard Overview
+The dashboard provides a quick overview of your projects, tasks, and team activity.
+
+2. Navigation
+Use the sidebar to navigate between different modules.
+
+3. Getting Help
+If you need assistance, check the Knowledge Base or contact your system administrator.</textarea>
+                                                </div>
+                                                <div class="form-row">
+                                                    <div class="form-group">
+                                                        <label for="edit-article-tags">Tags</label>
+                                                        <input type="text" id="edit-article-tags" class="form-input"
+                                                               value="getting started, tutorial, beginner" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="edit-article-visibility">Visibility</label>
+                                                        <select id="edit-article-visibility" class="form-select">
+                                                            <option value="public" selected>Public</option>
+                                                            <option value="internal">Internal Only</option>
+                                                            <option value="draft">Draft</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-secondary" data-modal-close>Cancel</button>
+                                            <button class="btn btn-primary">Save Changes</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @section PageScripts {
+                                    <script src="~/js/pages/knowledge-base.js" asp-append-version="true"></script>
+                                }
