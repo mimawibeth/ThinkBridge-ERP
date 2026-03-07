@@ -196,7 +196,7 @@ public class ProductLifecycleController : ControllerBase
     /// Advance product to a lifecycle stage (ProjectManager and TeamMember for assigned projects)
     /// </summary>
     [HttpPost("{id}/advance")]
-    [Authorize(Policy = "TeamMemberOnly")]
+    [Authorize(Policy = "ProjectManagerOnly")]
     public async Task<IActionResult> AdvanceStage(int id, [FromBody] AdvanceStageBody body)
     {
         if (body == null)
@@ -211,8 +211,8 @@ public class ProductLifecycleController : ControllerBase
         if (body.StageId <= 0)
             return BadRequest(new { success = false, message = "A valid stage is required." });
 
-        // CompanyAdmin can only view PLM, not advance stages
-        if (role.Equals("CompanyAdmin", StringComparison.OrdinalIgnoreCase))
+        // Only ProjectManagers can advance stages
+        if (!role.Equals("ProjectManager", StringComparison.OrdinalIgnoreCase))
         {
             return Forbid();
         }

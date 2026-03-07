@@ -520,10 +520,11 @@
                 closeModal('new-project-modal');
                 document.getElementById('new-project-form').reset();
                 renderTeamMemberCheckboxes('team-members-list', []);
+                showToast('Project created successfully.', 'success');
                 loadStats();
                 loadProjects();
             } else {
-                alert('Error: ' + (result.message || 'Failed to create project'));
+                showToast(result.message || 'Failed to create project.', 'error');
             }
         } catch (e) {
             console.error('Error:', e);
@@ -601,10 +602,11 @@
             const result = await res.json();
             if (result.success) {
                 closeModal('edit-project-modal');
+                showToast('Project updated successfully.', 'success');
                 loadStats();
                 loadProjects();
             } else {
-                alert('Error: ' + (result.message || 'Failed to update'));
+                showToast(result.message || 'Failed to update project.', 'error');
             }
         } catch (e) { console.error('Error:', e); alert('An error occurred.'); }
         finally {
@@ -647,10 +649,11 @@
             const result = await res.json();
             if (result.success) {
                 closeModal('archive-confirm-modal');
+                showToast('Project archived successfully.', 'success');
                 if (IS_ADMIN) loadStats();
                 loadProjects();
             } else {
-                alert('Error: ' + (result.message || 'Failed to archive'));
+                showToast(result.message || 'Failed to archive project.', 'error');
             }
         } catch (e) { console.error('Error:', e); alert('An error occurred.'); }
         finally {
@@ -986,10 +989,11 @@
             });
             const result = await res.json();
             if (result.success) {
+                showToast('Project restored successfully.', 'success');
                 if (IS_ADMIN) loadStats();
                 loadProjects();
             } else {
-                alert('Error: ' + (result.message || 'Failed to restore'));
+                showToast(result.message || 'Failed to restore project.', 'error');
             }
         } catch (e) { console.error('Error:', e); alert('An error occurred.'); }
     }

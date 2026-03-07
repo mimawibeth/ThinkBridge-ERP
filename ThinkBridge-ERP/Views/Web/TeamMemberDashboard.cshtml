@@ -2,6 +2,7 @@
     ViewData["Title"] = "My Dashboard";
     var userRole = ViewData["UserRole"]?.ToString() ?? "teammember";
     var userName = ViewData["UserName"]?.ToString() ?? "Team Member";
+    var firstName = userName.Split(' ')[0];
 }
 
 @section PageStyles {
@@ -12,7 +13,7 @@
 <div class="page-dashboard tm-dashboard">
     <!-- Welcome Section -->
     <section class="welcome-section">
-        <h1 class="welcome-title">Welcome back, <span id="dash-username">@userName</span>!</h1>
+        <h1 class="welcome-title">Welcome back, <span id="dash-username">@firstName</span>!</h1>
         <p class="welcome-subtitle">Here's what you have on your plate today.</p>
     </section>
 
@@ -79,8 +80,40 @@
         </div>
     </section>
 
+    <!-- Charts Grid -->
+    <div class="charts-grid">
+        <!-- Task Status Doughnut -->
+        <section class="chart-section">
+            <div class="section-header">
+                <h2 class="section-title">My Task Overview</h2>
+            </div>
+            <div class="chart-container"
+                 style="position:relative;height:280px;display:flex;align-items:center;justify-content:center;">
+                <canvas id="tmTaskStatusChart"></canvas>
+            </div>
+            <div class="chart-legend" id="tm-task-legend"></div>
+        </section>
+
+        <!-- Upcoming Deadlines -->
+        <section class="chart-section">
+            <div class="section-header">
+                <h2 class="section-title">Upcoming Deadlines</h2>
+                <a href="@Url.Action("MyTasks", "Web")" class="view-all-link">
+                    View all
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+            </div>
+            <div class="tm-deadlines-list" id="tm-deadlines-list">
+                <div style="text-align:center;padding:32px;color:var(--text-secondary);">Loading...</div>
+            </div>
+        </section>
+    </div>
+
     <!-- Main Content Grid -->
-    <div class="dashboard-grid">
+    <div class="dashboard-grid" style="margin-top:4px;">
         <!-- My Projects -->
         <section class="dashboard-section my-projects" style="grid-column: 1 / -1;">
             <div class="section-header">
@@ -101,76 +134,217 @@
 </div>
 
 @section PageScripts {
-<script>
-(function() {
-    'use strict';
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+        'use strict';
 
-    document.addEventListener('DOMContentLoaded', function() {
+        let tmTaskChart;
+
+        const chartColors = {
+        todo: '#94a3b8',
+        inProgress: '#f59e0b',
+        inReview: '#8b5cf6',
+        completed: '#10b981',
+        overdue: '#ef4444'
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
         loadTMStats();
         loadMyProjects();
-    });
+        loadTaskChart();
+        loadUpcomingDeadlines();
+        });
 
-    async function loadTMStats() {
+        /* ===================== Task Status Doughnut ===================== */
+
+        async function loadTaskChart() {
         try {
-            const res = await fetch('/api/projects/stats', { credentials: 'same-origin' });
-            const result = await res.json();
-            if (result.success) {
-                const d = result.data;
-                document.getElementById('kpi-projects').textContent = d.totalProjects;
-                document.getElementById('kpi-projects-sub').textContent = 'Assigned to you';
-                document.getElementById('kpi-active').textContent = d.activeProjects;
-                document.getElementById('kpi-active-sub').textContent = 'In progress';
-                document.getElementById('kpi-completed').textContent = d.completedProjects;
-                document.getElementById('kpi-completed-sub').textContent = 'Done';
-                document.getElementById('kpi-planning').textContent = d.planningProjects;
-                document.getElementById('kpi-planning-sub').textContent = 'Upcoming';
-            }
+        const res = await fetch('/api/tasks/stats', { credentials: 'same-origin' });
+        const result = await res.json();
+        if (result.success) {
+        renderTaskChart(result.data);
+        }
+        } catch (e) { console.error('Error loading task chart:', e); }
+        }
+
+        function renderTaskChart(t) {
+        const ctx = document.getElementById('tmTaskStatusChart').getContext('2d');
+        const data = [t.todoTasks, t.inProgressTasks, t.completedTasks, t.overdueTasks];
+        const labels = ['To Do', 'In Progress', 'Completed', 'Overdue'];
+        const colors = [chartColors.todo, chartColors.inProgress, chartColors.completed, chartColors.overdue];
+        const total = t.totalTasks || 0;
+
+        if (tmTaskChart) tmTaskChart.destroy();
+        tmTaskChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+        labels: labels,
+        datasets: [{ data: data, backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: {
+        legend: { display: false },
+        tooltip: {
+        backgroundColor: '#1e293b',
+        titleFont: { family: 'Outfit', size: 13 },
+        bodyFont: { family: 'Outfit', size: 12 },
+        padding: 10,
+        cornerRadius: 8,
+        callbacks: {
+        label: function (ctx) {
+        const pct = total > 0 ? Math.round(ctx.raw / total * 100) : 0;
+        return ` ${ctx.label}: ${ctx.raw} (${pct}%)`;
+        }
+        }
+        }
+        }
+        },
+        plugins: [{
+        id: 'centerText',
+        afterDraw(chart) {
+        const { ctx, width, height } = chart;
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = '700 1.8rem Outfit, sans-serif';
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#1e293b';
+        ctx.fillText(total, width / 2, height / 2 - 8);
+        ctx.font = '400 0.75rem Outfit, sans-serif';
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#64748b';
+        ctx.fillText('Tasks', width / 2, height / 2 + 14);
+        ctx.restore();
+        }
+        }]
+        });
+
+        document.getElementById('tm-task-legend').innerHTML = labels.map((l, i) => `
+        <div class="legend-item">
+        <span class="legend-dot" style="background:${colors[i]}"></span>
+        <span class="legend-label">${l}</span>
+        <span class="legend-value">${data[i]}</span>
+        </div>
+        `).join('');
+        }
+
+        /* ===================== Upcoming Deadlines ===================== */
+
+        async function loadUpcomingDeadlines() {
+        try {
+        const res = await fetch('/api/tasks?pageSize=6&page=1', { credentials: 'same-origin' });
+        const result = await res.json();
+        if (result.success && result.data.length > 0) {
+        const tasks = result.data
+        .filter(t => t.status !== 'Completed' && t.dueDate)
+        .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+        .slice(0, 5);
+
+        if (tasks.length === 0) {
+        document.getElementById('tm-deadlines-list').innerHTML =
+        '<div style="text-align:center;padding:32px;color:var(--text-secondary);">No upcoming deadlines.</div>';
+        return;
+        }
+
+        const now = new Date();
+        document.getElementById('tm-deadlines-list').innerHTML = `
+        <table class="tm-deadlines-table">
+        <thead>
+        <tr>
+        <th>Task</th>
+        <th>Due Date</th>
+        <th>Status</th>
+        <th>Priority</th>
+        </tr>
+        </thead>
+        <tbody>
+        ${tasks.map(t => {
+        const due = new Date(t.dueDate);
+        const isOverdue = due < now;
+        const dueStr = due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const statusCls = t.status === 'In Progress' ? 'in-progress'
+        : t.status === 'In Review' ? 'review'
+        : t.status === 'Completed' ? 'completed' : 'planning';
+        const priCls = (t.priority || 'medium').toLowerCase();
+        return `<tr>
+        <td class="deadline-task-name">${esc(t.title)}</td>
+        <td class="${isOverdue ? 'deadline-overdue' : ''}">${isOverdue ? '⚠ ' : ''}${dueStr}</td>
+        <td><span class="badge badge-${statusCls}" style="font-size:0.7rem;">${esc(t.status)}</span></td>
+        <td><span class="priority-pill ${priCls}">${esc(t.priority || 'Medium')}</span></td>
+        </tr>`;
+        }).join('')}
+        </tbody>
+        </table>`;
+        } else {
+        document.getElementById('tm-deadlines-list').innerHTML =
+        '<div style="text-align:center;padding:32px;color:var(--text-secondary);">No tasks assigned yet.</div>';
+        }
+        } catch (e) { console.error('Error loading deadlines:', e); }
+        }
+
+        async function loadTMStats() {
+        try {
+        const res = await fetch('/api/projects/stats', { credentials: 'same-origin' });
+        const result = await res.json();
+        if (result.success) {
+        const d = result.data;
+        document.getElementById('kpi-projects').textContent = d.totalProjects;
+        document.getElementById('kpi-projects-sub').textContent = 'Assigned to you';
+        document.getElementById('kpi-active').textContent = d.activeProjects;
+        document.getElementById('kpi-active-sub').textContent = 'In progress';
+        document.getElementById('kpi-completed').textContent = d.completedProjects;
+        document.getElementById('kpi-completed-sub').textContent = 'Done';
+        document.getElementById('kpi-planning').textContent = d.planningProjects;
+        document.getElementById('kpi-planning-sub').textContent = 'Upcoming';
+        }
         } catch (e) { console.error('Error loading stats:', e); }
-    }
+        }
 
-    async function loadMyProjects() {
+        async function loadMyProjects() {
         try {
-            const res = await fetch('/api/projects?page=1&pageSize=10', { credentials: 'same-origin' });
-            const result = await res.json();
-            if (result.success && result.data.length > 0) {
-                document.getElementById('my-projects-list').innerHTML = result.data.map(p => `
-                    <div class="project-compact-card" style="cursor:pointer;" onclick="window.location.href='@Url.Action("Projects", "Web")'">
-                        <div class="project-info">
-                            <h3 class="project-name">${esc(p.projectName)}</h3>
-                        </div>
-                        <div class="project-stats">
-                            <div class="stat">
-                                <span class="stat-value"><span class="badge badge-${getStatusClass(p.status)}" style="font-size:0.7rem;">${esc(p.status)}</span></span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-value">${p.progress || 0}%</span>
-                                <span class="stat-label">Progress</span>
-                            </div>
-                        </div>
-                        <div class="project-progress-mini">
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${p.progress || 0}%"></div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                document.getElementById('my-projects-list').innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-secondary);">No projects assigned to you yet.</div>';
-            }
+        const res = await fetch('/api/projects?page=1&pageSize=10', { credentials: 'same-origin' });
+        const result = await res.json();
+        if (result.success && result.data.length > 0) {
+        document.getElementById('my-projects-list').innerHTML = result.data.map(p => `
+        <div class="project-compact-card" style="cursor:pointer;" onclick="window.location.href='@Url.Action("Projects", "Web")'">
+        <div class="project-info">
+        <h3 class="project-name">${esc(p.projectName)}</h3>
+        </div>
+        <div class="project-stats">
+        <div class="stat">
+        <span class="stat-value"><span class="badge badge-${getStatusClass(p.status)}" style="font-size:0.7rem;">${esc(p.status)}</span></span>
+        </div>
+        <div class="stat">
+        <span class="stat-value">${p.progress || 0}%</span>
+        <span class="stat-label">Progress</span>
+        </div>
+        </div>
+        <div class="project-progress-mini">
+        <div class="progress-bar">
+        <div class="progress-fill" style="width: ${p.progress || 0}%"></div>
+        </div>
+        </div>
+        </div>
+        `).join('');
+        } else {
+        document.getElementById('my-projects-list').innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-secondary);">No projects assigned to you yet.</div>';
+        }
         } catch (e) { console.error('Error loading projects:', e); }
-    }
+        }
 
-    function getStatusClass(status) {
+        function getStatusClass(status) {
         const map = { 'Planning': 'planning', 'In Progress': 'in-progress', 'Review': 'review', 'Completed': 'completed', 'Delayed': 'delayed', 'Archived': 'archived' };
         return map[status] || 'planning';
-    }
+        }
 
-    function esc(text) {
+        function esc(text) {
         if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
-    }
-})();
-</script>
+        }
+        })();
+    </script>
 }

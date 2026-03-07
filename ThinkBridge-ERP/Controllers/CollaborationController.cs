@@ -123,7 +123,8 @@ public class CollaborationController : ControllerBase
     [HttpGet("posts/{postId}/comments")]
     public async Task<IActionResult> GetComments(int postId)
     {
-        var result = await _collaborationService.GetCommentsAsync(postId);
+        var role = GetCurrentUserRole();
+        var result = await _collaborationService.GetCommentsAsync(postId, role);
         if (!result.Success) return BadRequest(new { success = false, message = result.ErrorMessage });
 
         return Ok(new { success = true, data = result.Comments });

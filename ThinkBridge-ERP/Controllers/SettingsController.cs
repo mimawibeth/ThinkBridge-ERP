@@ -176,6 +176,44 @@ public class SettingsController : ControllerBase
             return StatusCode(500, new { message = "An error occurred while changing password." });
         }
     }
+
+    // GET api/settings/onboarding
+    [HttpGet("onboarding")]
+    public async Task<IActionResult> GetOnboardingStatus()
+    {
+        try
+        {
+            var userId = GetUserId();
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound(new { message = "User not found." });
+            return Ok(new { hasCompleted = user.HasCompletedOnboarding });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching onboarding status");
+            return StatusCode(500, new { message = "An error occurred." });
+        }
+    }
+
+    // POST api/settings/onboarding/complete
+    [HttpPost("onboarding/complete")]
+    public async Task<IActionResult> CompleteOnboarding()
+    {
+        try
+        {
+            var userId = GetUserId();
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null) return NotFound(new { message = "User not found." });
+            user.HasCompletedOnboarding = true;
+            await _context.SaveChangesAsync();
+            return Ok(new { success = true });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error completing onboarding");
+            return StatusCode(500, new { message = "An error occurred." });
+        }
+    }
 }
 
 // DTOs

@@ -72,7 +72,8 @@ public class AuthController : Controller
                 new Claim("LastName", result.User.Lname),
                 new Claim("IsSuperAdmin", result.User.IsSuperAdmin.ToString()),
                 new Claim("AvatarUrl", result.User.AvatarUrl ?? ""),
-                new Claim("AvatarColor", result.User.AvatarColor ?? "#0B4F6C")
+                new Claim("AvatarColor", result.User.AvatarColor ?? "#0B4F6C"),
+                new Claim("HasCompletedOnboarding", result.User.HasCompletedOnboarding.ToString())
             };
 
             // Add company claim if user belongs to a company

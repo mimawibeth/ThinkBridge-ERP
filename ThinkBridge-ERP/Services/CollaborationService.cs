@@ -39,8 +39,10 @@ public class CollaborationService : ICollaborationService
             if (userRole.Equals("TeamMember", StringComparison.OrdinalIgnoreCase))
             {
                 // Team members see posts for projects they belong to, plus general posts
-                query = query.Where(p => p.ProjectID == null ||
-                    p.Project!.ProjectMembers.Any(pm => pm.UserID == userId));
+                // Only see posts from other Team Members, not PMs or Admins
+                query = query.Where(p => (p.ProjectID == null ||
+                    p.Project!.ProjectMembers.Any(pm => pm.UserID == userId)) &&
+                    p.Creator.UserRoles.Any(ur => ur.Role.RoleName == "TeamMember"));
             }
             else if (userRole.Equals("ProjectManager", StringComparison.OrdinalIgnoreCase))
             {
@@ -180,13 +182,21 @@ public class CollaborationService : ICollaborationService
     // ──────────────────────────────────────────────
     // Comments
     // ──────────────────────────────────────────────
-    public async Task<CommentListResult> GetCommentsAsync(int postId)
+    public async Task<CommentListResult> GetCommentsAsync(int postId, string userRole)
     {
         try
         {
-            var comments = await _context.Comments
+            var query = _context.Comments
                 .Include(c => c.User)
-                .Where(c => c.PostID == postId)
+                .Where(c => c.PostID == postId);
+
+            // Team Members only see comments from other Team Members
+            if (userRole.Equals("TeamMember", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(c => c.User.UserRoles.Any(ur => ur.Role.RoleName == "TeamMember"));
+            }
+
+            var comments = await query
                 .OrderBy(c => c.CreatedAt)
                 .Select(c => new CommentItem
                 {
@@ -282,16 +292,24 @@ public class CollaborationService : ICollaborationService
             // Get project IDs the user can see
             var visibleProjectIds = await GetVisibleProjectIdsAsync(companyId, userId, userRole);
 
+            // For Team Members, only show activities from other Team Members
+            bool isTeamMember = userRole.Equals("TeamMember", StringComparison.OrdinalIgnoreCase);
+
             bool includeAll = string.IsNullOrWhiteSpace(filter.ActivityType) ||
                               filter.ActivityType.Equals("all", StringComparison.OrdinalIgnoreCase);
 
             // 1. Task Updates (status changes, creations)
             if (includeAll || filter.ActivityType == "task")
             {
-                var taskUpdates = await _context.TaskUpdates
+                var taskQuery = _context.TaskUpdates
                     .Include(tu => tu.User)
                     .Include(tu => tu.Task).ThenInclude(t => t.Project)
-                    .Where(tu => visibleProjectIds.Contains(tu.Task.ProjectID))
+                    .Where(tu => visibleProjectIds.Contains(tu.Task.ProjectID));
+
+                if (isTeamMember)
+                    taskQuery = taskQuery.Where(tu => tu.User.UserRoles.Any(ur => ur.Role.RoleName == "TeamMember"));
+
+                var taskUpdates = await taskQuery
                     .OrderByDescending(tu => tu.CreatedAt)
                     .Take(50)
                     .ToListAsync();
@@ -312,12 +330,17 @@ public class CollaborationService : ICollaborationService
             // 2. Product Lifecycle events
             if (includeAll || filter.ActivityType == "product")
             {
-                var productHistory = await _context.ProductHistories
+                var productQuery = _context.ProductHistories
                     .Include(ph => ph.User)
                     .Include(ph => ph.Product)
                     .Include(ph => ph.Stage)
                     .Where(ph => ph.Product.CompanyID == companyId &&
-                        (ph.Product.ProjectID == null || visibleProjectIds.Contains(ph.Product.ProjectID.Value)))
+                        (ph.Product.ProjectID == null || visibleProjectIds.Contains(ph.Product.ProjectID.Value)));
+
+                if (isTeamMember)
+                    productQuery = productQuery.Where(ph => ph.User.UserRoles.Any(ur => ur.Role.RoleName == "TeamMember"));
+
+                var productHistory = await productQuery
                     .OrderByDescending(ph => ph.ChangedAt)
                     .Take(50)
                     .ToListAsync();
@@ -338,11 +361,16 @@ public class CollaborationService : ICollaborationService
             // 3. Posts
             if (includeAll || filter.ActivityType == "post")
             {
-                var posts = await _context.Posts
+                var postQuery = _context.Posts
                     .Include(p => p.Creator)
                     .Include(p => p.Project)
                     .Where(p => p.CompanyID == companyId &&
-                        (p.ProjectID == null || visibleProjectIds.Contains(p.ProjectID.Value)))
+                        (p.ProjectID == null || visibleProjectIds.Contains(p.ProjectID.Value)));
+
+                if (isTeamMember)
+                    postQuery = postQuery.Where(p => p.Creator.UserRoles.Any(ur => ur.Role.RoleName == "TeamMember"));
+
+                var posts = await postQuery
                     .OrderByDescending(p => p.CreatedAt)
                     .Take(50)
                     .ToListAsync();
@@ -363,11 +391,16 @@ public class CollaborationService : ICollaborationService
             // 4. Comments
             if (includeAll || filter.ActivityType == "comment")
             {
-                var comments = await _context.Comments
+                var commentQuery = _context.Comments
                     .Include(c => c.User)
                     .Include(c => c.Post).ThenInclude(p => p.Project)
                     .Where(c => c.Post.CompanyID == companyId &&
-                        (c.Post.ProjectID == null || visibleProjectIds.Contains(c.Post.ProjectID.Value)))
+                        (c.Post.ProjectID == null || visibleProjectIds.Contains(c.Post.ProjectID.Value)));
+
+                if (isTeamMember)
+                    commentQuery = commentQuery.Where(c => c.User.UserRoles.Any(ur => ur.Role.RoleName == "TeamMember"));
+
+                var comments = await commentQuery
                     .OrderByDescending(c => c.CreatedAt)
                     .Take(50)
                     .ToListAsync();

@@ -11,13 +11,14 @@
 
     <!-- Global CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/onboarding.css" asp-append-version="true" />
 
     <!-- Early theme initializer (prevents flash of wrong theme) -->
     <script>
-                (function () {
-                    var theme = localStorage.getItem('thinkbridge-theme') || 'light';
-                    document.documentElement.setAttribute('data-theme', theme);
-                })();
+                    (function () {
+                        var theme = localStorage.getItem('thinkbridge-theme') || 'light';
+                        document.documentElement.setAttribute('data-theme', theme);
+                    })();
     </script>
 
     <!-- Page-specific CSS -->
@@ -81,6 +82,7 @@
 
     <!-- Global JS -->
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/onboarding.js" asp-append-version="true"></script>
 
     <!-- Page-specific JS -->
     @await RenderSectionAsync("PageScripts", required: false)

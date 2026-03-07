@@ -306,11 +306,13 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="edit-user-email">Email Address <span class="required">*</span></label>
-                                    <input type="email" id="edit-user-email" class="form-control" placeholder="user@company.com" required />
+                                    <input type="email" id="edit-user-email" class="form-control" placeholder="user@company.com"
+                                           required />
                                 </div>
                                 <div class="form-group">
                                     <label for="edit-user-phone">Phone Number</label>
-                                    <input type="tel" id="edit-user-phone" class="form-control" placeholder="0917 589 4567" maxlength="13" />
+                                    <input type="tel" id="edit-user-phone" class="form-control" placeholder="0917 589 4567"
+                                           maxlength="13" />
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group">
@@ -358,14 +360,17 @@
                         </div>
                         <div class="modal-body" style="padding: 24px;">
                             <div style="display: flex; align-items: flex-start; gap: 16px;">
-                                <div style="flex-shrink: 0; width: 42px; height: 42px; border-radius: 50%; background: rgba(245, 158, 11, 0.12); display: flex; align-items: center; justify-content: center;">
+                                <div
+                                    style="flex-shrink: 0; width: 42px; height: 42px; border-radius: 50%; background: rgba(245, 158, 11, 0.12); display: flex; align-items: center; justify-content: center;">
                                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
                                         <circle cx="12" cy="12" r="10"></circle>
                                         <line x1="12" y1="8" x2="12" y2="12"></line>
                                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
                                     </svg>
                                 </div>
-                                <p id="confirm-modal-message" style="margin: 0; padding-top: 8px; font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5;"></p>
+                                <p id="confirm-modal-message"
+                                       style="margin: 0; padding-top: 8px; font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5;">
+                                </p>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -377,487 +382,491 @@
 
                 @section PageScripts {
                     <script>
-                            document.addEventListener('DOMContentLoaded', function () {
-                                // Elements
-                                const addUserBtn = document.getElementById('add-user-btn');
-                                const modal = document.getElementById('add-user-modal');
-                                const modalClose = document.getElementById('user-modal-close');
-                                const modalCancel = document.getElementById('user-modal-cancel');
-                                const modalSubmit = document.getElementById('user-modal-submit');
-                                const form = document.getElementById('add-user-form');
-                                const roleSelect = document.getElementById('user-role');
-                                const searchInput = document.getElementById('search-input');
-                                const statusFilter = document.getElementById('status-filter');
-                                const roleFilter = document.getElementById('role-filter');
+                        document.addEventListener('DOMContentLoaded', function () {
+                            // Elements
+                            const addUserBtn = document.getElementById('add-user-btn');
+                            const modal = document.getElementById('add-user-modal');
+                            const modalClose = document.getElementById('user-modal-close');
+                            const modalCancel = document.getElementById('user-modal-cancel');
+                            const modalSubmit = document.getElementById('user-modal-submit');
+                            const form = document.getElementById('add-user-form');
+                            const roleSelect = document.getElementById('user-role');
+                            const searchInput = document.getElementById('search-input');
+                            const statusFilter = document.getElementById('status-filter');
+                            const roleFilter = document.getElementById('role-filter');
 
-                                // Password modal elements
-                                const passwordModal = document.getElementById('password-modal');
-                                const passwordModalClose = document.getElementById('password-modal-close');
-                                const passwordModalDone = document.getElementById('password-modal-done');
-                                const generatedPassword = document.getElementById('generated-password');
-                                const copyPasswordBtn = document.getElementById('copy-password-btn');
+                            // Password modal elements
+                            const passwordModal = document.getElementById('password-modal');
+                            const passwordModalClose = document.getElementById('password-modal-close');
+                            const passwordModalDone = document.getElementById('password-modal-done');
+                            const generatedPassword = document.getElementById('generated-password');
+                            const copyPasswordBtn = document.getElementById('copy-password-btn');
 
-                                // Edit modal elements
-                                const editModal = document.getElementById('edit-user-modal');
-                                const editModalClose = document.getElementById('edit-user-modal-close');
-                                const editModalCancel = document.getElementById('edit-user-modal-cancel');
-                                const editModalSubmit = document.getElementById('edit-user-modal-submit');
-                                const editForm = document.getElementById('edit-user-form');
+                            // Edit modal elements
+                            const editModal = document.getElementById('edit-user-modal');
+                            const editModalClose = document.getElementById('edit-user-modal-close');
+                            const editModalCancel = document.getElementById('edit-user-modal-cancel');
+                            const editModalSubmit = document.getElementById('edit-user-modal-submit');
+                            const editForm = document.getElementById('edit-user-form');
 
-                                // Load initial data
-                                loadStats();
-                                loadUsers();
+                            // Load initial data
+                            loadStats();
+                            loadUsers();
 
-                                // Role description toggle
-                                roleSelect.addEventListener('change', function () {
-                                    const pmDesc = document.querySelector('.pm-desc');
-                                    const tmDesc = document.querySelector('.tm-desc');
-                                    pmDesc.style.display = this.value === 'ProjectManager' ? 'flex' : 'none';
-                                    tmDesc.style.display = this.value === 'TeamMember' ? 'flex' : 'none';
-                                });
+                            // Role description toggle
+                            roleSelect.addEventListener('change', function () {
+                                const pmDesc = document.querySelector('.pm-desc');
+                                const tmDesc = document.querySelector('.tm-desc');
+                                pmDesc.style.display = this.value === 'ProjectManager' ? 'flex' : 'none';
+                                tmDesc.style.display = this.value === 'TeamMember' ? 'flex' : 'none';
+                            });
 
-                                // Password modal functions
-                                function showPasswordModal(password) {
-                                    generatedPassword.value = password;
-                                    passwordModal.classList.add('active');
-                                }
+                            // Password modal functions
+                            function showPasswordModal(password) {
+                                generatedPassword.value = password;
+                                passwordModal.classList.add('active');
+                            }
 
-                                function closePasswordModal() {
-                                    passwordModal.classList.remove('active');
-                                }
+                            function closePasswordModal() {
+                                passwordModal.classList.remove('active');
+                            }
 
-                                passwordModalClose.addEventListener('click', closePasswordModal);
-                                passwordModalDone.addEventListener('click', closePasswordModal);
-                                passwordModal.addEventListener('click', function (e) {
-                                    if (e.target === passwordModal) closePasswordModal();
-                                });
+                            passwordModalClose.addEventListener('click', closePasswordModal);
+                            passwordModalDone.addEventListener('click', closePasswordModal);
+                            passwordModal.addEventListener('click', function (e) {
+                                if (e.target === passwordModal) closePasswordModal();
+                            });
 
-                                copyPasswordBtn.addEventListener('click', function () {
-                                    generatedPassword.select();
-                                    document.execCommand('copy');
-                                    copyPasswordBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-                                    setTimeout(() => {
-                                        copyPasswordBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
-                                    }, 2000);
-                                });
+                            copyPasswordBtn.addEventListener('click', function () {
+                                generatedPassword.select();
+                                document.execCommand('copy');
+                                copyPasswordBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                                setTimeout(() => {
+                                    copyPasswordBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+                                }, 2000);
+                            });
 
-                                // Phone formatting: 0917 589 4567
-                                function formatPhone(input) {
-                                    input.addEventListener('input', function () {
-                                        let digits = this.value.replace(/\D/g, '').slice(0, 11);
-                                        let formatted = '';
-                                        if (digits.length > 4) {
-                                            formatted = digits.slice(0, 4) + ' ' + digits.slice(4);
-                                        } else {
-                                            formatted = digits;
-                                        }
-                                        if (digits.length > 7) {
-                                            formatted = digits.slice(0, 4) + ' ' + digits.slice(4, 7) + ' ' + digits.slice(7);
-                                        }
-                                        this.value = formatted;
-                                    });
-                                }
-                                formatPhone(document.getElementById('user-phone'));
-                                formatPhone(document.getElementById('edit-user-phone'));
-
-                                // Add User Modal
-                                addUserBtn.addEventListener('click', function () {
-                                    modal.classList.add('active');
-                                });
-
-                                function closeModal() {
-                                    modal.classList.remove('active');
-                                    form.reset();
-                                    document.querySelector('.pm-desc').style.display = 'none';
-                                    document.querySelector('.tm-desc').style.display = 'none';
-                                }
-
-                                modalClose.addEventListener('click', closeModal);
-                                modalCancel.addEventListener('click', closeModal);
-                                modal.addEventListener('click', function (e) {
-                                    if (e.target === modal) closeModal();
-                                });
-
-                                // Create user submission
-                                modalSubmit.addEventListener('click', async function () {
-                                    if (form.checkValidity()) {
-                                        const userData = {
-                                            firstName: document.getElementById('user-fname').value,
-                                            lastName: document.getElementById('user-lname').value,
-                                            email: document.getElementById('user-email').value,
-                                            phone: document.getElementById('user-phone').value.replace(/\s/g, ''),
-                                            role: document.getElementById('user-role').value
-                                        };
-
-                                        modalSubmit.disabled = true;
-                                        modalSubmit.innerHTML = '<span class="spinner"></span> Creating...';
-
-                                        try {
-                                            const response = await fetch('/api/companyadmin/users', {
-                                                method: 'POST',
-                                                headers: { 'Content-Type': 'application/json' },
-                                                credentials: 'same-origin',
-                                                body: JSON.stringify(userData)
-                                            });
-
-                                            const result = await response.json();
-
-                                            if (result.success) {
-                                                closeModal();
-                                                showPasswordModal(result.data.temporaryPassword);
-                                                loadStats();
-                                                loadUsers();
-                                            } else {
-                                                alert('Error: ' + (result.message || 'Failed to create user'));
-                                            }
-                                        } catch (error) {
-                                            console.error('Error creating user:', error);
-                                            alert('An error occurred while creating the user.');
-                                        } finally {
-                                            modalSubmit.disabled = false;
-                                            modalSubmit.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg> Create User';
-                                        }
+                            // Phone formatting: 0917 589 4567
+                            function formatPhone(input) {
+                                input.addEventListener('input', function () {
+                                    let digits = this.value.replace(/\D/g, '').slice(0, 11);
+                                    let formatted = '';
+                                    if (digits.length > 4) {
+                                        formatted = digits.slice(0, 4) + ' ' + digits.slice(4);
                                     } else {
-                                        form.reportValidity();
+                                        formatted = digits;
                                     }
-                                });
-
-                                // Edit User Modal
-                                function closeEditModal() {
-                                    editModal.classList.remove('active');
-                                    editForm.reset();
-                                }
-
-                                editModalClose.addEventListener('click', closeEditModal);
-                                editModalCancel.addEventListener('click', closeEditModal);
-                                editModal.addEventListener('click', function (e) {
-                                    if (e.target === editModal) closeEditModal();
-                                });
-
-                                editModalSubmit.addEventListener('click', async function () {
-                                    if (editForm.checkValidity()) {
-                                        const userId = document.getElementById('edit-user-id').value;
-                                        const userData = {
-                                            firstName: document.getElementById('edit-user-fname').value,
-                                            lastName: document.getElementById('edit-user-lname').value,
-                                            email: document.getElementById('edit-user-email').value,
-                                            phone: document.getElementById('edit-user-phone').value.replace(/\s/g, ''),
-                                            role: document.getElementById('edit-user-role').value,
-                                            status: document.getElementById('edit-user-status').value
-                                        };
-
-                                        editModalSubmit.disabled = true;
-                                        editModalSubmit.innerHTML = '<span class="spinner"></span> Saving...';
-
-                                        try {
-                                            const response = await fetch(`/api/companyadmin/users/${userId}`, {
-                                                method: 'PUT',
-                                                headers: { 'Content-Type': 'application/json' },
-                                                credentials: 'same-origin',
-                                                body: JSON.stringify(userData)
-                                            });
-
-                                            const result = await response.json();
-
-                                            if (result.success) {
-                                                closeEditModal();
-                                                loadStats();
-                                                loadUsers();
-                                            } else {
-                                                alert('Error: ' + (result.message || 'Failed to update user'));
-                                            }
-                                        } catch (error) {
-                                            console.error('Error updating user:', error);
-                                            alert('An error occurred while updating the user.');
-                                        } finally {
-                                            editModalSubmit.disabled = false;
-                                            editModalSubmit.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Save Changes';
-                                        }
-                                    } else {
-                                        editForm.reportValidity();
+                                    if (digits.length > 7) {
+                                        formatted = digits.slice(0, 4) + ' ' + digits.slice(4, 7) + ' ' + digits.slice(7);
                                     }
+                                    this.value = formatted;
                                 });
+                            }
+                            formatPhone(document.getElementById('user-phone'));
+                            formatPhone(document.getElementById('edit-user-phone'));
 
-                                // Filter event listeners
-                                let debounceTimer;
-                                searchInput.addEventListener('input', function () {
-                                    clearTimeout(debounceTimer);
-                                    debounceTimer = setTimeout(() => loadUsers(), 300);
-                                });
-                                statusFilter.addEventListener('change', () => loadUsers());
-                                roleFilter.addEventListener('change', () => loadUsers());
+                            // Add User Modal
+                            addUserBtn.addEventListener('click', function () {
+                                modal.classList.add('active');
+                            });
 
-                                // Load stats
-                                async function loadStats() {
-                                    try {
-                                        const response = await fetch('/api/companyadmin/users/stats', {
-                                            credentials: 'same-origin'
-                                        });
-                                        const result = await response.json();
+                            function closeModal() {
+                                modal.classList.remove('active');
+                                form.reset();
+                                document.querySelector('.pm-desc').style.display = 'none';
+                                document.querySelector('.tm-desc').style.display = 'none';
+                            }
 
-                                        if (result.success) {
-                                            document.getElementById('total-users').textContent = result.data.totalUsers;
-                                            document.getElementById('active-users').textContent = result.data.activeUsers;
-                                            document.getElementById('project-managers').textContent = result.data.projectManagers;
-                                            document.getElementById('team-members').textContent = result.data.teamMembers;
-                                        }
-                                    } catch (error) {
-                                        console.error('Error loading stats:', error);
-                                    }
-                                }
+                            modalClose.addEventListener('click', closeModal);
+                            modalCancel.addEventListener('click', closeModal);
+                            modal.addEventListener('click', function (e) {
+                                if (e.target === modal) closeModal();
+                            });
 
-                                // Load users
-                                async function loadUsers(page = 1) {
-                                    const params = new URLSearchParams({
-                                        page: page,
-                                        pageSize: 10
-                                    });
+                            // Create user submission
+                            modalSubmit.addEventListener('click', async function () {
+                                if (form.checkValidity()) {
+                                    const userData = {
+                                        firstName: document.getElementById('user-fname').value,
+                                        lastName: document.getElementById('user-lname').value,
+                                        email: document.getElementById('user-email').value,
+                                        phone: document.getElementById('user-phone').value.replace(/\s/g, ''),
+                                        role: document.getElementById('user-role').value
+                                    };
 
-                                    if (searchInput.value) params.append('search', searchInput.value);
-                                    if (statusFilter.value) params.append('status', statusFilter.value);
-                                    if (roleFilter.value) params.append('role', roleFilter.value);
+                                    modalSubmit.disabled = true;
+                                    modalSubmit.innerHTML = '<span class="spinner"></span> Creating...';
 
                                     try {
-                                        const response = await fetch(`/api/companyadmin/users?${params}`, {
-                                            credentials: 'same-origin'
-                                        });
-                                        const result = await response.json();
-
-                                        if (result.success) {
-                                            renderUsers(result.data);
-                                            renderPagination(result.pagination);
-                                        }
-                                    } catch (error) {
-                                        console.error('Error loading users:', error);
-                                    }
-                                }
-
-                                function renderUsers(users) {
-                                    const tbody = document.getElementById('users-table-body');
-
-                                    // Avatar color palette — blends with system theme
-                                    const avatarColors = [
-                                        'linear-gradient(135deg, #0B4F6C, #1d4ed8)',
-                                        'linear-gradient(135deg, #7c3aed, #6d28d9)',
-                                        'linear-gradient(135deg, #059669, #10b981)',
-                                        'linear-gradient(135deg, #d97706, #f59e0b)',
-                                        'linear-gradient(135deg, #dc2626, #ef4444)',
-                                        'linear-gradient(135deg, #0891b2, #06b6d4)',
-                                        'linear-gradient(135deg, #4f46e5, #818cf8)',
-                                        'linear-gradient(135deg, #be185d, #ec4899)',
-                                        'linear-gradient(135deg, #0d9488, #2dd4bf)',
-                                        'linear-gradient(135deg, #9333ea, #c084fc)',
-                                    ];
-
-                                    if (users.length === 0) {
-                                        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;">No users found</td></tr>';
-                                        return;
-                                    }
-
-                                    tbody.innerHTML = users.map(user => {
-                                        const initials = (user.firstName?.[0] || '') + (user.lastName?.[0] || '');
-                                        const roleBadge = user.role === 'ProjectManager' ? 'pm' : 'tm';
-                                        const roleLabel = user.role === 'ProjectManager' ? 'Project Manager' : 'Team Member';
-                                        const statusClass = user.status?.toLowerCase() || 'active';
-                                        const lastLogin = user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never';
-                                        const avatarBg = user.avatarColor || '#0B4F6C';
-
-                                        return `
-                                            <tr>
-                                                <td>
-                                                    <div class="user-cell">
-                                                        <div class="user-avatar ${statusClass === 'inactive' ? 'inactive' : ''}" style="background: ${statusClass === 'inactive' ? '' : avatarBg}">${initials.toUpperCase()}</div>
-                                                        <div class="user-details">
-                                                            <span class="user-name">${user.fullName}</span>
-                                                            <span class="user-email">${user.email}</span>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td><span class="role-badge ${roleBadge}">${roleLabel}</span></td>
-                                                <td>${user.assignedProjectsCount || 0}</td>
-                                                <td>${user.assignedTasksCount || 0}</td>
-                                                <td><span class="status-badge ${statusClass}">${user.status}</span></td>
-                                                <td>${lastLogin}</td>
-                                                <td>
-                                                    <div class="action-buttons">
-                                                        <button class="btn-icon" title="Edit" onclick="editUser(${user.userID})">
-                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                                            </svg>
-                                                        </button>
-                                                        <button class="btn-icon" title="Reset Password" onclick="resetPassword(${user.userID}, '${user.fullName}')">
-                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                                                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                                                            </svg>
-                                                        </button>
-                                                        <button class="btn-icon ${statusClass === 'active' ? 'danger' : 'success'}" title="${statusClass === 'active' ? 'Deactivate' : 'Activate'}" onclick="toggleStatus(${user.userID}, '${statusClass}')">
-                                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                                ${statusClass === 'active' ?
-                                                                    '<circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>' :
-                                                                    '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>'}
-                                                            </svg>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        `;
-                                    }).join('');
-                                }
-
-                                function renderPagination(pagination) {
-                                    const container = document.getElementById('pagination');
-                                    const info = container.querySelector('.pagination-info');
-                                    const controls = container.querySelector('.pagination-controls');
-
-                                    const start = (pagination.page - 1) * pagination.pageSize + 1;
-                                    const end = Math.min(pagination.page * pagination.pageSize, pagination.totalCount);
-                                    info.textContent = `Showing ${pagination.totalCount > 0 ? start : 0}-${end} of ${pagination.totalCount} users`;
-
-                                    if (pagination.totalPages <= 1) {
-                                        controls.innerHTML = '';
-                                        return;
-                                    }
-
-                                    let html = `<button class="btn-page" ${pagination.page === 1 ? 'disabled' : ''} onclick="loadUsersPage(${pagination.page - 1})">&laquo;</button>`;
-                                    for (let i = 1; i <= Math.min(pagination.totalPages, 5); i++) {
-                                        html += `<button class="btn-page ${pagination.page === i ? 'active' : ''}" onclick="loadUsersPage(${i})">${i}</button>`;
-                                    }
-                                    if (pagination.totalPages > 5) {
-                                        html += `<button class="btn-page" disabled>...</button>`;
-                                        html += `<button class="btn-page" onclick="loadUsersPage(${pagination.totalPages})">${pagination.totalPages}</button>`;
-                                    }
-                                    html += `<button class="btn-page" ${pagination.page === pagination.totalPages ? 'disabled' : ''} onclick="loadUsersPage(${pagination.page + 1})">&raquo;</button>`;
-                                    controls.innerHTML = html;
-                                }
-
-                                // Global functions
-                                window.loadUsersPage = function (page) {
-                                    loadUsers(page);
-                                };
-
-                                window.editUser = async function (userId) {
-                                    try {
-                                        const response = await fetch(`/api/companyadmin/users/${userId}`, {
-                                            credentials: 'same-origin'
-                                        });
-                                        const result = await response.json();
-
-                                        if (result.success) {
-                                            const user = result.data;
-                                            document.getElementById('edit-user-id').value = user.userID;
-                                            document.getElementById('edit-user-fname').value = user.firstName;
-                                            document.getElementById('edit-user-lname').value = user.lastName;
-                                            document.getElementById('edit-user-email').value = user.email;
-                                            // Format phone with spaces for display
-                                            let ph = (user.phone || '').replace(/\D/g, '');
-                                            if (ph.length > 7) ph = ph.slice(0,4) + ' ' + ph.slice(4,7) + ' ' + ph.slice(7);
-                                            else if (ph.length > 4) ph = ph.slice(0,4) + ' ' + ph.slice(4);
-                                            document.getElementById('edit-user-phone').value = ph;
-                                            document.getElementById('edit-user-role').value = user.role;
-                                            document.getElementById('edit-user-status').value = user.status;
-                                            editModal.classList.add('active');
-                                        } else {
-                                            alert('Error: ' + result.message);
-                                        }
-                                    } catch (error) {
-                                        console.error('Error loading user:', error);
-                                        alert('An error occurred while loading user details.');
-                                    }
-                                };
-
-                                window.resetPassword = function (userId, userName) {
-                                    showConfirmModal(
-                                        `Are you sure you want to reset the password for <strong>${userName}</strong>?`,
-                                        'Reset Password',
-                                        'Reset',
-                                        async () => {
-                                            try {
-                                                const response = await fetch(`/api/companyadmin/users/${userId}/reset-password`, {
-                                                    method: 'POST',
-                                                    credentials: 'same-origin'
-                                                });
-                                                const result = await response.json();
-
-                                                if (result.success) {
-                                                    showPasswordModal(result.data.temporaryPassword);
-                                                } else {
-                                                    alert('Error: ' + result.message);
-                                                }
-                                            } catch (error) {
-                                                console.error('Error resetting password:', error);
-                                                alert('An error occurred while resetting the password.');
-                                            }
-                                        }
-                                    );
-                                };
-
-                                window.toggleStatus = function (userId, currentStatus) {
-                                    const newStatus = currentStatus === 'active' ? 'Inactive' : 'Active';
-                                    const action = currentStatus === 'active' ? 'deactivate' : 'activate';
-
-                                    showConfirmModal(
-                                        `Are you sure you want to <strong>${action}</strong> this user?`,
-                                        `${action.charAt(0).toUpperCase() + action.slice(1)} User`,
-                                        action.charAt(0).toUpperCase() + action.slice(1),
-                                        async () => {
-                                    try {
-                                        const response = await fetch(`/api/companyadmin/users/${userId}/status`, {
-                                            method: 'PATCH',
+                                        const response = await fetch('/api/companyadmin/users', {
+                                            method: 'POST',
                                             headers: { 'Content-Type': 'application/json' },
                                             credentials: 'same-origin',
-                                            body: JSON.stringify({ status: newStatus })
+                                            body: JSON.stringify(userData)
                                         });
+
                                         const result = await response.json();
 
                                         if (result.success) {
+                                            closeModal();
+                                            showToast('User created successfully.', 'success');
+                                            showPasswordModal(result.data.temporaryPassword);
                                             loadStats();
                                             loadUsers();
                                         } else {
-                                            alert('Error: ' + result.message);
+                                            showToast(result.message || 'Failed to create user.', 'error');
                                         }
                                     } catch (error) {
-                                        console.error('Error updating status:', error);
-                                        alert('An error occurred while updating user status.');
+                                        console.error('Error creating user:', error);
+                                        alert('An error occurred while creating the user.');
+                                    } finally {
+                                        modalSubmit.disabled = false;
+                                        modalSubmit.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg> Create User';
                                     }
-                                        }
-                                    );
-                                };
-
-                                // Confirmation modal helpers
-                                let confirmCallback = null;
-                                function showConfirmModal(message, title, actionLabel, onConfirm) {
-                                    const overlay = document.getElementById('confirm-modal');
-                                    document.getElementById('confirm-modal-title').textContent = title || 'Confirm';
-                                    document.getElementById('confirm-modal-message').innerHTML = message;
-                                    document.getElementById('confirm-modal-action').textContent = actionLabel || 'Confirm';
-                                    confirmCallback = onConfirm;
-                                    overlay.classList.add('active');
+                                } else {
+                                    form.reportValidity();
                                 }
-                                function closeConfirmModal() {
-                                    document.getElementById('confirm-modal').classList.remove('active');
-                                    confirmCallback = null;
-                                }
-                                document.getElementById('confirm-modal-cancel').addEventListener('click', closeConfirmModal);
-                                document.getElementById('confirm-modal-close').addEventListener('click', closeConfirmModal);
-                                document.getElementById('confirm-modal').addEventListener('click', function(e) {
-                                    if (e.target === this) closeConfirmModal();
-                                });
-                                document.getElementById('confirm-modal-action').addEventListener('click', function() {
-                                    if (confirmCallback) confirmCallback();
-                                    closeConfirmModal();
-                                });
-
-                                // Close modals on Escape
-                                document.addEventListener('keydown', function (e) {
-                                    if (e.key === 'Escape') {
-                                        if (document.getElementById('confirm-modal').classList.contains('active')) closeConfirmModal();
-                                        else if (modal.classList.contains('active')) closeModal();
-                                        else if (passwordModal.classList.contains('active')) closePasswordModal();
-                                        else if (editModal.classList.contains('active')) closeEditModal();
-                                    }
-                                });
                             });
+
+                            // Edit User Modal
+                            function closeEditModal() {
+                                editModal.classList.remove('active');
+                                editForm.reset();
+                            }
+
+                            editModalClose.addEventListener('click', closeEditModal);
+                            editModalCancel.addEventListener('click', closeEditModal);
+                            editModal.addEventListener('click', function (e) {
+                                if (e.target === editModal) closeEditModal();
+                            });
+
+                            editModalSubmit.addEventListener('click', async function () {
+                                if (editForm.checkValidity()) {
+                                    const userId = document.getElementById('edit-user-id').value;
+                                    const userData = {
+                                        firstName: document.getElementById('edit-user-fname').value,
+                                        lastName: document.getElementById('edit-user-lname').value,
+                                        email: document.getElementById('edit-user-email').value,
+                                        phone: document.getElementById('edit-user-phone').value.replace(/\s/g, ''),
+                                        role: document.getElementById('edit-user-role').value,
+                                        status: document.getElementById('edit-user-status').value
+                                    };
+
+                                    editModalSubmit.disabled = true;
+                                    editModalSubmit.innerHTML = '<span class="spinner"></span> Saving...';
+
+                                    try {
+                                        const response = await fetch(`/api/companyadmin/users/${userId}`, {
+                                            method: 'PUT',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            credentials: 'same-origin',
+                                            body: JSON.stringify(userData)
+                                        });
+
+                                        const result = await response.json();
+
+                                        if (result.success) {
+                                            closeEditModal();
+                                            showToast('User updated successfully.', 'success');
+                                            loadStats();
+                                            loadUsers();
+                                        } else {
+                                            showToast(result.message || 'Failed to update user.', 'error');
+                                        }
+                                    } catch (error) {
+                                        console.error('Error updating user:', error);
+                                        alert('An error occurred while updating the user.');
+                                    } finally {
+                                        editModalSubmit.disabled = false;
+                                        editModalSubmit.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Save Changes';
+                                    }
+                                } else {
+                                    editForm.reportValidity();
+                                }
+                            });
+
+                            // Filter event listeners
+                            let debounceTimer;
+                            searchInput.addEventListener('input', function () {
+                                clearTimeout(debounceTimer);
+                                debounceTimer = setTimeout(() => loadUsers(), 300);
+                            });
+                            statusFilter.addEventListener('change', () => loadUsers());
+                            roleFilter.addEventListener('change', () => loadUsers());
+
+                            // Load stats
+                            async function loadStats() {
+                                try {
+                                    const response = await fetch('/api/companyadmin/users/stats', {
+                                        credentials: 'same-origin'
+                                    });
+                                    const result = await response.json();
+
+                                    if (result.success) {
+                                        document.getElementById('total-users').textContent = result.data.totalUsers;
+                                        document.getElementById('active-users').textContent = result.data.activeUsers;
+                                        document.getElementById('project-managers').textContent = result.data.projectManagers;
+                                        document.getElementById('team-members').textContent = result.data.teamMembers;
+                                    }
+                                } catch (error) {
+                                    console.error('Error loading stats:', error);
+                                }
+                            }
+
+                            // Load users
+                            async function loadUsers(page = 1) {
+                                const params = new URLSearchParams({
+                                    page: page,
+                                    pageSize: 10
+                                });
+
+                                if (searchInput.value) params.append('search', searchInput.value);
+                                if (statusFilter.value) params.append('status', statusFilter.value);
+                                if (roleFilter.value) params.append('role', roleFilter.value);
+
+                                try {
+                                    const response = await fetch(`/api/companyadmin/users?${params}`, {
+                                        credentials: 'same-origin'
+                                    });
+                                    const result = await response.json();
+
+                                    if (result.success) {
+                                        renderUsers(result.data);
+                                        renderPagination(result.pagination);
+                                    }
+                                } catch (error) {
+                                    console.error('Error loading users:', error);
+                                }
+                            }
+
+                            function renderUsers(users) {
+                                const tbody = document.getElementById('users-table-body');
+
+                                // Avatar color palette — blends with system theme
+                                const avatarColors = [
+                                    'linear-gradient(135deg, #0B4F6C, #1d4ed8)',
+                                    'linear-gradient(135deg, #7c3aed, #6d28d9)',
+                                    'linear-gradient(135deg, #059669, #10b981)',
+                                    'linear-gradient(135deg, #d97706, #f59e0b)',
+                                    'linear-gradient(135deg, #dc2626, #ef4444)',
+                                    'linear-gradient(135deg, #0891b2, #06b6d4)',
+                                    'linear-gradient(135deg, #4f46e5, #818cf8)',
+                                    'linear-gradient(135deg, #be185d, #ec4899)',
+                                    'linear-gradient(135deg, #0d9488, #2dd4bf)',
+                                    'linear-gradient(135deg, #9333ea, #c084fc)',
+                                ];
+
+                                if (users.length === 0) {
+                                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;">No users found</td></tr>';
+                                    return;
+                                }
+
+                                tbody.innerHTML = users.map(user => {
+                                    const initials = (user.firstName?.[0] || '') + (user.lastName?.[0] || '');
+                                    const roleBadge = user.role === 'ProjectManager' ? 'pm' : 'tm';
+                                    const roleLabel = user.role === 'ProjectManager' ? 'Project Manager' : 'Team Member';
+                                    const statusClass = user.status?.toLowerCase() || 'active';
+                                    const lastLogin = user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never';
+                                    const avatarBg = user.avatarColor || '#0B4F6C';
+
+                                    return `
+                                                                <tr>
+                                                                    <td>
+                                                                        <div class="user-cell">
+                                                                            <div class="user-avatar ${statusClass === 'inactive' ? 'inactive' : ''}" style="background: ${statusClass === 'inactive' ? '' : avatarBg}">${initials.toUpperCase()}</div>
+                                                                            <div class="user-details">
+                                                                                <span class="user-name">${user.fullName}</span>
+                                                                                <span class="user-email">${user.email}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td><span class="role-badge ${roleBadge}">${roleLabel}</span></td>
+                                                                    <td>${user.assignedProjectsCount || 0}</td>
+                                                                    <td>${user.assignedTasksCount || 0}</td>
+                                                                    <td><span class="status-badge ${statusClass}">${user.status}</span></td>
+                                                                    <td>${lastLogin}</td>
+                                                                    <td>
+                                                                        <div class="action-buttons">
+                                                                            <button class="btn-icon" title="Edit" onclick="editUser(${user.userID})">
+                                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                                                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                                                                </svg>
+                                                                            </button>
+                                                                            <button class="btn-icon" title="Reset Password" onclick="resetPassword(${user.userID}, '${user.fullName}')">
+                                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                                                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                                                                </svg>
+                                                                            </button>
+                                                                            <button class="btn-icon ${statusClass === 'active' ? 'danger' : 'success'}" title="${statusClass === 'active' ? 'Deactivate' : 'Activate'}" onclick="toggleStatus(${user.userID}, '${statusClass}')">
+                                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                                                    ${statusClass === 'active' ?
+                                            '<circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>' :
+                                            '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>'}
+                                                                                </svg>
+                                                                            </button>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            `;
+                                }).join('');
+                            }
+
+                            function renderPagination(pagination) {
+                                const container = document.getElementById('pagination');
+                                const info = container.querySelector('.pagination-info');
+                                const controls = container.querySelector('.pagination-controls');
+
+                                const start = (pagination.page - 1) * pagination.pageSize + 1;
+                                const end = Math.min(pagination.page * pagination.pageSize, pagination.totalCount);
+                                info.textContent = `Showing ${pagination.totalCount > 0 ? start : 0}-${end} of ${pagination.totalCount} users`;
+
+                                if (pagination.totalPages <= 1) {
+                                    controls.innerHTML = '';
+                                    return;
+                                }
+
+                                let html = `<button class="btn-page" ${pagination.page === 1 ? 'disabled' : ''} onclick="loadUsersPage(${pagination.page - 1})">&laquo;</button>`;
+                                for (let i = 1; i <= Math.min(pagination.totalPages, 5); i++) {
+                                    html += `<button class="btn-page ${pagination.page === i ? 'active' : ''}" onclick="loadUsersPage(${i})">${i}</button>`;
+                                }
+                                if (pagination.totalPages > 5) {
+                                    html += `<button class="btn-page" disabled>...</button>`;
+                                    html += `<button class="btn-page" onclick="loadUsersPage(${pagination.totalPages})">${pagination.totalPages}</button>`;
+                                }
+                                html += `<button class="btn-page" ${pagination.page === pagination.totalPages ? 'disabled' : ''} onclick="loadUsersPage(${pagination.page + 1})">&raquo;</button>`;
+                                controls.innerHTML = html;
+                            }
+
+                            // Global functions
+                            window.loadUsersPage = function (page) {
+                                loadUsers(page);
+                            };
+
+                            window.editUser = async function (userId) {
+                                try {
+                                    const response = await fetch(`/api/companyadmin/users/${userId}`, {
+                                        credentials: 'same-origin'
+                                    });
+                                    const result = await response.json();
+
+                                    if (result.success) {
+                                        const user = result.data;
+                                        document.getElementById('edit-user-id').value = user.userID;
+                                        document.getElementById('edit-user-fname').value = user.firstName;
+                                        document.getElementById('edit-user-lname').value = user.lastName;
+                                        document.getElementById('edit-user-email').value = user.email;
+                                        // Format phone with spaces for display
+                                        let ph = (user.phone || '').replace(/\D/g, '');
+                                        if (ph.length > 7) ph = ph.slice(0, 4) + ' ' + ph.slice(4, 7) + ' ' + ph.slice(7);
+                                        else if (ph.length > 4) ph = ph.slice(0, 4) + ' ' + ph.slice(4);
+                                        document.getElementById('edit-user-phone').value = ph;
+                                        document.getElementById('edit-user-role').value = user.role;
+                                        document.getElementById('edit-user-status').value = user.status;
+                                        editModal.classList.add('active');
+                                    } else {
+                                        alert('Error: ' + result.message);
+                                    }
+                                } catch (error) {
+                                    console.error('Error loading user:', error);
+                                    alert('An error occurred while loading user details.');
+                                }
+                            };
+
+                            window.resetPassword = function (userId, userName) {
+                                showConfirmModal(
+                                    `Are you sure you want to reset the password for <strong>${userName}</strong>?`,
+                                    'Reset Password',
+                                    'Reset',
+                                    async () => {
+                                        try {
+                                            const response = await fetch(`/api/companyadmin/users/${userId}/reset-password`, {
+                                                method: 'POST',
+                                                credentials: 'same-origin'
+                                            });
+                                            const result = await response.json();
+
+                                            if (result.success) {
+                                                showToast('Password reset successfully.', 'success');
+                                                showPasswordModal(result.data.temporaryPassword);
+                                            } else {
+                                                showToast(result.message || 'Failed to reset password.', 'error');
+                                            }
+                                        } catch (error) {
+                                            console.error('Error resetting password:', error);
+                                            alert('An error occurred while resetting the password.');
+                                        }
+                                    }
+                                );
+                            };
+
+                            window.toggleStatus = function (userId, currentStatus) {
+                                const newStatus = currentStatus === 'active' ? 'Inactive' : 'Active';
+                                const action = currentStatus === 'active' ? 'deactivate' : 'activate';
+
+                                showConfirmModal(
+                                    `Are you sure you want to <strong>${action}</strong> this user?`,
+                                    `${action.charAt(0).toUpperCase() + action.slice(1)} User`,
+                                    action.charAt(0).toUpperCase() + action.slice(1),
+                                    async () => {
+                                        try {
+                                            const response = await fetch(`/api/companyadmin/users/${userId}/status`, {
+                                                method: 'PATCH',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                credentials: 'same-origin',
+                                                body: JSON.stringify({ status: newStatus })
+                                            });
+                                            const result = await response.json();
+
+                                            if (result.success) {
+                                                showToast(`User ${action}d successfully.`, 'success');
+                                                loadStats();
+                                                loadUsers();
+                                            } else {
+                                                showToast(result.message || 'Failed to update user status.', 'error');
+                                            }
+                                        } catch (error) {
+                                            console.error('Error updating status:', error);
+                                            alert('An error occurred while updating user status.');
+                                        }
+                                    }
+                                );
+                            };
+
+                            // Confirmation modal helpers
+                            let confirmCallback = null;
+                            function showConfirmModal(message, title, actionLabel, onConfirm) {
+                                const overlay = document.getElementById('confirm-modal');
+                                document.getElementById('confirm-modal-title').textContent = title || 'Confirm';
+                                document.getElementById('confirm-modal-message').innerHTML = message;
+                                document.getElementById('confirm-modal-action').textContent = actionLabel || 'Confirm';
+                                confirmCallback = onConfirm;
+                                overlay.classList.add('active');
+                            }
+                            function closeConfirmModal() {
+                                document.getElementById('confirm-modal').classList.remove('active');
+                                confirmCallback = null;
+                            }
+                            document.getElementById('confirm-modal-cancel').addEventListener('click', closeConfirmModal);
+                            document.getElementById('confirm-modal-close').addEventListener('click', closeConfirmModal);
+                            document.getElementById('confirm-modal').addEventListener('click', function (e) {
+                                if (e.target === this) closeConfirmModal();
+                            });
+                            document.getElementById('confirm-modal-action').addEventListener('click', function () {
+                                if (confirmCallback) confirmCallback();
+                                closeConfirmModal();
+                            });
+
+                            // Close modals on Escape
+                            document.addEventListener('keydown', function (e) {
+                                if (e.key === 'Escape') {
+                                    if (document.getElementById('confirm-modal').classList.contains('active')) closeConfirmModal();
+                                    else if (modal.classList.contains('active')) closeModal();
+                                    else if (passwordModal.classList.contains('active')) closePasswordModal();
+                                    else if (editModal.classList.contains('active')) closeEditModal();
+                                }
+                            });
+                        });
                     </script>
                 }

@@ -75,7 +75,7 @@
 .landing-page {
     margin: 0;
     padding: 0;
-    background: linear-gradient(180deg, #FFFFFF 0%, #F6F8FC 40%, #F0F4FA 100%);
+    background: linear-gradient(180deg, #FAFBFC 0%, #F6F8FC 40%, #F0F4FA 100%);
     overflow-x: hidden;
 }
 
@@ -411,7 +411,7 @@
 
 .preview-window {
     width: 100%;
-    background: #fff;
+    background: #FAFBFC;
     border-radius: 16px;
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.1), 0 8px 24px rgba(0, 0, 0, 0.05);
     overflow: hidden;
@@ -479,7 +479,7 @@
 }
 
 .preview-stat-card {
-    background: #fff;
+    background: #FAFBFC;
     border: 1px solid #eee;
     border-radius: 10px;
     padding: 12px 12px;
@@ -520,7 +520,7 @@
     display: none;
     align-items: center;
     gap: 12px;
-    background: #fff;
+    background: #FAFBFC;
     padding: 16px;
     border-radius: 12px;
     border: 1px solid rgba(229, 232, 235, 0.5);
@@ -599,7 +599,7 @@
     align-items: center;
     gap: 8px;
     padding: 14px 32px;
-    background: white;
+    background: #F5F6F8;
     color: var(--primary-blue);
     border: none;
     border-radius: var(--radius-full);
@@ -1656,7 +1656,7 @@
     width: 26px;
     height: 26px;
     border-radius: 50%;
-    background: white;
+    background: #F5F6F8;
     color: var(--text-muted);
     display: flex;
     align-items: center;
@@ -2183,7 +2183,7 @@
 }
 
 .signup-modal {
-    background: #fff;
+    background: #FAFBFC;
     border-radius: 16px;
     padding: 32px 28px 24px;
     max-width: 400px;

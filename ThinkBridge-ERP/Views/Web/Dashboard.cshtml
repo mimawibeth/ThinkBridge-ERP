@@ -2,6 +2,7 @@
     ViewData["Title"] = "Dashboard";
     var userRole = ViewData["UserRole"]?.ToString() ?? "companyadmin";
     var userName = ViewData["UserName"]?.ToString() ?? "Admin";
+    var firstName = userName.Split(' ')[0];
 }
 
 @section PageStyles {
@@ -11,7 +12,7 @@
 <div class="page-dashboard companyadmin-dashboard">
     <!-- Welcome Section -->
     <section class="welcome-section">
-        <h1 class="welcome-title">Welcome back, <span id="dash-username">@userName</span>!</h1>
+        <h1 class="welcome-title">Welcome back, <span id="dash-username">@firstName</span>!</h1>
         <p class="welcome-subtitle">Here's an overview of your projects and activities.</p>
     </section>
 

@@ -8,7 +8,7 @@ public interface ICollaborationService
     Task<ServiceResult> DeletePostAsync(int companyId, int userId, int postId);
 
     // Comments
-    Task<CommentListResult> GetCommentsAsync(int postId);
+    Task<CommentListResult> GetCommentsAsync(int postId, string userRole);
     Task<CreateCommentResult> AddCommentAsync(int companyId, int userId, int postId, string content);
     Task<ServiceResult> DeleteCommentAsync(int userId, int commentId);
 

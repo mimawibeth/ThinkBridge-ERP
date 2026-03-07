@@ -197,75 +197,97 @@
             <div id="receipt-loading" class="payment-history-loading">
                 <p>Loading receipt...</p>
             </div>
-            <div id="receipt-content" style="display:none;">
-                <div class="receipt-section">
-                    <h4 class="receipt-section-title">Company</h4>
-                    <p class="receipt-value" id="receipt-company">—</p>
-                </div>
-                <div class="receipt-grid">
-                    <div class="receipt-section">
-                        <h4 class="receipt-section-title">Plan</h4>
-                        <p class="receipt-value" id="receipt-plan">—</p>
+            <div id="receipt-content" class="receipt-paper" style="display:none;">
+                <!-- Billed To -->
+                <div class="receipt-row">
+                    <div class="receipt-cell">
+                        <span class="receipt-label">Billed To</span>
+                        <span class="receipt-val" id="receipt-company">—</span>
                     </div>
-                    <div class="receipt-section">
-                        <h4 class="receipt-section-title">Billing Cycle</h4>
-                        <p class="receipt-value" id="receipt-cycle">—</p>
+                    <div class="receipt-cell receipt-cell-right">
+                        <span class="receipt-label">Date Paid</span>
+                        <span class="receipt-val" id="receipt-date">—</span>
                     </div>
                 </div>
-                <div class="receipt-divider"></div>
-                <div class="receipt-grid">
-                    <div class="receipt-section">
-                        <h4 class="receipt-section-title">Amount Paid</h4>
-                        <p class="receipt-value receipt-amount" id="receipt-amount">—</p>
+
+                <div class="receipt-line"></div>
+
+                <!-- Plan Details -->
+                <div class="receipt-row">
+                    <div class="receipt-cell">
+                        <span class="receipt-label">Plan</span>
+                        <span class="receipt-val" id="receipt-plan">—</span>
                     </div>
-                    <div class="receipt-section">
-                        <h4 class="receipt-section-title">Payment Method</h4>
-                        <p class="receipt-value" id="receipt-method">—</p>
-                    </div>
-                </div>
-                <div class="receipt-grid">
-                    <div class="receipt-section">
-                        <h4 class="receipt-section-title">Status</h4>
-                        <p id="receipt-status-wrap"><span class="receipt-status" id="receipt-status">—</span></p>
-                    </div>
-                    <div class="receipt-section">
-                        <h4 class="receipt-section-title">Date Paid</h4>
-                        <p class="receipt-value" id="receipt-date">—</p>
+                    <div class="receipt-cell receipt-cell-right">
+                        <span class="receipt-label">Billing Cycle</span>
+                        <span class="receipt-val" id="receipt-cycle">—</span>
                     </div>
                 </div>
-                <div class="receipt-divider"></div>
-                <div class="receipt-grid">
-                    <div class="receipt-section">
-                        <h4 class="receipt-section-title">Provider</h4>
-                        <p class="receipt-value" id="receipt-provider">—</p>
-                    </div>
-                    <div class="receipt-section">
-                        <h4 class="receipt-section-title">Transaction ID</h4>
-                        <p class="receipt-value receipt-txn" id="receipt-txn">—</p>
+
+                <div class="receipt-row">
+                    <div class="receipt-cell">
+                        <span class="receipt-label">Subscription Period</span>
+                        <span class="receipt-val" id="receipt-period">—</span>
                     </div>
                 </div>
-                <div class="receipt-grid">
-                    <div class="receipt-section">
-                        <h4 class="receipt-section-title">Subscription Period</h4>
-                        <p class="receipt-value" id="receipt-period">—</p>
+
+                <div class="receipt-line"></div>
+
+                <!-- Amount Section -->
+                <div class="receipt-amount-block">
+                    <span class="receipt-label">Amount Paid</span>
+                    <span class="receipt-amount-value" id="receipt-amount">—</span>
+                </div>
+
+                <div class="receipt-line"></div>
+
+                <!-- Payment Info -->
+                <div class="receipt-row">
+                    <div class="receipt-cell">
+                        <span class="receipt-label">Payment Method</span>
+                        <span class="receipt-val" id="receipt-method">—</span>
                     </div>
+                    <div class="receipt-cell receipt-cell-right">
+                        <span class="receipt-label">Status</span>
+                        <span id="receipt-status-wrap"><span class="receipt-status" id="receipt-status">—</span></span>
+                    </div>
+                </div>
+
+                <div class="receipt-row">
+                    <div class="receipt-cell">
+                        <span class="receipt-label">Provider</span>
+                        <span class="receipt-val" id="receipt-provider">—</span>
+                    </div>
+                </div>
+
+                <div class="receipt-line"></div>
+
+                <!-- Transaction ID -->
+                <div class="receipt-txn-block">
+                    <span class="receipt-label">Transaction ID</span>
+                    <span class="receipt-val receipt-txn" id="receipt-txn">—</span>
+                </div>
+
+                <div class="receipt-footer-note">
+                    This is a computer-generated receipt. No signature required.
                 </div>
             </div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary" onclick="closeModal('receiptModal')">Close</button>
-            <button class="btn btn-primary" id="btn-print-receipt" onclick="window.printReceipt()">
+            <button class="btn btn-primary" id="btn-download-receipt" onclick="window.downloadReceipt()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                    <rect x="6" y="14" width="12" height="8"></rect>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
-                Print Receipt
+                Download
             </button>
         </div>
     </div>
 </div>
 
 @section PageScripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
     <script src="~/js/pages/my-subscription.js" asp-append-version="true"></script>
 }

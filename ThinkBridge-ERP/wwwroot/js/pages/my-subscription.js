@@ -249,61 +249,86 @@
         document.getElementById('receipt-period').textContent = `${start} — ${end}`;
     };
 
-    window.printReceipt = function () {
-        const content = document.getElementById('receipt-content');
-        if (!content) return;
+    window.downloadReceipt = function () {
+        if (typeof html2pdf === 'undefined') {
+            // Fallback: open printable window if CDN failed to load
+            var w = window.open('', '_blank', 'width=600,height=700');
+            w.document.write(buildReceiptHTML());
+            w.document.close();
+            w.focus();
+            setTimeout(function () { w.print(); }, 400);
+            return;
+        }
 
-        const invoiceNum = document.getElementById('receipt-invoice-number').textContent;
-        const printWindow = window.open('', '_blank', 'width=600,height=700');
-        printWindow.document.write(`<!DOCTYPE html>
-<html><head><title>${escapeHtml(invoiceNum)} - ThinkBridge ERP</title>
-<style>
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 40px; color: #1a1a2e; max-width: 560px; margin: 0 auto; }
-h1 { font-size: 1.5rem; margin: 0 0 4px; }
-.subtitle { font-size: 0.875rem; color: #6b7280; margin: 0 0 24px; }
-.brand { font-size: 0.75rem; color: #6b7280; margin-bottom: 20px; }
-.section-title { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; margin: 0 0 4px; }
-.value { font-size: 0.95rem; margin: 0 0 16px; }
-.amount { font-size: 1.25rem; font-weight: 700; color: #2563eb; }
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
-hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
-.status { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
-.status-paid { background: #d1fae5; color: #065f46; }
-.status-pending { background: #fef3c7; color: #92400e; }
-.status-failed { background: #fee2e2; color: #991b1b; }
-.footer { margin-top: 32px; text-align: center; font-size: 0.75rem; color: #9ca3af; }
-</style></head><body>
-<p class="brand">ThinkBridge ERP</p>
-<h1>Payment Receipt</h1>
-<p class="subtitle">${escapeHtml(invoiceNum)}</p>
-<p class="section-title">Company</p>
-<p class="value">${escapeHtml(document.getElementById('receipt-company').textContent)}</p>
-<div class="grid">
-<div><p class="section-title">Plan</p><p class="value">${escapeHtml(document.getElementById('receipt-plan').textContent)}</p></div>
-<div><p class="section-title">Billing Cycle</p><p class="value">${escapeHtml(document.getElementById('receipt-cycle').textContent)}</p></div>
-</div>
-<hr>
-<div class="grid">
-<div><p class="section-title">Amount Paid</p><p class="value amount">${escapeHtml(document.getElementById('receipt-amount').textContent)}</p></div>
-<div><p class="section-title">Payment Method</p><p class="value">${escapeHtml(document.getElementById('receipt-method').textContent)}</p></div>
-</div>
-<div class="grid">
-<div><p class="section-title">Status</p><p class="value"><span class="status ${document.getElementById('receipt-status').className.replace('receipt-status', '').trim()}">${escapeHtml(document.getElementById('receipt-status').textContent)}</span></p></div>
-<div><p class="section-title">Date Paid</p><p class="value">${escapeHtml(document.getElementById('receipt-date').textContent)}</p></div>
-</div>
-<hr>
-<div class="grid">
-<div><p class="section-title">Provider</p><p class="value">${escapeHtml(document.getElementById('receipt-provider').textContent)}</p></div>
-<div><p class="section-title">Transaction ID</p><p class="value" style="word-break:break-all;font-size:0.8rem;">${escapeHtml(document.getElementById('receipt-txn').textContent)}</p></div>
-</div>
-<p class="section-title">Subscription Period</p>
-<p class="value">${escapeHtml(document.getElementById('receipt-period').textContent)}</p>
-<p class="footer">This is a computer-generated receipt. No signature required.<br>ThinkBridge ERP &copy; ${new Date().getFullYear()}</p>
-</body></html>`);
-        printWindow.document.close();
-        printWindow.focus();
-        setTimeout(() => printWindow.print(), 300);
+        var container = document.createElement('div');
+        container.innerHTML = buildReceiptHTML();
+
+        var invoiceNum = (document.getElementById('receipt-invoice-number').textContent || 'Receipt').replace(/[^a-zA-Z0-9_-]/g, '_');
+
+        html2pdf().set({
+            margin: [15, 18, 15, 18],
+            filename: invoiceNum + '.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, logging: false },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        }).from(container).save();
     };
+
+    function buildReceiptHTML() {
+        var inv = escapeHtml(document.getElementById('receipt-invoice-number').textContent);
+        var company = escapeHtml(document.getElementById('receipt-company').textContent);
+        var date = escapeHtml(document.getElementById('receipt-date').textContent);
+        var plan = escapeHtml(document.getElementById('receipt-plan').textContent);
+        var cycle = escapeHtml(document.getElementById('receipt-cycle').textContent);
+        var period = escapeHtml(document.getElementById('receipt-period').textContent);
+        var amount = escapeHtml(document.getElementById('receipt-amount').textContent);
+        var method = escapeHtml(document.getElementById('receipt-method').textContent);
+        var status = escapeHtml(document.getElementById('receipt-status').textContent);
+        var provider = escapeHtml(document.getElementById('receipt-provider').textContent);
+        var txn = escapeHtml(document.getElementById('receipt-txn').textContent);
+        var year = new Date().getFullYear();
+
+        return '<!DOCTYPE html><html><head><meta charset="utf-8"><title>' + inv + '</title>' +
+            '<style>' +
+            'body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;margin:0;padding:48px 40px;color:#1a1a2e;max-width:600px;margin:0 auto;}' +
+            '.brand{font-size:0.7rem;color:#9ca3af;margin:0 0 6px;letter-spacing:0.3px;}' +
+            'h1{font-size:1.4rem;font-weight:700;margin:0 0 2px;}' +
+            '.inv{font-size:0.82rem;color:#6b7280;margin:0 0 28px;}' +
+            '.row{display:flex;justify-content:space-between;margin-bottom:14px;}' +
+            '.cell{display:flex;flex-direction:column;gap:2px;}' +
+            '.cell-r{text-align:right;}' +
+            '.lbl{font-size:0.65rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:#6b7280;}' +
+            '.val{font-size:0.92rem;}' +
+            'hr{border:none;border-top:1px solid #e5e7eb;margin:8px 0 16px;}' +
+            '.amt-block{text-align:center;padding:16px 0;}' +
+            '.amt{font-size:1.6rem;font-weight:700;color:#0B4F6C;}' +
+            '.badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:0.72rem;font-weight:600;}' +
+            '.badge-paid{background:#d1fae5;color:#065f46;}' +
+            '.badge-pending{background:#fef3c7;color:#92400e;}' +
+            '.badge-failed{background:#fee2e2;color:#991b1b;}' +
+            '.txn{font-size:0.75rem;font-family:monospace;word-break:break-all;color:#6b7280;}' +
+            '.foot{text-align:center;font-size:0.7rem;color:#9ca3af;margin-top:24px;padding-top:12px;border-top:1px dashed #e5e7eb;}' +
+            '</style></head><body>' +
+            '<p class="brand">ThinkBridge ERP</p>' +
+            '<h1>Payment Receipt</h1>' +
+            '<p class="inv">' + inv + '</p>' +
+            '<div class="row"><div class="cell"><span class="lbl">Billed To</span><span class="val">' + company + '</span></div>' +
+            '<div class="cell cell-r"><span class="lbl">Date Paid</span><span class="val">' + date + '</span></div></div>' +
+            '<hr>' +
+            '<div class="row"><div class="cell"><span class="lbl">Plan</span><span class="val">' + plan + '</span></div>' +
+            '<div class="cell cell-r"><span class="lbl">Billing Cycle</span><span class="val">' + cycle + '</span></div></div>' +
+            '<div class="row"><div class="cell"><span class="lbl">Subscription Period</span><span class="val">' + period + '</span></div></div>' +
+            '<hr>' +
+            '<div class="amt-block"><span class="lbl">Amount Paid</span><br><span class="amt">' + amount + '</span></div>' +
+            '<hr>' +
+            '<div class="row"><div class="cell"><span class="lbl">Payment Method</span><span class="val">' + method + '</span></div>' +
+            '<div class="cell cell-r"><span class="lbl">Status</span><span class="badge badge-' + status.toLowerCase() + '">' + status + '</span></div></div>' +
+            '<div class="row"><div class="cell"><span class="lbl">Provider</span><span class="val">' + provider + '</span></div></div>' +
+            '<hr>' +
+            '<div class="row"><div class="cell"><span class="lbl">Transaction ID</span><span class="txn">' + txn + '</span></div></div>' +
+            '<p class="foot">This is a computer-generated receipt. No signature required.<br>ThinkBridge ERP &copy; ' + year + '</p>' +
+            '</body></html>';
+    }
 
     function escapeHtml(str) {
         if (!str) return '';

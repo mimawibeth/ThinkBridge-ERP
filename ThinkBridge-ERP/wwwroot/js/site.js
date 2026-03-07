@@ -503,30 +503,35 @@
     window.showToast = function (message, type) {
         type = type || 'info';
 
+        const icons = {
+            success: '✓',
+            error: '✕',
+            warning: '!',
+            info: 'i'
+        };
+
         // Create toast container if it doesn't exist
         let toastContainer = document.querySelector('.toast-container');
         if (!toastContainer) {
             toastContainer = document.createElement('div');
             toastContainer.className = 'toast-container';
-            toastContainer.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
             document.body.appendChild(toastContainer);
         }
 
         // Create toast
         const toast = document.createElement('div');
         toast.className = 'toast toast-' + type;
-        toast.style.cssText = 'background: var(--surface); padding: 16px 24px; border-radius: 8px; box-shadow: var(--shadow-lg); margin-bottom: 10px; animation: slideIn 0.3s ease;';
-        toast.textContent = message;
+        toast.innerHTML = `<span class="toast-icon">${icons[type] || icons.info}</span><span class="toast-message">${message}</span><button class="toast-close" onclick="this.parentElement.classList.add('toast-exit');setTimeout(()=>this.parentElement.remove(),300)">&times;</button>`;
 
         toastContainer.appendChild(toast);
 
-        // Remove after 3 seconds
+        // Remove after 3.5 seconds
         setTimeout(function () {
-            toast.style.animation = 'slideOut 0.3s ease';
-            setTimeout(function () {
-                toast.remove();
-            }, 300);
-        }, 3000);
+            if (toast.parentElement) {
+                toast.classList.add('toast-exit');
+                setTimeout(function () { toast.remove(); }, 300);
+            }
+        }, 3500);
     };
 
     // ===========================================
@@ -575,13 +580,11 @@
             if (!toastContainer) {
                 toastContainer = document.createElement('div');
                 toastContainer.className = 'toast-container';
-                toastContainer.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
                 document.body.appendChild(toastContainer);
             }
             warningToast = document.createElement('div');
             warningToast.className = 'toast toast-warning';
-            warningToast.style.cssText = 'background: var(--surface); padding: 16px 24px; border-radius: 8px; box-shadow: var(--shadow-lg); margin-bottom: 10px; border-left: 4px solid var(--warning);';
-            warningToast.textContent = 'Your session will expire in 2 minutes due to inactivity.';
+            warningToast.innerHTML = '<span class="toast-icon">!</span><span class="toast-message">Your session will expire in 2 minutes due to inactivity.</span>';
             toastContainer.appendChild(warningToast);
         }
 

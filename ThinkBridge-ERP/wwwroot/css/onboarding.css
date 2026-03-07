@@ -1,0 +1,446 @@
+/* ==========================================
+   ThinkBridge ERP - Onboarding Tour & Help Panel
+   ========================================== */
+
+/* ---- Onboarding Overlay ---- */
+.onboarding-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 20, 35, 0.65);
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+    animation: obFadeIn 0.25s ease;
+}
+
+.onboarding-overlay.active {
+    display: flex;
+}
+
+@keyframes obFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* ---- Tour Card ---- */
+.onboarding-card {
+    background: var(--surface);
+    border-radius: 16px;
+    width: 520px;
+    max-width: 92vw;
+    max-height: 88vh;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: obSlideUp 0.3s ease;
+}
+
+@keyframes obSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.onboarding-header {
+    padding: 28px 32px 0;
+    text-align: center;
+}
+
+.onboarding-header .ob-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    background: var(--blue-lightest);
+    color: var(--primary-blue);
+}
+
+.onboarding-header .ob-step-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--primary-blue);
+    margin-bottom: 6px;
+}
+
+.onboarding-header h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 8px;
+}
+
+.onboarding-header p {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    margin: 0;
+}
+
+/* ---- Step Body ---- */
+.onboarding-body {
+    padding: 20px 32px 8px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.ob-features-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ob-features-list li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--background);
+    border: 1px solid var(--border-light);
+}
+
+.ob-features-list .ob-feat-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.ob-features-list .ob-feat-icon svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+}
+
+.onboarding-header .ob-icon svg {
+    width: 26px;
+    height: 26px;
+    stroke: currentColor;
+}
+
+.ob-feat-icon.blue {
+    background: #DBEAFE;
+    color: #2563EB;
+}
+
+.ob-feat-icon.green {
+    background: #D1FAE5;
+    color: #059669;
+}
+
+.ob-feat-icon.purple {
+    background: #EDE9FE;
+    color: #7C3AED;
+}
+
+.ob-feat-icon.orange {
+    background: #FEF3C7;
+    color: #D97706;
+}
+
+.ob-feat-icon.red {
+    background: #FEE2E2;
+    color: #DC2626;
+}
+
+.ob-feat-icon.teal {
+    background: #CCFBF1;
+    color: #0D9488;
+}
+
+.ob-feat-text h4 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 2px;
+}
+
+.ob-feat-text p {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.45;
+}
+
+/* ---- Footer / Nav ---- */
+.onboarding-footer {
+    padding: 16px 32px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.ob-dots {
+    display: flex;
+    gap: 6px;
+}
+
+.ob-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: all 0.2s;
+}
+
+.ob-dot.active {
+    background: var(--primary-blue);
+    width: 20px;
+    border-radius: 4px;
+}
+
+.ob-footer-btns {
+    display: flex;
+    gap: 8px;
+}
+
+.ob-btn {
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: var(--font-ui);
+    transition: all 0.15s;
+}
+
+.ob-btn-skip {
+    background: transparent;
+    color: var(--text-secondary);
+}
+
+.ob-btn-skip:hover {
+    color: var(--text-primary);
+    background: var(--background);
+}
+
+.ob-btn-prev {
+    background: var(--background);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.ob-btn-prev:hover {
+    background: var(--border-light);
+}
+
+.ob-btn-next,
+.ob-btn-finish {
+    background: var(--primary-blue);
+    color: #fff;
+}
+
+.ob-btn-next:hover,
+.ob-btn-finish:hover {
+    background: var(--blue-dark);
+}
+
+/* ---- Help Panel (Slide-in) ---- */
+.help-panel-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 20, 35, 0.35);
+    z-index: 9999;
+    display: none;
+    animation: obFadeIn 0.2s ease;
+}
+
+.help-panel-overlay.active {
+    display: block;
+}
+
+.help-panel {
+    position: fixed;
+    top: 0;
+    right: -420px;
+    width: 400px;
+    max-width: 90vw;
+    height: 100vh;
+    background: var(--surface);
+    z-index: 10001;
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    transition: right 0.3s ease;
+}
+
+.help-panel.open {
+    right: 0;
+}
+
+.help-panel-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.help-panel-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.help-panel-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: var(--background);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.help-panel-close:hover {
+    background: var(--border-light);
+    color: var(--text-primary);
+}
+
+.help-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+}
+
+/* Tour restart button */
+.help-tour-btn {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--primary-blue);
+    background: var(--blue-lightest);
+    color: var(--primary-blue);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 24px;
+    font-family: var(--font-ui);
+    transition: all 0.15s;
+}
+
+.help-tour-btn:hover {
+    background: var(--primary-blue);
+    color: #fff;
+}
+
+/* FAQ Section */
+.help-section-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin: 0 0 12px;
+}
+
+.faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.faq-item {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.faq-question {
+    width: 100%;
+    padding: 12px 14px;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-family: var(--font-ui);
+    text-align: left;
+}
+
+.faq-question:hover {
+    background: var(--background);
+}
+
+.faq-question .faq-chevron {
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    color: var(--text-muted);
+}
+
+.faq-item.open .faq-question .faq-chevron {
+    transform: rotate(180deg);
+}
+
+.faq-answer {
+    display: none;
+    padding: 0 14px 14px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+}
+
+.faq-item.open .faq-answer {
+    display: block;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .onboarding-card {
+        width: 100%;
+        border-radius: 12px;
+    }
+
+    .onboarding-header,
+    .onboarding-body,
+    .onboarding-footer {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .help-panel {
+        width: 100%;
+        max-width: 100vw;
+    }
+}

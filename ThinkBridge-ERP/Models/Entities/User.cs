@@ -44,6 +44,8 @@ public class User
 
     public bool MustChangePassword { get; set; } = true;
 
+    public bool HasCompletedOnboarding { get; set; } = false;
+
     public DateTime? LastLoginAt { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

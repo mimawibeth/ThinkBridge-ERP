@@ -108,7 +108,8 @@
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                <input type="text" placeholder="Search subscriptions..." class="search-input" id="subscription-search" />
+                <input type="text" placeholder="Search subscriptions..." class="search-input"
+                       id="subscription-search" />
             </div>
             <div class="filter-group">
                 <select class="filter-select" id="status-filter">
@@ -297,19 +298,23 @@
         </div>
         <div class="modal-body" style="padding: 24px;">
             <div style="display: flex; align-items: flex-start; gap: 16px;">
-                <div style="flex-shrink: 0; width: 42px; height: 42px; border-radius: 50%; background: rgba(220, 38, 38, 0.1); display: flex; align-items: center; justify-content: center;">
+                <div
+                    style="flex-shrink: 0; width: 42px; height: 42px; border-radius: 50%; background: rgba(220, 38, 38, 0.1); display: flex; align-items: center; justify-content: center;">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="12" y1="8" x2="12" y2="12"></line>
                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
                     </svg>
                 </div>
-                <p id="confirm-modal-message" style="margin: 0; padding-top: 8px; font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5;"></p>
+                <p id="confirm-modal-message"
+                       style="margin: 0; padding-top: 8px; font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5;">
+                </p>
             </div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary" id="confirm-modal-cancel">Cancel</button>
-            <button class="btn btn-primary" id="confirm-modal-action" style="background: var(--danger, #DC2626); border-color: var(--danger, #DC2626);">Confirm</button>
+            <button class="btn btn-primary" id="confirm-modal-action"
+                    style="background: var(--danger, #DC2626); border-color: var(--danger, #DC2626);">Confirm</button>
         </div>
     </div>
 </div>
@@ -441,26 +446,26 @@
                 }
 
                 tbody.innerHTML = visiblePlans.map(p => `
-                    <tr>
-                        <td><strong>${esc(p.planName)}</strong></td>
-                        <td>₱${formatNumber(p.price)}</td>
-                        <td>${esc(p.billingCycle)}</td>
-                        <td>${p.maxUsers ? p.maxUsers : '<span class="text-muted">Unlimited</span>'}</td>
-                        <td>${p.maxProjects ? p.maxProjects : '<span class="text-muted">Unlimited</span>'}</td>
-                        <td>${p.activeSubscriptions}</td>
-                        <td>${p.isActive ? 'Active' : 'Inactive'}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="btn-icon" title="Edit Plan" onclick="openPlanModal(${p.planID})">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `).join('');
+                        <tr>
+                            <td><strong>${esc(p.planName)}</strong></td>
+                            <td>₱${formatNumber(p.price)}</td>
+                            <td>${esc(p.billingCycle)}</td>
+                            <td>${p.maxUsers ? p.maxUsers : '<span class="text-muted">Unlimited</span>'}</td>
+                            <td>${p.maxProjects ? p.maxProjects : '<span class="text-muted">Unlimited</span>'}</td>
+                            <td>${p.activeSubscriptions}</td>
+                            <td>${p.isActive ? 'Active' : 'Inactive'}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-icon" title="Edit Plan" onclick="openPlanModal(${p.planID})">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
             }
 
             function populatePlanDropdowns(plans) {
@@ -542,10 +547,11 @@
                     const result = await res.json();
                     if (result.success) {
                         closePlanModal();
+                        showToast(editId ? 'Plan updated successfully.' : 'Plan created successfully.', 'success');
                         loadPlans();
                         loadStats();
                     } else {
-                        alert('Error: ' + result.message);
+                        showToast(result.message || 'Failed to save plan.', 'error');
                     }
                 } catch (e) { alert('An error occurred while saving the plan.'); }
             }
@@ -590,26 +596,26 @@
                     }
 
                     return `
-                        <tr class="clickable-row" onclick="viewSubscription(${sub.subscriptionID})">
-                            <td><strong>${esc(sub.companyName)}</strong></td>
-                            <td><span class="plan-text ${planClass}">${esc(sub.planName)}</span></td>
-                            <td>₱${formatNumber(sub.planPrice)}/${sub.billingCycle === 'Annual' ? 'yr' : 'mo'}</td>
-                            <td><span class="status-indicator ${statusClass}">${esc(sub.status)}</span></td>
-                            <td>${formatDate(sub.startDate)}</td>
-                            <td>${sub.endDate ? formatDate(sub.endDate) : '<span class="text-muted">—</span>'}</td>
-                            <td>${remaining}</td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn-icon" title="Edit Subscription" onclick="event.stopPropagation(); openEditSubModal(${sub.subscriptionID})">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
+                            <tr class="clickable-row" onclick="viewSubscription(${sub.subscriptionID})">
+                                <td><strong>${esc(sub.companyName)}</strong></td>
+                                <td><span class="plan-text ${planClass}">${esc(sub.planName)}</span></td>
+                                <td>₱${formatNumber(sub.planPrice)}/${sub.billingCycle === 'Annual' ? 'yr' : 'mo'}</td>
+                                <td><span class="status-indicator ${statusClass}">${esc(sub.status)}</span></td>
+                                <td>${formatDate(sub.startDate)}</td>
+                                <td>${sub.endDate ? formatDate(sub.endDate) : '<span class="text-muted">—</span>'}</td>
+                                <td>${remaining}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-icon" title="Edit Subscription" onclick="event.stopPropagation(); openEditSubModal(${sub.subscriptionID})">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
                 }).join('');
             }
 
@@ -628,9 +634,9 @@
                 }
 
                 footer.innerHTML = `
-                    <span class="table-info">Showing ${(currentPage - 1) * pagination.pageSize + 1}–${Math.min(currentPage * pagination.pageSize, pagination.totalCount)} of ${pagination.totalCount}</span>
-                    <div class="pagination">${pagesHtml}</div>
-                `;
+                        <span class="table-info">Showing ${(currentPage - 1) * pagination.pageSize + 1}–${Math.min(currentPage * pagination.pageSize, pagination.totalCount)} of ${pagination.totalCount}</span>
+                        <div class="pagination">${pagesHtml}</div>
+                    `;
             }
 
             window.goToPage = function (page) {
@@ -651,12 +657,12 @@
                         // Company info (read-only context)
                         const infoEl = document.getElementById('edit-sub-company-info');
                         infoEl.innerHTML = `
-                            <div class="company-cell">
-                                <div class="company-details">
-                                    <span class="company-name">${esc(d.company.companyName)}</span>
-                                    <span class="company-email">${d.admin ? esc(d.admin.email) : ''}</span>
-                                </div>
-                            </div>`;
+                                <div class="company-cell">
+                                    <div class="company-details">
+                                        <span class="company-name">${esc(d.company.companyName)}</span>
+                                        <span class="company-email">${d.admin ? esc(d.admin.email) : ''}</span>
+                                    </div>
+                                </div>`;
 
                         document.getElementById('edit-sub-plan').value = d.subscription.planID;
                         document.getElementById('edit-sub-status').value = d.subscription.status;
@@ -739,65 +745,65 @@
                         const d = result.data;
                         const planClass = (d.subscription.planName || 'trial').toLowerCase();
                         body.innerHTML = `
-                            <div class="detail-section" style="margin-bottom: var(--spacing-md); padding-bottom: var(--spacing-md); border-bottom: 1px solid var(--border);">
-                                <div style="display: flex; align-items: center; gap: 12px;">
-                                    <strong style="font-size: 1rem;">${esc(d.company.companyName)}</strong>
-                                    <span class="status-indicator ${d.company.status.toLowerCase()}" style="font-size: 0.75rem;">${esc(d.company.status)}</span>
+                                <div class="detail-section" style="margin-bottom: var(--spacing-md); padding-bottom: var(--spacing-md); border-bottom: 1px solid var(--border);">
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <strong style="font-size: 1rem;">${esc(d.company.companyName)}</strong>
+                                        <span class="status-indicator ${d.company.status.toLowerCase()}" style="font-size: 0.75rem;">${esc(d.company.status)}</span>
+                                    </div>
+                                    ${d.admin ? `<span style="font-size: 0.85rem; color: var(--text-secondary);">${esc(d.admin.name)} &middot; ${esc(d.admin.email)}</span>` : ''}
                                 </div>
-                                ${d.admin ? `<span style="font-size: 0.85rem; color: var(--text-secondary);">${esc(d.admin.name)} &middot; ${esc(d.admin.email)}</span>` : ''}
-                            </div>
-                            <div class="detail-grid">
-                                <div class="detail-section">
-                                    <h4>Billing Details</h4>
-                                    <div class="detail-row"><span>Plan</span><span class="plan-text ${planClass}">${esc(d.subscription.planName)}</span></div>
-                                    <div class="detail-row"><span>Price</span><span>₱${formatNumber(d.subscription.planPrice)}/${d.subscription.billingCycle === 'Annual' ? 'yr' : 'mo'}</span></div>
-                                    <div class="detail-row"><span>Status</span><span>${esc(d.subscription.status)}</span></div>
+                                <div class="detail-grid">
+                                    <div class="detail-section">
+                                        <h4>Billing Details</h4>
+                                        <div class="detail-row"><span>Plan</span><span class="plan-text ${planClass}">${esc(d.subscription.planName)}</span></div>
+                                        <div class="detail-row"><span>Price</span><span>₱${formatNumber(d.subscription.planPrice)}/${d.subscription.billingCycle === 'Annual' ? 'yr' : 'mo'}</span></div>
+                                        <div class="detail-row"><span>Status</span><span>${esc(d.subscription.status)}</span></div>
+                                    </div>
+                                    <div class="detail-section">
+                                        <h4>Period</h4>
+                                        <div class="detail-row"><span>Start Date</span><span>${formatDate(d.subscription.startDate)}</span></div>
+                                        <div class="detail-row"><span>End Date</span><span>${d.subscription.endDate ? formatDate(d.subscription.endDate) : '—'}</span></div>
+                                    </div>
                                 </div>
-                                <div class="detail-section">
-                                    <h4>Period</h4>
-                                    <div class="detail-row"><span>Start Date</span><span>${formatDate(d.subscription.startDate)}</span></div>
-                                    <div class="detail-row"><span>End Date</span><span>${d.subscription.endDate ? formatDate(d.subscription.endDate) : '—'}</span></div>
-                                </div>
-                            </div>
-                            ${d.invoices.length > 0 ? `
-                                <div class="detail-section">
-                                    <h4>Recent Invoices (${d.invoices.length})</h4>
-                                    <table class="data-table compact">
-                                        <thead><tr><th>Invoice #</th><th>Amount</th><th>Due</th><th>Paid</th><th>Status</th></tr></thead>
-                                        <tbody>
-                                            ${d.invoices.slice(0, 5).map(i => `
-                                                <tr>
-                                                    <td>${esc(i.invoiceNumber)}</td>
-                                                    <td>₱${formatNumber(i.amount)}</td>
-                                                    <td>${formatDate(i.dueDate)}</td>
-                                                    <td>${i.paidDate ? formatDate(i.paidDate) : '—'}</td>
-                                                    <td>${esc(i.status)}</td>
-                                                </tr>
-                                            `).join('')}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            ` : ''}
-                            ${d.payments.length > 0 ? `
-                                <div class="detail-section">
-                                    <h4>Recent Payments (${d.payments.length})</h4>
-                                    <table class="data-table compact">
-                                        <thead><tr><th>Provider</th><th>Method</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
-                                        <tbody>
-                                            ${d.payments.slice(0, 5).map(p => `
-                                                <tr>
-                                                    <td>${esc(p.provider)}</td>
-                                                    <td>${esc(p.paymentMethod || '—')}</td>
-                                                    <td>₱${formatNumber(p.amount)}</td>
-                                                    <td>${esc(p.status)}</td>
-                                                    <td>${p.paidAt || p.createdAt}</td>
-                                                </tr>
-                                            `).join('')}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            ` : ''}
-                        `;
+                                ${d.invoices.length > 0 ? `
+                                    <div class="detail-section">
+                                        <h4>Recent Invoices (${d.invoices.length})</h4>
+                                        <table class="data-table compact">
+                                            <thead><tr><th>Invoice #</th><th>Amount</th><th>Due</th><th>Paid</th><th>Status</th></tr></thead>
+                                            <tbody>
+                                                ${d.invoices.slice(0, 5).map(i => `
+                                                    <tr>
+                                                        <td>${esc(i.invoiceNumber)}</td>
+                                                        <td>₱${formatNumber(i.amount)}</td>
+                                                        <td>${formatDate(i.dueDate)}</td>
+                                                        <td>${i.paidDate ? formatDate(i.paidDate) : '—'}</td>
+                                                        <td>${esc(i.status)}</td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ` : ''}
+                                ${d.payments.length > 0 ? `
+                                    <div class="detail-section">
+                                        <h4>Recent Payments (${d.payments.length})</h4>
+                                        <table class="data-table compact">
+                                            <thead><tr><th>Provider</th><th>Method</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+                                            <tbody>
+                                                ${d.payments.slice(0, 5).map(p => `
+                                                    <tr>
+                                                        <td>${esc(p.provider)}</td>
+                                                        <td>${esc(p.paymentMethod || '—')}</td>
+                                                        <td>₱${formatNumber(p.amount)}</td>
+                                                        <td>${esc(p.status)}</td>
+                                                        <td>${p.paidAt || p.createdAt}</td>
+                                                    </tr>
+                                                `).join('')}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ` : ''}
+                            `;
                     } else {
                         body.innerHTML = '<div class="loading-cell">Failed to load subscription details.</div>';
                     }

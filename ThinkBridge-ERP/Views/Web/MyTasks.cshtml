@@ -106,35 +106,7 @@
         </div>
     </div>
 
-    <!-- Add Update Modal -->
-    <div class="modal-overlay" id="update-modal">
-        <div class="modal modal-container" style="max-width:480px;">
-            <div class="modal-header">
-                <h2 class="modal-title">Add Progress Update</h2>
-                <button class="modal-close" onclick="closeUpdateModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="update-task-id" />
-                <div class="form-group">
-                    <label>New Status</label>
-                    <select id="update-status" class="form-select">
-                        <option value="To Do">To Do</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="In Review">In Review</option>
-                        <option value="Completed">Completed</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Hours Worked</label>
-                    <input type="number" id="update-hours" class="form-input" placeholder="0" step="0.5" min="0" />
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeUpdateModal()">Cancel</button>
-                <button class="btn btn-primary" id="submit-update-btn" onclick="submitUpdate()">Submit Update</button>
-            </div>
-        </div>
-    </div>
+
 </div>
 
 <script>
@@ -307,14 +279,18 @@
         if (isCompletedGroup) {
             return `
             <div class="task-card completed" onclick="viewTask(${t.taskID})">
-                <div class="task-header">
-                    <span class="task-id">TASK-${String(t.taskID).padStart(3, '0')}</span>
-                    <span class="status-badge completed">Completed</span>
-                </div>
-                <h4 class="task-title">${escapeHtml(t.title)}</h4>
-                <div class="task-meta">
-                    <span class="task-project">${escapeHtml(t.projectName)}</span>
-                    ${dueDateStr ? '<span class="completed-date">Completed</span>' : ''}
+                <div class="task-card-body">
+                        <div class="task-title-row">
+                            <h4 class="task-title">${escapeHtml(t.title)}</h4>
+                            <span class="status-dot completed-dot"></span>
+                            <span class="inline-status completed">Completed</span>
+                            <span class="priority-badge ${priorityCls}">${escapeHtml(t.priority || 'Medium').toUpperCase()}</span>
+                        </div>
+                        ${t.description ? `<p class="task-description">${escapeHtml(t.description).substring(0, 150)}${(t.description || '').length > 150 ? '...' : ''}</p>` : ''}
+                        <div class="task-meta">
+                            ${dueDateStr ? `<span class="task-due"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>${dueDateStr}</span>` : ''}
+                            <span class="task-project"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>${escapeHtml(t.projectName)}</span>
+                        </div>
                 </div>
             </div>`;
         }
@@ -330,42 +306,52 @@
                 : t.status === 'Completed' ? 'completed'
                     : 'todo';
 
+        const statusDotCls = t.status === 'In Progress' ? 'inprogress-dot'
+            : t.status === 'In Review' ? 'review-dot'
+                : t.status === 'Completed' ? 'completed-dot'
+                    : t.status === 'To Do' ? 'todo-dot'
+                        : 'todo-dot';
+
+        const statusLabel = t.status;
+        const statusLabelCls = t.status === 'In Progress' ? 'inprogress'
+            : t.status === 'In Review' ? 'review'
+                : t.status === 'Completed' ? 'completed'
+                    : 'todo';
+
         return `
         <div class="task-card ${isOverdue ? 'overdue' : ''}" onclick="viewTask(${t.taskID})">
-            <div class="task-header">
-                <span class="task-id">TASK-${String(t.taskID).padStart(3, '0')}</span>
-                <span class="priority-badge ${priorityCls}">${escapeHtml(t.priority || 'Medium')}</span>
-            </div>
-            <h4 class="task-title">${escapeHtml(t.title)}</h4>
-            ${t.description ? `<p class="task-description">${escapeHtml(t.description).substring(0, 120)}${(t.description || '').length > 120 ? '...' : ''}</p>` : ''}
-            <div class="task-meta">
-                <span class="task-project">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                    </svg>
-                    ${escapeHtml(t.projectName)}
-                </span>
-                ${dueDateStr ? `
-                <span class="task-due ${isOverdue ? 'overdue' : ''}">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
-                    ${isOverdue ? 'Overdue &mdash; ' : 'Due '}${dueDateStr}
-                </span>` : ''}
-            </div>
-            <div class="task-actions" onclick="event.stopPropagation()">
-                <select class="status-select ${statusSelectCls}" onchange="quickStatusUpdate(${t.taskID}, this.value, this)">
-                    ${statusOptionsHtml}
-                </select>
-                <button class="btn-small" onclick="openUpdateModal(${t.taskID}, '${t.status}')">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-                    Update
-                </button>
-                <button class="btn-small" onclick="viewTask(${t.taskID})">View Details</button>
-            </div>
+                <div class="task-card-body">
+                    <div class="task-title-row">
+                        <h4 class="task-title">${escapeHtml(t.title)}</h4>
+                        <span class="status-dot ${statusDotCls}"></span>
+                        <span class="inline-status ${statusLabelCls}">${escapeHtml(statusLabel)}</span>
+                        <span class="priority-badge ${priorityCls}">${escapeHtml(t.priority || 'Medium').toUpperCase()}</span>
+                    </div>
+                    ${t.description ? `<p class="task-description">${escapeHtml(t.description).substring(0, 150)}${(t.description || '').length > 150 ? '...' : ''}</p>` : ''}
+                    <div class="task-meta">
+                        ${dueDateStr ? `
+                        <span class="task-due ${isOverdue ? 'overdue' : ''}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            ${isOverdue ? 'Overdue &mdash; ' : ''}${dueDateStr}
+                        </span>` : ''}
+                        <span class="task-project">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            ${escapeHtml(t.projectName)}
+                        </span>
+                    </div>
+                    <div class="task-actions" onclick="event.stopPropagation()">
+                        <select class="status-select ${statusSelectCls}" onchange="quickStatusUpdate(${t.taskID}, this.value, this)">
+                            ${statusOptionsHtml}
+                        </select>
+                    </div>
+                </div>
         </div>`;
     }
 
@@ -409,10 +395,11 @@
             let json;
             try { json = await res.json(); } catch (_) { json = null; }
             if (json && json.success) {
+                showToast('Task status updated.', 'success');
                 loadTasks();
                 loadStats();
             } else {
-                alert(json?.message || `Error ${res.status}: Failed to update status.`);
+                showToast(json?.message || 'Failed to update status.', 'error');
                 loadTasks();
             }
         } catch (e) {
@@ -422,61 +409,7 @@
         }
     }
 
-    /* ===================== Update Modal ===================== */
 
-    function openUpdateModal(taskId, currentStatus) {
-        document.getElementById('update-task-id').value = taskId;
-        document.getElementById('update-status').value = currentStatus;
-        document.getElementById('update-hours').value = '';
-        document.getElementById('update-modal').classList.add('active');
-    }
-
-    function closeUpdateModal() {
-        document.getElementById('update-modal').classList.remove('active');
-    }
-
-    async function submitUpdate() {
-        const taskId = document.getElementById('update-task-id').value;
-        const newStatus = document.getElementById('update-status').value;
-        const hours = document.getElementById('update-hours').value;
-
-        const btn = document.getElementById('submit-update-btn');
-        btn.disabled = true;
-        btn.textContent = 'Submitting...';
-
-        try {
-            const statusRes = await fetch(`/api/tasks/${taskId}/status`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: newStatus })
-            });
-            let statusJson;
-            try { statusJson = await statusRes.json(); } catch (_) { statusJson = null; }
-
-            if (statusJson && statusJson.success) {
-                if (hours && parseFloat(hours) > 0) {
-                    try {
-                        await fetch(`/api/tasks/${taskId}`, {
-                            method: 'PUT',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ actualHours: parseFloat(hours) })
-                        });
-                    } catch (e) { console.error('Failed to update hours', e); }
-                }
-                closeUpdateModal();
-                loadTasks();
-                loadStats();
-            } else {
-                alert(statusJson?.message || 'Failed to update status.');
-            }
-        } catch (e) {
-            console.error('Submit update error:', e);
-            alert('Network error. Please try again.');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = 'Submit Update';
-        }
-    }
 
     /* ===================== View Task Detail Modal ===================== */
 
@@ -637,8 +570,9 @@
             const json = await res.json();
             if (json.success) {
                 input.value = '';
+                showToast('Comment posted.', 'success');
                 loadTaskComments(currentViewTaskId);
-            } else { alert(json.message); }
+            } else { showToast(json.message || 'Failed to post comment.', 'error'); }
         } catch (e) { alert('Failed to post comment.'); }
         finally { btn.disabled = false; }
     }
