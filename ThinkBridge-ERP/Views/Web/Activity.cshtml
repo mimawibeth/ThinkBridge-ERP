@@ -1,0 +1,452 @@
+@{
+    ViewData["Title"] = "Activity";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/activity.css" asp-append-version="true" />
+}
+
+<div class="page-activity">
+    <!-- Tabs -->
+    <div class="activity-tabs">
+        <button class="tab-btn active" data-tab="feed">Activity Feed</button>
+    </div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-filters">
+            <div class="search-box">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search activities..." />
+            </div>
+            <div class="filter-dropdown" id="filterDropdown">
+                <button class="filter-btn" id="filterBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                    <span id="filterLabel">All Activities</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="filter-menu" id="filterMenu">
+                    <button class="filter-option active" data-type="all">All Activities</button>
+                    <button class="filter-option" data-type="task">Tasks</button>
+                    <button class="filter-option" data-type="product">Product Lifecycle</button>
+                    <button class="filter-option" data-type="post">Posts</button>
+                    <button class="filter-option" data-type="comment">Comments</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Feed Tab -->
+    <div class="tab-content active" id="feedTab">
+        <div class="activity-timeline" id="activityTimeline">
+            <div class="loading-state">Loading activity...</div>
+        </div>
+        <div class="load-more" id="loadMoreFeed" style="display:none;">
+            <button class="btn btn-secondary" onclick="loadMoreActivities()">Load More Activity</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- Comment Modal -->
+<div class="modal-overlay" id="commentModal">
+    <div class="modal-container modal-sm">
+        <div class="modal-header">
+            <h3>Comments</h3>
+            <button class="modal-close" onclick="closeCommentModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="comments-list" id="commentsList"></div>
+            <div class="comment-input-row">
+                <input type="text" id="commentInput" class="comment-input" placeholder="Write a comment..." />
+                <button class="btn btn-primary btn-sm" onclick="addComment()">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ── State ──
+    let currentTab = 'feed';
+    let activityFilter = 'all';
+    let searchTerm = '';
+    let feedPage = 1;
+    let postPage = 1;
+    let feedTotalCount = 0;
+    let postTotalCount = 0;
+    let currentPostId = null;
+
+    const ICONS = {
+        task: { svg: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>' },
+        completed: { svg: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>' },
+        product: { svg: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>' },
+        post: { svg: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>' },
+        comment: { svg: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>' }
+    };
+
+    const ICON_CLASS_MAP = {
+        task: a => a.subType === 'completed' ? 'completed' : 'project',
+        product: () => 'lifecycle',
+        post: () => 'comment',
+        comment: () => 'comment'
+    };
+
+    const TYPE_LABEL = { task: 'Task', product: 'Product Lifecycle', post: 'Discussion', comment: 'Comment' };
+
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', () => {
+        loadActivityFeed();
+        setupEventListeners();
+    });
+
+    function setupEventListeners() {
+        // Tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+        });
+
+        // Search debounce
+        let timer;
+        document.getElementById('searchInput').addEventListener('input', e => {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                searchTerm = e.target.value.trim();
+                if (currentTab === 'feed') { feedPage = 1; loadActivityFeed(); }
+                else { postPage = 1; loadPosts(); }
+            }, 400);
+        });
+
+        // Filter dropdown toggle
+        document.getElementById('filterBtn').addEventListener('click', e => {
+            e.stopPropagation();
+            document.getElementById('filterMenu').classList.toggle('show');
+        });
+
+        // Filter options
+        document.querySelectorAll('.filter-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.filter-option').forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+                activityFilter = opt.dataset.type;
+                document.getElementById('filterLabel').textContent = opt.textContent;
+                document.getElementById('filterMenu').classList.remove('show');
+                feedPage = 1;
+                loadActivityFeed();
+            });
+        });
+
+        // Close filter on outside click
+        document.addEventListener('click', () => {
+            document.getElementById('filterMenu').classList.remove('show');
+        });
+
+        // Comment input enter key
+        document.getElementById('commentInput').addEventListener('keypress', e => {
+            if (e.key === 'Enter') addComment();
+        });
+    }
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+        document.getElementById('feedTab').classList.toggle('active', tab === 'feed');
+    }
+
+    // ── API Helpers ──
+    async function apiFetch(url) {
+        const res = await fetch(url, { credentials: 'include' });
+        return res.json();
+    }
+
+    async function apiPost(url, body) {
+        const res = await fetch(url, {
+            method: 'POST', credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        return res.json();
+    }
+
+    async function apiDelete(url) {
+        const res = await fetch(url, { method: 'DELETE', credentials: 'include' });
+        return res.json();
+    }
+
+    async function apiPatch(url) {
+        const res = await fetch(url, { method: 'PATCH', credentials: 'include' });
+        return res.json();
+    }
+
+    // ── Activity Feed ──
+    async function loadActivityFeed(append = false) {
+        const container = document.getElementById('activityTimeline');
+        if (!append) container.innerHTML = '<div class="loading-state">Loading activity...</div>';
+
+        const params = new URLSearchParams({ page: feedPage, pageSize: 30 });
+        if (activityFilter !== 'all') params.set('type', activityFilter);
+        if (searchTerm) params.set('search', searchTerm);
+
+        const json = await apiFetch(`/api/collaboration/activity?${params}`);
+        if (!json.success) {
+            container.innerHTML = '<div class="empty-state">Failed to load activity.</div>';
+            return;
+        }
+
+        feedTotalCount = json.pagination.totalCount;
+        const activities = json.data || [];
+
+        if (!append) container.innerHTML = '';
+
+        if (activities.length === 0 && !append) {
+            container.innerHTML = '<div class="empty-state">No activity to show yet.</div>';
+            document.getElementById('loadMoreFeed').style.display = 'none';
+            return;
+        }
+
+        // Group by date
+        const groups = {};
+        activities.forEach(a => {
+            const dateKey = new Date(a.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' });
+            if (!groups[dateKey]) groups[dateKey] = [];
+            groups[dateKey].push(a);
+        });
+
+        Object.entries(groups).forEach(([date, items]) => {
+            // Date header
+            const dateEl = document.createElement('div');
+            dateEl.className = 'timeline-date';
+            dateEl.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>${date}</span>`;
+            container.appendChild(dateEl);
+
+            items.forEach(a => container.appendChild(renderActivityItem(a)));
+        });
+
+        document.getElementById('loadMoreFeed').style.display =
+            (feedPage * 30 < feedTotalCount) ? '' : 'none';
+    }
+
+    function renderActivityItem(a) {
+        const iconClass = ICON_CLASS_MAP[a.activityType] ? ICON_CLASS_MAP[a.activityType](a) : 'project';
+        const iconSvg = a.subType === 'completed' ? ICONS.completed.svg : (ICONS[a.activityType]?.svg || ICONS.task.svg);
+        const typeLabel = TYPE_LABEL[a.activityType] || a.activityType;
+
+        const el = document.createElement('div');
+        el.className = 'activity-item';
+        el.innerHTML = `
+            <div class="activity-icon ${iconClass}">${iconSvg}</div>
+            <div class="activity-content">
+                <div class="activity-header">
+                    <p class="activity-text">
+                        <strong>${escHtml(a.userName)}</strong> ${escHtml(a.description)}
+                        ${a.entityName ? `<span class="activity-link">${escHtml(a.entityName)}</span>` : ''}
+                    </p>
+                    <span class="activity-avatar" style="background:${a.userAvatarColor || '#0B4F6C'}">${escHtml(a.userInitials)}</span>
+                </div>
+                <div class="activity-meta">
+                    <span class="activity-time">${timeAgo(a.createdAt)}</span>
+                    <span class="activity-type">${typeLabel}</span>
+                </div>
+            </div>`;
+        return el;
+    }
+
+    function loadMoreActivities() {
+        feedPage++;
+        loadActivityFeed(true);
+    }
+
+    // ── Discussions (Posts) ──
+    async function loadPosts(append = false) {
+        const container = document.getElementById('postsList');
+        if (!append) container.innerHTML = '<div class="loading-state">Loading discussions...</div>';
+
+        const params = new URLSearchParams({ page: postPage, pageSize: 20 });
+        if (searchTerm) params.set('search', searchTerm);
+
+        const json = await apiFetch(`/api/collaboration/posts?${params}`);
+        if (!json.success) {
+            container.innerHTML = '<div class="empty-state">Failed to load discussions.</div>';
+            return;
+        }
+
+        postTotalCount = json.pagination.totalCount;
+        const posts = json.data || [];
+
+        if (!append) container.innerHTML = '';
+
+        if (posts.length === 0 && !append) {
+            container.innerHTML = '<div class="empty-state">No discussions yet. Start one above!</div>';
+            document.getElementById('loadMorePosts').style.display = 'none';
+            return;
+        }
+
+        posts.forEach(p => container.appendChild(renderPostItem(p)));
+        document.getElementById('loadMorePosts').style.display =
+            (postPage * 20 < postTotalCount) ? '' : 'none';
+    }
+
+    function renderPostItem(p) {
+        const el = document.createElement('div');
+        el.className = 'post-card';
+        el.innerHTML = `
+            <div class="post-header">
+                <span class="activity-avatar" style="background:${p.authorAvatarColor || '#0B4F6C'}">${escHtml(p.authorInitials)}</span>
+                <div class="post-meta">
+                    <strong>${escHtml(p.authorName)}</strong>
+                    <span class="activity-time">${timeAgo(p.createdAt)}</span>
+                </div>
+                ${p.projectName ? `<span class="post-project-badge">${escHtml(p.projectName)}</span>` : ''}
+            </div>
+            <p class="post-body">${escHtml(p.content)}</p>
+            <div class="post-footer">
+                <button class="post-action-btn" onclick="openComments(${p.postID})">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    ${p.commentCount} comment${p.commentCount !== 1 ? 's' : ''}
+                </button>
+            </div>`;
+        return el;
+    }
+
+    function loadMorePosts() {
+        postPage++;
+        loadPosts(true);
+    }
+
+    async function createPost() {
+        const content = document.getElementById('postContent').value.trim();
+        if (!content) return;
+
+        const projectId = document.getElementById('postProject').value || null;
+        const json = await apiPost('/api/collaboration/posts', {
+            content,
+            projectID: projectId ? parseInt(projectId) : null
+        });
+
+        if (json.success) {
+            document.getElementById('postContent').value = '';
+            postPage = 1;
+            loadPosts();
+        }
+    }
+
+    async function loadProjects() {
+        const select = document.getElementById('postProject');
+        if (select.options.length > 1) return; // already loaded
+        try {
+            const json = await apiFetch('/api/projects');
+            if (json.success && json.data) {
+                json.data.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.projectID;
+                    opt.textContent = p.projectName;
+                    select.appendChild(opt);
+                });
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    // ── Comments ──
+    async function openComments(postId) {
+        currentPostId = postId;
+        document.getElementById('commentModal').classList.add('show');
+        document.getElementById('commentInput').value = '';
+        await loadComments(postId);
+    }
+
+    function closeCommentModal() {
+        document.getElementById('commentModal').classList.remove('show');
+        currentPostId = null;
+    }
+
+    async function loadComments(postId) {
+        const container = document.getElementById('commentsList');
+        container.innerHTML = '<div class="loading-state">Loading...</div>';
+
+        const json = await apiFetch(`/api/collaboration/posts/${postId}/comments`);
+        if (!json.success) {
+            container.innerHTML = '<div class="empty-state">Failed to load comments.</div>';
+            return;
+        }
+
+        const comments = json.data || [];
+        if (comments.length === 0) {
+            container.innerHTML = '<div class="empty-state">No comments yet.</div>';
+            return;
+        }
+
+        container.innerHTML = comments.map(c => `
+            <div class="comment-item">
+                <span class="activity-avatar small" style="background:${c.authorAvatarColor || '#0B4F6C'}">${escHtml(c.authorInitials)}</span>
+                <div class="comment-body">
+                    <div class="comment-head">
+                        <strong>${escHtml(c.authorName)}</strong>
+                        <span class="activity-time">${timeAgo(c.createdAt)}</span>
+                    </div>
+                    <p>${escHtml(c.content)}</p>
+                </div>
+            </div>`).join('');
+    }
+
+    async function addComment() {
+        if (!currentPostId) return;
+        const input = document.getElementById('commentInput');
+        const content = input.value.trim();
+        if (!content) return;
+
+        const json = await apiPost(`/api/collaboration/posts/${currentPostId}/comments`, { content });
+        if (json.success) {
+            input.value = '';
+            await loadComments(currentPostId);
+            // Refresh post list to update comment count
+            postPage = 1;
+            loadPosts();
+        }
+    }
+
+    // ── Notifications Bell (Header) ──
+    async function loadNotificationCount() {
+        try {
+            const json = await apiFetch('/api/notifications/unread-count');
+            if (json.success) {
+                const badge = document.querySelector('.notification-badge');
+                if (badge) {
+                    badge.textContent = json.data;
+                    badge.style.display = json.data > 0 ? '' : 'none';
+                }
+            }
+        } catch (e) { /* silent */ }
+    }
+
+    // ── Utilities ──
+    function escHtml(str) {
+        const d = document.createElement('div');
+        d.textContent = str || '';
+        return d.innerHTML;
+    }
+
+    function timeAgo(dateStr) {
+        const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
+        if (diff < 60) return 'just now';
+        if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+        if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+        return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+</script>

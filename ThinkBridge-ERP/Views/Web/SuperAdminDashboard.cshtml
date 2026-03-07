@@ -1,0 +1,386 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["UserRole"] = "superadmin";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/dashboard.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/superadmin.css" asp-append-version="true" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+}
+
+<div class="page-dashboard superadmin-dashboard">
+    <!-- Welcome Section -->
+    <section class="welcome-section">
+        <h1 class="welcome-title">Welcome, Maribeth!</h1>
+        <p class="welcome-subtitle">Platform overview and company management</p>
+    </section>
+
+    <!-- KPI Cards Section -->
+    <section class="kpi-section">
+        <div class="kpi-card">
+            <div class="kpi-content">
+                <span class="kpi-label">Total Companies</span>
+                <span class="kpi-value">45</span>
+                <span class="kpi-change positive">+5 this month</span>
+            </div>
+            <div class="kpi-icon blue">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 21h18"></path>
+                    <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
+                </svg>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-content">
+                <span class="kpi-label">Active Subscriptions</span>
+                <span class="kpi-value">38</span>
+                <span class="kpi-change positive">84% active</span>
+            </div>
+            <div class="kpi-icon green">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-content">
+                <span class="kpi-label">Pending Payments</span>
+                <span class="kpi-value">7</span>
+                <span class="kpi-change warning">$12,450 due</span>
+            </div>
+            <div class="kpi-icon orange">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                </svg>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-content">
+                <span class="kpi-label">Monthly Revenue</span>
+                <span class="kpi-value">$48.5K</span>
+                <span class="kpi-change positive">+12% vs last month</span>
+            </div>
+            <div class="kpi-icon purple">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trend Charts Grid -->
+    <div class="dashboard-grid dashboard-grid-2col">
+        <!-- Revenue Trend Chart -->
+        <section class="dashboard-section chart-section">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Revenue Trend</h2>
+                    <span class="chart-subtitle">Last 6 months</span>
+                </div>
+                <div class="chart-legend">
+                    <span class="legend-item"><span class="legend-dot revenue-dot"></span> Revenue</span>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="revenueTrendChart"></canvas>
+            </div>
+            <div class="chart-summary">
+                <div class="chart-summary-item">
+                    <span class="chart-summary-label">Total Revenue</span>
+                    <span class="chart-summary-value" id="totalRevenue">—</span>
+                </div>
+                <div class="chart-summary-item">
+                    <span class="chart-summary-label">Growth</span>
+                    <span class="chart-summary-value" id="revenueGrowth">—</span>
+                </div>
+                <div class="chart-summary-item">
+                    <span class="chart-summary-label">Avg / Month</span>
+                    <span class="chart-summary-value" id="avgRevenue">—</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Subscription Distribution Chart -->
+        <section class="dashboard-section chart-section">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Subscription Distribution</h2>
+                    <span class="chart-subtitle">Active plans breakdown</span>
+                </div>
+            </div>
+            <div class="chart-container chart-container-doughnut">
+                <canvas id="subscriptionChart"></canvas>
+            </div>
+            <div class="sub-legend" id="subscriptionLegend">
+                <!-- Filled by JS -->
+            </div>
+        </section>
+    </div>
+</div>
+
+@section PageScripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+        try {
+        const [dashRes, subRes, revRes] = await Promise.all([
+        fetch('/api/superadmin/dashboard', { credentials: 'same-origin' }),
+        fetch('/api/superadmin/subscriptions/stats', { credentials: 'same-origin' }),
+        fetch('/api/superadmin/dashboard/revenue', { credentials: 'same-origin' })
+        ]);
+
+        const dashResult = await dashRes.json();
+        const subResult = await subRes.json();
+        const revResult = await revRes.json();
+
+        if (dashResult.success) {
+        const data = dashResult.data;
+
+        // Update KPI cards
+        const kpiValues = document.querySelectorAll('.kpi-value');
+        const kpiChanges = document.querySelectorAll('.kpi-change');
+
+        if (kpiValues[0]) kpiValues[0].textContent = data.totalCompanies;
+        if (kpiValues[1]) kpiValues[1].textContent = data.activeSubscriptions;
+        if (kpiValues[2]) kpiValues[2].textContent = data.pendingPayments;
+        if (kpiValues[3]) kpiValues[3].textContent = formatCurrency(data.monthlyRevenue);
+
+        if (kpiChanges[0]) kpiChanges[0].textContent = `+${data.newCompaniesThisMonth} this month`;
+
+        // Update user name
+        const welcomeTitle = document.querySelector('.welcome-title');
+        if (welcomeTitle) {
+        const userName = '@(ViewData["UserName"] ?? "Admin")';
+        welcomeTitle.textContent = `Welcome, ${userName.split(' ')[0]}!`;
+        }
+        }
+
+        // === Revenue Trend Chart ===
+        if (revResult.success) {
+        const rev = revResult.data;
+        const trend = rev.monthlyTrend || [];
+        const labels = trend.map(m => m.label);
+        const revenueData = trend.map(m => m.revenue);
+
+        // Summary values
+        const totalRev = rev.totalAllTimeRevenue || 0;
+        const growth = rev.revenueGrowthPercent || 0;
+        const avgRev = trend.length > 0 ? revenueData.reduce((a, b) => a + b, 0) / trend.length : 0;
+
+        document.getElementById('totalRevenue').textContent = formatCurrency(totalRev);
+        const growthEl = document.getElementById('revenueGrowth');
+        growthEl.textContent = (growth >= 0 ? '+' : '') + growth + '%';
+        growthEl.classList.add(growth >= 0 ? 'positive' : 'negative');
+        document.getElementById('avgRevenue').textContent = formatCurrency(avgRev);
+
+        const ctx = document.getElementById('revenueTrendChart').getContext('2d');
+        new Chart(ctx, {
+        type: 'line',
+        data: {
+        labels: labels,
+        datasets: [{
+        label: 'Revenue',
+        data: revenueData,
+        borderColor: '#0B4F6C',
+        backgroundColor: 'rgba(11, 79, 108, 0.08)',
+        borderWidth: 2.5,
+        pointBackgroundColor: '#0B4F6C',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        tension: 0.4,
+        fill: true
+        }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+        legend: { display: false },
+        tooltip: {
+        backgroundColor: '#1e293b',
+        titleColor: '#f8fafc',
+        bodyColor: '#f8fafc',
+        borderColor: 'rgba(255,255,255,0.1)',
+        borderWidth: 1,
+        cornerRadius: 8,
+        padding: 12,
+        callbacks: {
+        label: function (ctx) {
+        return '₱' + Number(ctx.raw).toLocaleString(undefined, { minimumFractionDigits: 2 });
+        }
+        }
+        }
+        },
+        scales: {
+        x: {
+        grid: { display: false },
+        ticks: { color: '#94a3b8', font: { size: 12 } }
+        },
+        y: {
+        beginAtZero: true,
+        grid: { color: 'rgba(148, 163, 184, 0.1)' },
+        ticks: {
+        color: '#94a3b8',
+        font: { size: 12 },
+        callback: function (v) {
+        if (v >= 1000) return '₱' + (v / 1000).toFixed(0) + 'K';
+        return '₱' + v;
+        }
+        }
+        }
+        }
+        }
+        });
+        }
+
+        // === Subscription Doughnut Chart ===
+        if (subResult.success) {
+        const subData = subResult.data;
+        const dist = subData.planDistribution || {};
+        const planLabels = Object.keys(dist);
+        const planCounts = Object.values(dist);
+        const total = subData.totalSubscriptions || 1;
+
+        const planColors = {
+        'Enterprise': '#7C3AED',
+        'Professional': '#0B4F6C',
+        'Starter': '#f97316',
+        'Trial': '#94a3b8'
+        };
+        const colors = planLabels.map(p => planColors[p] || '#64748b');
+
+        const dCtx = document.getElementById('subscriptionChart').getContext('2d');
+        new Chart(dCtx, {
+        type: 'doughnut',
+        data: {
+        labels: planLabels,
+        datasets: [{
+        data: planCounts,
+        backgroundColor: colors,
+        borderWidth: 0,
+        hoverOffset: 6
+        }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: {
+        legend: { display: false },
+        tooltip: {
+        backgroundColor: '#1e293b',
+        titleColor: '#f8fafc',
+        bodyColor: '#f8fafc',
+        cornerRadius: 8,
+        padding: 12,
+        callbacks: {
+        label: function (ctx) {
+        const pct = Math.round((ctx.raw / total) * 100);
+        return ctx.label + ': ' + ctx.raw + ' (' + pct + '%)';
+        }
+        }
+        }
+        }
+        }
+        });
+
+        // Build legend
+        const legendEl = document.getElementById('subscriptionLegend');
+        if (legendEl) {
+        legendEl.innerHTML = planLabels.map((plan, i) => {
+        const pct = Math.round((planCounts[i] / total) * 100);
+        return `
+        <div class="sub-legend-item">
+            <span class="sub-legend-dot" style="background:${colors[i]}"></span>
+            <span class="sub-legend-plan">${escapeHtml(plan)}</span>
+            <span class="sub-legend-count">${planCounts[i]}</span>
+            <span class="sub-legend-pct">${pct}%</span>
+        </div>`;
+        }).join('');
+        }
+
+        // Update active subscriptions KPI
+        const kpiChanges = document.querySelectorAll('.kpi-change');
+        if (kpiChanges[1]) kpiChanges[1].textContent = `${subData.activeSubscriptions} active`;
+        }
+
+        } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        }
+        });
+
+        function getInitials(name) {
+        if (!name) return '??';
+        return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+        }
+
+        function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+        }
+
+        function formatCurrency(amount) {
+        if (amount >= 1000) {
+        return '₱' + (amount / 1000).toFixed(1) + 'K';
+        }
+        return '₱' + amount.toFixed(0);
+        }
+
+        function formatCurrencyFull(amount) {
+        return '₱' + Number(amount).toLocaleString(undefined, { minimumFractionDigits: 2 });
+        }
+
+        function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function formatDateShort(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        }
+
+        function timeAgo(dateString) {
+        const now = new Date();
+        const date = new Date(dateString);
+        const seconds = Math.floor((now - date) / 1000);
+        if (seconds < 60) return 'Just now';
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return minutes + ' min ago';
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return hours + ' hours ago';
+        const days = Math.floor(hours / 24);
+        if (days === 1) return 'Yesterday';
+        return days + ' days ago';
+        }
+
+        function getActivityIconClass(entity) {
+        switch (entity) {
+        case 'Company': return 'new-company';
+        case 'PaymentTransaction': return 'payment';
+        case 'Subscription': return 'upgrade';
+        default: return 'new-company';
+        }
+        }
+
+        function getActivityIcon(entity) {
+        switch (entity) {
+        case 'Company':
+        return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"></path><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path></svg>';
+        case 'PaymentTransaction':
+        return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>';
+        case 'Subscription':
+        return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>';
+        default:
+        return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+        }
+        }
+    </script>
+}

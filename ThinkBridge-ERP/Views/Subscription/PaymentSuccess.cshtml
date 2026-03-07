@@ -1,0 +1,116 @@
+@{
+    ViewData["Title"] = "Payment Successful - ThinkBridge ERP";
+    ViewData["HideLayout"] = true;
+    ViewData["BodyClass"] = "signup-page";
+    var companyName = ViewData["CompanyName"] as string;
+    var planName = ViewData["PlanName"] as string;
+    var userEmail = ViewData["UserEmail"] as string;
+    var subscriptionStatus = ViewData["SubscriptionStatus"] as string;
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/landing.css" asp-append-version="true" />
+}
+
+<div class="payment-result-page">
+    <div class="payment-result-card">
+        <div class="success-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+        </div>
+        <h2>Payment Successful!</h2>
+        <p class="success-subtitle">Your ThinkBridge ERP account has been activated.</p>
+
+        <div class="credentials-card">
+            @if (!string.IsNullOrEmpty(companyName))
+            {
+                <div class="credential-row">
+                    <span class="credential-label">Company</span>
+                    <span class="credential-value">@companyName</span>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(planName))
+            {
+                <div class="credential-row">
+                    <span class="credential-label">Plan</span>
+                    <span class="credential-value">@planName</span>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(userEmail))
+            {
+                <div class="credential-row">
+                    <span class="credential-label">Login Email</span>
+                    <span class="credential-value" id="displayEmail">@userEmail</span>
+                </div>
+            }
+            <div class="credential-row" id="passwordRow" style="display:none;">
+                <span class="credential-label">Temporary Password</span>
+                <span class="credential-value credential-password" id="displayPassword">—</span>
+            </div>
+            <div class="credential-row">
+                <span class="credential-label">Status</span>
+                <span class="credential-value">
+                    <span class="badge badge-completed" id="statusBadge">
+                        @(subscriptionStatus == "Active" ? "Active" : "Activating...")
+                    </span>
+                </span>
+            </div>
+        </div>
+
+        <div class="result-actions">
+            <a href="/Auth/Login" class="btn btn-primary btn-lg">
+                Go to Login
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </a>
+            <a href="/" class="btn btn-secondary btn-lg">Back to Home</a>
+        </div>
+    </div>
+</div>
+
+@section PageScripts {
+    <script>
+            // Try to recover saved credentials from sessionStorage
+            const savedEmail = sessionStorage.getItem('tb_email');
+            const savedPassword = sessionStorage.getItem('tb_password');
+
+            if (savedPassword) {
+                document.getElementById('passwordRow').style.display = 'flex';
+                document.getElementById('displayPassword').textContent = savedPassword;
+                // Clear from storage
+                sessionStorage.removeItem('tb_password');
+            }
+
+            if (savedEmail && !document.getElementById('displayEmail')) {
+                // Email not coming from server, use saved
+            }
+
+            sessionStorage.removeItem('tb_email');
+            sessionStorage.removeItem('tb_plan');
+
+            // Poll for activation if status is not Active
+            const statusBadge = document.getElementById('statusBadge');
+            if (statusBadge && statusBadge.textContent.trim() !== 'Active') {
+                const urlParams = new URLSearchParams(window.location.search);
+                const subId = urlParams.get('subscription_id');
+
+                if (subId) {
+                    // Try to verify payment
+                    fetch('/api/subscription/verify-payment', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ subscriptionId: parseInt(subId) })
+                    }).then(r => r.json()).then(data => {
+                        if (data.isActive) {
+                            statusBadge.textContent = 'Active';
+                            statusBadge.className = 'badge badge-completed';
+                        }
+                    });
+                }
+            }
+    </script>
+}

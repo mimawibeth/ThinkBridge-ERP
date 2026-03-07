@@ -1,0 +1,1004 @@
+@{
+    ViewData["Title"] = "Projects";
+    var userRole = ViewData["UserRole"]?.ToString() ?? "teammember";
+    var canCreate = userRole == "projectmanager";
+    var canArchive = userRole == "projectmanager" || userRole == "companyadmin";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/projects.css" asp-append-version="true" />
+}
+
+<div class="page-projects">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-filters">
+            <div class="search-box">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" class="search-input" id="project-search" placeholder="Search projects..." />
+            </div>
+            <div class="filter-dropdown">
+                <select class="form-select" id="status-filter" style="min-width: 150px; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); color: var(--text-primary); font-size: 0.85rem;">
+                    <option value="">All Status</option>
+                    <option value="Planning">Planning</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Review">Review</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Delayed">Delayed</option>
+                    <option value="Archived">Archived</option>
+                </select>
+            </div>
+        </div>
+        @if (canCreate)
+        {
+            <button class="btn btn-primary" id="new-project-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                New Project
+            </button>
+        }
+    </div>
+
+    <!-- Stats Cards (CompanyAdmin only) -->
+    @if (userRole == "companyadmin")
+    {
+    <div class="stats-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 24px;">
+        <div class="stat-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; text-align: center;">
+            <div style="font-size: 1.8rem; font-weight: 700; color: var(--primary);" id="stat-total">0</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">Total Projects</div>
+        </div>
+        <div class="stat-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; text-align: center;">
+            <div style="font-size: 1.8rem; font-weight: 700; color: #3b82f6;" id="stat-active">0</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">Active</div>
+        </div>
+        <div class="stat-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; text-align: center;">
+            <div style="font-size: 1.8rem; font-weight: 700; color: #10b981;" id="stat-completed">0</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">Completed</div>
+        </div>
+        <div class="stat-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; text-align: center;">
+            <div style="font-size: 1.8rem; font-weight: 700; color: #f59e0b;" id="stat-planning">0</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">Planning</div>
+        </div>
+        <div class="stat-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; text-align: center;">
+            <div style="font-size: 1.8rem; font-weight: 700; color: #ef4444;" id="stat-delayed">0</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">Delayed</div>
+        </div>
+    </div>
+    }
+
+    <!-- Tabs -->
+    <div class="tabs-container">
+        <button class="tab-btn active" data-tab="all">All</button>
+        <button class="tab-btn" data-tab="In Progress">Active</button>
+        <button class="tab-btn" data-tab="Completed">Completed</button>
+        <button class="tab-btn" data-tab="Planning">Planning</button>
+        <button class="tab-btn" data-tab="Archived">Archived</button>
+    </div>
+
+    <!-- Projects Grid -->
+    <div class="projects-grid" id="projects-grid">
+        <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.3; margin-bottom: 16px;">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <p>Loading projects...</p>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination-container" style="display: none; justify-content: space-between; align-items: center; margin-top: 24px; padding: 12px 0;">
+        <span id="pagination-info" style="font-size: 0.85rem; color: var(--text-secondary);"></span>
+        <div id="pagination-controls" style="display: flex; gap: 4px;"></div>
+    </div>
+</div>
+
+<!-- New Project Modal (PM only) -->
+@if (canCreate)
+{
+<div class="modal-overlay" id="new-project-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h2>Create New Project</h2>
+            <button class="modal-close" id="modal-close">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form class="project-form" id="new-project-form">
+                <div class="form-group">
+                    <label for="project-name">Project Name <span style="color: var(--danger);">*</span></label>
+                    <input type="text" id="project-name" class="form-input" placeholder="Enter project name" required />
+                </div>
+                <div class="form-group">
+                    <label for="project-description">Description</label>
+                    <textarea id="project-description" class="form-textarea" rows="3" placeholder="Enter project description"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="start-date">Start Date</label>
+                        <input type="date" id="start-date" class="form-input" />
+                    </div>
+                    <div class="form-group">
+                        <label for="due-date">Due Date</label>
+                        <input type="date" id="due-date" class="form-input" />
+                        <span id="project-date-error" style="color:#dc3545;font-size:0.8rem;margin-top:4px;display:none;"></span>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="project-status">Status</label>
+                        <select id="project-status" class="form-select">
+                            <option value="Planning">Planning</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Review">Review</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="project-category">Category</label>
+                        <select id="project-category" class="form-select">
+                            <option value="">Select Category</option>
+                            <option value="Development">Development</option>
+                            <option value="Infrastructure">Infrastructure</option>
+                            <option value="Analytics">Analytics</option>
+                            <option value="Security">Security</option>
+                            <option value="Documentation">Documentation</option>
+                            <option value="Design">Design</option>
+                            <option value="Marketing">Marketing</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Assign Team Members</label>
+                    <div id="team-members-list" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-md); min-height: 42px; background: var(--bg-secondary, #f8f9fa);">
+                        <span style="color: var(--text-secondary); font-size: 0.85rem;">Loading members...</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="modal-cancel">Cancel</button>
+            <button class="btn btn-primary" id="modal-submit">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                </svg>
+                Create Project
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Project Modal -->
+<div class="modal-overlay" id="edit-project-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h2>Edit Project</h2>
+            <button class="modal-close" data-close="edit-project-modal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form class="project-form" id="edit-project-form">
+                <input type="hidden" id="edit-project-id" />
+                <div class="form-group">
+                    <label for="edit-project-name">Project Name <span style="color: var(--danger);">*</span></label>
+                    <input type="text" id="edit-project-name" class="form-input" required />
+                </div>
+                <div class="form-group">
+                    <label for="edit-project-description">Description</label>
+                    <textarea id="edit-project-description" class="form-textarea" rows="3"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-start-date">Start Date</label>
+                        <input type="date" id="edit-start-date" class="form-input" />
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-due-date">Due Date</label>
+                        <input type="date" id="edit-due-date" class="form-input" />
+                        <span id="edit-project-date-error" style="color:#dc3545;font-size:0.8rem;margin-top:4px;display:none;"></span>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-project-status">Status</label>
+                        <select id="edit-project-status" class="form-select">
+                            <option value="Planning">Planning</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Review">Review</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Delayed">Delayed</option>
+                            <option value="Archived">Archived</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-project-category">Category</label>
+                        <select id="edit-project-category" class="form-select">
+                            <option value="">Select Category</option>
+                            <option value="Development">Development</option>
+                            <option value="Infrastructure">Infrastructure</option>
+                            <option value="Analytics">Analytics</option>
+                            <option value="Security">Security</option>
+                            <option value="Documentation">Documentation</option>
+                            <option value="Design">Design</option>
+                            <option value="Marketing">Marketing</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-project-progress">Progress (%)</label>
+                        <input type="number" id="edit-project-progress" class="form-input" min="0" max="100" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Assign Team Members</label>
+                    <div id="edit-team-members-list" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-md); min-height: 42px; background: var(--bg-secondary, #f8f9fa);">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-close="edit-project-modal">Cancel</button>
+            <button class="btn btn-primary" id="edit-modal-submit">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                </svg>
+                Save Changes
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Archive Confirmation Modal -->
+@if (canArchive)
+{
+<div class="modal-overlay" id="archive-confirm-modal">
+    <div class="modal" style="max-width: 440px;">
+        <div class="modal-header" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+            <h2 style="display:flex;align-items:center;gap:8px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+                Archive Project
+            </h2>
+            <button class="modal-close" data-close="archive-confirm-modal" style="color:white;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body" style="text-align:center; padding: 28px 24px;">
+            <div style="width:56px;height:56px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
+            <h3 style="margin-bottom:8px;font-size:1.1rem;color:var(--text-primary);">Are you sure?</h3>
+            <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:4px;">You are about to archive the project:</p>
+            <p style="font-weight:600;font-size:1rem;color:var(--text-primary);margin-bottom:12px;" id="archive-project-name"></p>
+            <p style="color:var(--text-secondary);font-size:0.8rem;">Archived projects can be restored later from the Archived tab.</p>
+        </div>
+        <div class="modal-footer" style="justify-content:center;gap:12px;">
+            <button class="btn btn-secondary" data-close="archive-confirm-modal" style="min-width:100px;">Cancel</button>
+            <button class="btn" id="archive-confirm-btn" style="min-width:100px;background:#f59e0b;color:white;border:none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect></svg>
+                Archive
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- View Project Modal (all roles) -->
+<div class="modal-overlay" id="view-project-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header modal-header-primary">
+            <div>
+                <h2 id="view-project-name">Project Details</h2>
+                <p class="modal-subtitle" id="view-project-code"></p>
+            </div>
+            <button class="modal-close" data-close="view-project-modal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body" id="view-project-body">
+            <p style="text-align:center; color: var(--text-secondary);">Loading...</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-close="view-project-modal">Close</button>
+            @if (canCreate)
+            {
+                <button class="btn btn-primary" id="edit-from-view-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    Edit Project
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+@section PageScripts {
+<script>
+(function() {
+    'use strict';
+
+    const USER_ROLE = '@userRole';
+    const CAN_CREATE = @(canCreate ? "true" : "false");
+    const CAN_ARCHIVE = @(canArchive ? "true" : "false");
+    const IS_ADMIN = USER_ROLE === 'companyadmin';
+    let currentPage = 1;
+    let currentTab = 'all';
+    let teamMembers = [];
+
+    // =================== Init ===================
+    document.addEventListener('DOMContentLoaded', function() {
+        if (IS_ADMIN) loadStats();
+        loadProjects();
+        if (CAN_CREATE) loadTeamMembers();
+        initEventListeners();
+    });
+
+    // =================== Event Listeners ===================
+    function initEventListeners() {
+        // Search with debounce
+        const searchInput = document.getElementById('project-search');
+        if (searchInput) {
+            let timeout;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => { currentPage = 1; loadProjects(); }, 300);
+            });
+        }
+
+        // Status filter
+        const statusFilter = document.getElementById('status-filter');
+        if (statusFilter) {
+            statusFilter.addEventListener('change', function() {
+                currentPage = 1;
+                loadProjects();
+            });
+        }
+
+        // Tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentTab = this.dataset.tab;
+                currentPage = 1;
+                loadProjects();
+            });
+        });
+
+        // New project modal
+        if (CAN_CREATE) {
+            document.getElementById('new-project-btn')?.addEventListener('click', () => openModal('new-project-modal'));
+            document.getElementById('modal-close')?.addEventListener('click', () => closeModal('new-project-modal'));
+            document.getElementById('modal-cancel')?.addEventListener('click', () => closeModal('new-project-modal'));
+            document.getElementById('modal-submit')?.addEventListener('click', createProject);
+
+            // Edit modal
+            document.querySelectorAll('[data-close="edit-project-modal"]').forEach(el => el.addEventListener('click', () => closeModal('edit-project-modal')));
+            document.getElementById('edit-modal-submit')?.addEventListener('click', updateProject);
+
+            document.getElementById('edit-from-view-btn')?.addEventListener('click', function() {
+                const projectId = this.dataset.projectId;
+                closeModal('view-project-modal');
+                setTimeout(() => openEditModal(projectId), 200);
+            });
+
+            // Archive confirm modal
+            document.querySelectorAll('[data-close="archive-confirm-modal"]').forEach(el => el.addEventListener('click', () => closeModal('archive-confirm-modal')));
+            document.getElementById('archive-confirm-btn')?.addEventListener('click', confirmArchive);
+        }
+
+        // View modal close
+        document.querySelectorAll('[data-close="view-project-modal"]').forEach(el => {
+            el.addEventListener('click', () => closeModal('view-project-modal'));
+        });
+
+        // Close modals on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) closeModal(this.id);
+            });
+        });
+    }
+
+    // =================== API Calls ===================
+    async function loadStats() {
+        try {
+            const res = await fetch('/api/projects/stats', { credentials: 'same-origin' });
+            const result = await res.json();
+            if (result.success) {
+                document.getElementById('stat-total').textContent = result.data.totalProjects;
+                document.getElementById('stat-active').textContent = result.data.activeProjects;
+                document.getElementById('stat-completed').textContent = result.data.completedProjects;
+                document.getElementById('stat-planning').textContent = result.data.planningProjects;
+                document.getElementById('stat-delayed').textContent = result.data.delayedProjects;
+            }
+        } catch (e) { console.error('Error loading stats:', e); }
+    }
+
+    async function loadProjects() {
+        const search = document.getElementById('project-search')?.value || '';
+        const statusFilter = document.getElementById('status-filter')?.value || '';
+        const status = currentTab !== 'all' ? currentTab : statusFilter;
+
+        const params = new URLSearchParams({ page: currentPage, pageSize: 6 });
+        if (search) params.append('search', search);
+        if (status) params.append('status', status);
+
+        try {
+            const res = await fetch(`/api/projects?${params}`, { credentials: 'same-origin' });
+            const result = await res.json();
+            if (result.success) {
+                const recentProjects = JSON.parse(localStorage.getItem('recentProjects') || '{}');
+                const sorted = result.data.slice().sort((a, b) => {
+                    const ta = recentProjects[a.projectID] || 0;
+                    const tb = recentProjects[b.projectID] || 0;
+                    return tb - ta;
+                });
+                renderProjects(sorted);
+                renderPagination(result.pagination);
+            }
+        } catch (e) { console.error('Error loading projects:', e); }
+    }
+
+    async function loadTeamMembers() {
+        try {
+            const res = await fetch('/api/projects/team-members', { credentials: 'same-origin' });
+            const result = await res.json();
+            if (result.success) {
+                teamMembers = result.data;
+                renderTeamMemberCheckboxes('team-members-list', []);
+            }
+        } catch (e) { console.error('Error loading team members:', e); }
+    }
+
+    async function createProject() {
+        const name = document.getElementById('project-name').value.trim();
+        if (!name) { alert('Project name is required.'); return; }
+
+        const projDesc = document.getElementById('project-description').value.trim();
+
+        // Clear previous date error
+        const dateErr = document.getElementById('project-date-error');
+        dateErr.style.display = 'none';
+
+        const startVal = document.getElementById('start-date').value;
+        const dueVal = document.getElementById('due-date').value;
+        if (startVal && dueVal) {
+            if (dueVal <= startVal) {
+                dateErr.textContent = 'Due Date cannot be the same as Start Date. Select a Due Date at least 1 day later than the Start Date.';
+                dateErr.style.display = 'block';
+                return;
+            }
+        }
+
+        const selectedMembers = getSelectedMembers('team-members-list');
+        const data = {
+            projectName: name,
+            description: projDesc,
+            startDate: startVal || null,
+            dueDate: dueVal || null,
+            status: document.getElementById('project-status').value,
+            category: document.getElementById('project-category').value || null,
+            teamMemberIds: selectedMembers
+        };
+
+        const btn = document.getElementById('modal-submit');
+        btn.disabled = true;
+        btn.textContent = 'Creating...';
+
+        try {
+            const res = await fetch('/api/projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            if (result.success) {
+                closeModal('new-project-modal');
+                document.getElementById('new-project-form').reset();
+                renderTeamMemberCheckboxes('team-members-list', []);
+                loadStats();
+                loadProjects();
+            } else {
+                alert('Error: ' + (result.message || 'Failed to create project'));
+            }
+        } catch (e) {
+            console.error('Error:', e);
+            alert('An error occurred while creating the project.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Create Project';
+        }
+    }
+
+    async function openEditModal(projectId) {
+        try {
+            const res = await fetch(`/api/projects/${projectId}`, { credentials: 'same-origin' });
+            const result = await res.json();
+            if (!result.success) { alert(result.message); return; }
+
+            const p = result.data;
+            document.getElementById('edit-project-id').value = p.projectID;
+            document.getElementById('edit-project-name').value = p.projectName;
+            document.getElementById('edit-project-description').value = p.description || '';
+            document.getElementById('edit-start-date').value = p.startDate ? p.startDate.split('T')[0] : '';
+            document.getElementById('edit-due-date').value = p.dueDate ? p.dueDate.split('T')[0] : '';
+            document.getElementById('edit-project-status').value = p.status;
+            document.getElementById('edit-project-category').value = p.category || '';
+            document.getElementById('edit-project-progress').value = p.progress || 0;
+
+            const memberIds = p.members.map(m => m.userID);
+            renderTeamMemberCheckboxes('edit-team-members-list', memberIds);
+            openModal('edit-project-modal');
+        } catch (e) { console.error('Error:', e); alert('Failed to load project.'); }
+    }
+
+    async function updateProject() {
+        const projectId = document.getElementById('edit-project-id').value;
+
+        const editProjDesc = document.getElementById('edit-project-description').value.trim();
+
+        // Clear previous date error
+        const editDateErr = document.getElementById('edit-project-date-error');
+        editDateErr.style.display = 'none';
+
+        const editStartVal = document.getElementById('edit-start-date').value;
+        const editDueVal = document.getElementById('edit-due-date').value;
+        if (editStartVal && editDueVal) {
+            if (editDueVal <= editStartVal) {
+                editDateErr.textContent = 'Due Date cannot be the same as Start Date. Select a Due Date at least 1 day later than the Start Date.';
+                editDateErr.style.display = 'block';
+                return;
+            }
+        }
+
+        const selectedMembers = getSelectedMembers('edit-team-members-list');
+        const data = {
+            projectName: document.getElementById('edit-project-name').value.trim(),
+            description: editProjDesc,
+            startDate: editStartVal || null,
+            dueDate: editDueVal || null,
+            status: document.getElementById('edit-project-status').value,
+            category: document.getElementById('edit-project-category').value || null,
+            progress: parseFloat(document.getElementById('edit-project-progress').value) || 0,
+            teamMemberIds: selectedMembers
+        };
+
+        const btn = document.getElementById('edit-modal-submit');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+
+        try {
+            const res = await fetch(`/api/projects/${projectId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            if (result.success) {
+                closeModal('edit-project-modal');
+                loadStats();
+                loadProjects();
+            } else {
+                alert('Error: ' + (result.message || 'Failed to update'));
+            }
+        } catch (e) { console.error('Error:', e); alert('An error occurred.'); }
+        finally {
+            btn.disabled = false;
+            btn.textContent = 'Save Changes';
+        }
+    }
+
+    let archiveTargetId = null;
+
+    async function archiveProject(projectId) {
+        archiveTargetId = projectId;
+        // Fetch project name for the modal
+        try {
+            const res = await fetch(`/api/projects/${projectId}`, { credentials: 'same-origin' });
+            const result = await res.json();
+            if (result.success) {
+                document.getElementById('archive-project-name').textContent = result.data.projectName;
+            } else {
+                document.getElementById('archive-project-name').textContent = 'Project #' + projectId;
+            }
+        } catch (e) {
+            document.getElementById('archive-project-name').textContent = 'Project #' + projectId;
+        }
+        openModal('archive-confirm-modal');
+    }
+
+    async function confirmArchive() {
+        if (!archiveTargetId) return;
+        const btn = document.getElementById('archive-confirm-btn');
+        btn.disabled = true;
+        btn.textContent = 'Archiving...';
+        try {
+            const res = await fetch(`/api/projects/${archiveTargetId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({ status: 'Archived' })
+            });
+            const result = await res.json();
+            if (result.success) {
+                closeModal('archive-confirm-modal');
+                if (IS_ADMIN) loadStats();
+                loadProjects();
+            } else {
+                alert('Error: ' + (result.message || 'Failed to archive'));
+            }
+        } catch (e) { console.error('Error:', e); alert('An error occurred.'); }
+        finally {
+            btn.disabled = false;
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect></svg> Archive';
+            archiveTargetId = null;
+        }
+    }
+
+    async function viewProject(projectId) {
+        // Track recently accessed
+        const recentProjects = JSON.parse(localStorage.getItem('recentProjects') || '{}');
+        recentProjects[projectId] = Date.now();
+        localStorage.setItem('recentProjects', JSON.stringify(recentProjects));
+
+        try {
+            const [projRes, tasksRes, productsRes] = await Promise.all([
+                fetch(`/api/projects/${projectId}`, { credentials: 'same-origin' }),
+                fetch(`/api/tasks/by-project/${projectId}`, { credentials: 'same-origin' }),
+                fetch(`/api/products/by-project/${projectId}`, { credentials: 'same-origin' })
+            ]);
+            const result = await projRes.json();
+            if (!result.success) { alert(result.message); return; }
+            const p = result.data;
+
+            const tasksResult = await tasksRes.json();
+            const tasks = tasksResult.success ? tasksResult.data : [];
+            const productsResult = await productsRes.json();
+            const products = productsResult.success ? productsResult.data : [];
+
+            // Task stats
+            const taskStats = { total: tasks.length, todo: 0, inProgress: 0, completed: 0, overdue: 0 };
+            tasks.forEach(t => {
+                if (t.status === 'To Do') taskStats.todo++;
+                else if (t.status === 'In Progress') taskStats.inProgress++;
+                else if (t.status === 'Completed') taskStats.completed++;
+                if (t.status !== 'Completed' && t.dueDate && new Date(t.dueDate) < new Date()) taskStats.overdue++;
+            });
+
+            document.getElementById('view-project-name').textContent = p.projectName;
+            document.getElementById('view-project-code').textContent = '';
+
+            if (CAN_CREATE) {
+                document.getElementById('edit-from-view-btn').dataset.projectId = p.projectID;
+            }
+
+            const body = document.getElementById('view-project-body');
+            body.innerHTML = `
+                <div class="detail-section">
+                    <h4 class="detail-section-title">Project Information</h4>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-label">Status</span>
+                            <span class="badge badge-${getStatusClass(p.status)}">${esc(p.status)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Category</span>
+                            <span class="badge badge-category">${esc(p.category || 'N/A')}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Start Date</span>
+                            <span class="detail-value">${p.startDate ? formatDate(p.startDate) : 'Not set'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Due Date</span>
+                            <span class="detail-value">${p.dueDate ? formatDate(p.dueDate) : 'Not set'}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Created By</span>
+                            <span class="detail-value">${esc(p.createdByName)}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Tasks</span>
+                            <span class="detail-value">${p.completedTaskCount}/${p.taskCount} completed</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <h4 class="detail-section-title">Description</h4>
+                    <p class="detail-description">${esc(p.description || 'No description provided.')}</p>
+                </div>
+                <div class="detail-section">
+                    <h4 class="detail-section-title">Progress</h4>
+                    <div class="detail-progress">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                            <span>Overall Completion</span>
+                            <span>${p.progress}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${p.progress}%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <h4 class="detail-section-title">Team Members (${p.members.length})</h4>
+                    <div style="display:flex;flex-wrap:wrap;gap:12px;">
+                        ${p.members.map(m => `
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <span class="team-avatar" style="background:${m.avatarColor || '#0B4F6C'}">${esc(m.initials)}</span>
+                                <span style="font-size:0.9rem;">${esc(m.fullName)}</span>
+                                ${m.memberRole ? `<span style="font-size:0.7rem;color:var(--text-secondary);">(${esc(m.memberRole)})</span>` : ''}
+                            </div>
+                        `).join('')}
+                        ${p.members.length === 0 ? '<span style="color:var(--text-secondary);">No team members assigned.</span>' : ''}
+                    </div>
+                </div>
+
+                <!-- Tasks Summary -->
+                <div class="detail-section" style="margin-top:16px;">
+                    <h4 class="detail-section-title">Tasks (${taskStats.total})</h4>
+                    ${taskStats.total > 0 ? `
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin-bottom:12px;">
+                        <div style="text-align:center;padding:8px;border-radius:var(--radius-md);background:#DBEAFE;">
+                            <div style="font-size:1.2rem;font-weight:700;color:#1E40AF;">${taskStats.todo}</div>
+                            <div style="font-size:0.7rem;color:#1E40AF;">To Do</div>
+                        </div>
+                        <div style="text-align:center;padding:8px;border-radius:var(--radius-md);background:#FEF3C7;">
+                            <div style="font-size:1.2rem;font-weight:700;color:#92400E;">${taskStats.inProgress}</div>
+                            <div style="font-size:0.7rem;color:#92400E;">In Progress</div>
+                        </div>
+                        <div style="text-align:center;padding:8px;border-radius:var(--radius-md);background:#D1FAE5;">
+                            <div style="font-size:1.2rem;font-weight:700;color:#065F46;">${taskStats.completed}</div>
+                            <div style="font-size:0.7rem;color:#065F46;">Done</div>
+                        </div>
+                        ${taskStats.overdue > 0 ? `<div style="text-align:center;padding:8px;border-radius:var(--radius-md);background:#FEE2E2;">
+                            <div style="font-size:1.2rem;font-weight:700;color:#991B1B;">${taskStats.overdue}</div>
+                            <div style="font-size:0.7rem;color:#991B1B;">Overdue</div>
+                        </div>` : ''}
+                    </div>
+                    <div style="max-height:180px;overflow-y:auto;">
+                        <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+                            <thead>
+                                <tr style="border-bottom:1px solid var(--border);">
+                                    <th style="text-align:left;padding:6px 8px;color:var(--text-secondary);">Task</th>
+                                    <th style="text-align:left;padding:6px 8px;color:var(--text-secondary);">Status</th>
+                                    <th style="text-align:left;padding:6px 8px;color:var(--text-secondary);">Priority</th>
+                                    <th style="text-align:left;padding:6px 8px;color:var(--text-secondary);">Assignees</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tasks.map(t => `
+                                    <tr style="border-bottom:1px solid var(--border-light, #f0f0f0);">
+                                        <td style="padding:6px 8px;">${esc(t.title)}</td>
+                                        <td style="padding:6px 8px;"><span class="badge badge-${t.status === 'Completed' ? 'completed' : t.status === 'In Progress' ? 'in-progress' : 'planning'}" style="font-size:0.72rem;">${esc(t.status)}</span></td>
+                                        <td style="padding:6px 8px;font-size:0.78rem;color:${t.priority === 'Critical' ? '#DC2626' : t.priority === 'High' ? '#F59E0B' : 'var(--text-secondary)'};">${esc(t.priority)}</td>
+                                        <td style="padding:6px 8px;">${t.assignees?.map(a => esc(a.fullName)).join(', ') || '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    ` : '<p style="color:var(--text-secondary);font-size:0.85rem;">No tasks assigned to this project.</p>'}
+                </div>
+
+                <!-- Products Summary -->
+                <div class="detail-section" style="margin-top:16px;">
+                    <h4 class="detail-section-title">Products (${products.length})</h4>
+                    ${products.length > 0 ? `
+                    <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                        ${products.map(pr => {
+                            const stageMap = { 'Concept': '#DBEAFE', 'Design': '#EDE9FE', 'Development': '#FEF3C7', 'Testing': '#FEF3C7', 'Production': '#D1FAE5', 'Maintenance': '#E0E7FF', 'End of Life': '#FEE2E2' };
+                            const colorMap = { 'Concept': '#1E40AF', 'Design': '#6D28D9', 'Development': '#B45309', 'Testing': '#92400E', 'Production': '#065F46', 'Maintenance': '#3730A3', 'End of Life': '#991B1B' };
+                            const bg = stageMap[pr.currentStage] || '#DBEAFE';
+                            const fg = colorMap[pr.currentStage] || '#1E40AF';
+                            return `<div style="padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);min-width:180px;">
+                                <div style="font-weight:600;font-size:0.85rem;">${esc(pr.productName)}</div>
+                                <div style="font-size:0.75rem;color:var(--text-muted);margin:2px 0;">${esc(pr.productCode)}</div>
+                                <span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:0.72rem;font-weight:600;background:${bg};color:${fg};">${esc(pr.currentStage)}</span>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                    ` : '<p style="color:var(--text-secondary);font-size:0.85rem;">No products linked to this project.</p>'}
+                </div>
+            `;
+
+            openModal('view-project-modal');
+        } catch (e) { console.error('Error:', e); alert('Failed to load project details.'); }
+    }
+
+    // =================== Rendering ===================
+    function renderProjects(projects) {
+        const grid = document.getElementById('projects-grid');
+
+        if (!projects || projects.length === 0) {
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity: 0.3; margin-bottom: 16px;">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <p>No projects found</p>
+                </div>`;
+            return;
+        }
+
+        grid.innerHTML = projects.map(p => `
+            <div class="project-card" onclick="window._viewProject(${p.projectID})" style="cursor:pointer;">
+                <div class="project-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </div>
+                <div class="project-content">
+                    <div class="project-header">
+                        ${(CAN_CREATE || CAN_ARCHIVE) ? `
+                        <div style="display:flex;gap:4px;" onclick="event.stopPropagation();">
+                            ${CAN_CREATE ? `<button onclick="window._editProject(${p.projectID})" class="btn btn-secondary" style="padding:4px 8px;font-size:0.75rem;" title="Edit">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            </button>` : ''}
+                            ${CAN_ARCHIVE ? (currentTab === 'Archived' ? `
+                            <button onclick="window._restoreProject(${p.projectID})" class="btn btn-secondary" style="padding:4px 8px;font-size:0.75rem;color:var(--success, #10b981);" title="Restore">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                            </button>
+                            ` : `
+                            <button onclick="window._archiveProject(${p.projectID})" class="btn btn-secondary" style="padding:4px 8px;font-size:0.75rem;color:var(--warning, #f59e0b);" title="Archive">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+                            </button>
+                            `) : ''}
+                        </div>
+                        ` : ''}
+                    </div>
+                    <h3 class="project-name">${esc(p.projectName)}</h3>
+                    <p class="project-description">${esc(p.description || 'No description')}</p>
+                    <div class="project-tags">
+                        <span class="badge badge-${getStatusClass(p.status)}">${esc(p.status)}</span>
+                        ${p.category ? `<span class="badge badge-category">${esc(p.category)}</span>` : ''}
+                    </div>
+                    <div class="project-progress">
+                        <div class="progress-header">
+                            <span>Progress</span>
+                            <span class="progress-percent">${p.progress}%</span>
+                        </div>
+                        <div class="progress-bar ${p.progress >= 100 ? 'progress-bar-success' : p.status === 'Delayed' ? 'progress-bar-danger' : ''}">
+                            <div class="progress-fill" style="width: ${p.progress}%"></div>
+                        </div>
+                    </div>
+                    <div class="project-footer">
+                        <div class="project-team">
+                            ${p.members.slice(0, 3).map(m => `<span class="team-avatar" style="background:${m.avatarColor || '#0B4F6C'}">${esc(m.initials)}</span>`).join('')}
+                            ${p.members.length > 3 ? `<span class="team-avatar-more">+${p.members.length - 3}</span>` : ''}
+                        </div>
+                        <div class="project-date">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            ${p.dueDate ? formatDate(p.dueDate) : 'No due date'}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderPagination(pagination) {
+        const container = document.getElementById('pagination-container');
+        const info = document.getElementById('pagination-info');
+        const controls = document.getElementById('pagination-controls');
+
+        if (!pagination || pagination.totalPages <= 1) {
+            container.style.display = 'none';
+            return;
+        }
+
+        container.style.display = 'flex';
+        const start = (pagination.page - 1) * pagination.pageSize + 1;
+        const end = Math.min(pagination.page * pagination.pageSize, pagination.totalCount);
+        info.textContent = `Showing ${start}-${end} of ${pagination.totalCount} projects`;
+
+        let btns = `<button style="padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);cursor:pointer;" ${pagination.page === 1 ? 'disabled' : ''} onclick="window._goToPage(${pagination.page - 1})">&laquo;</button>`;
+        for (let i = 1; i <= pagination.totalPages; i++) {
+            btns += `<button style="padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:${i === pagination.page ? 'var(--primary)' : 'var(--surface)'};color:${i === pagination.page ? 'white' : 'var(--text-primary)'};cursor:pointer;" onclick="window._goToPage(${i})">${i}</button>`;
+        }
+        btns += `<button style="padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);cursor:pointer;" ${pagination.page === pagination.totalPages ? 'disabled' : ''} onclick="window._goToPage(${pagination.page + 1})">&raquo;</button>`;
+        controls.innerHTML = btns;
+    }
+
+    function renderTeamMemberCheckboxes(containerId, selectedIds) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        if (teamMembers.length === 0) {
+            container.innerHTML = '<span style="color: var(--text-secondary); font-size: 0.85rem;">No team members available.</span>';
+            return;
+        }
+
+        container.innerHTML = teamMembers.map(m => `
+            <label style="display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--radius-md);background:var(--surface);border:1px solid var(--border);cursor:pointer;font-size:0.85rem;white-space:nowrap;">
+                <input type="checkbox" value="${m.userID}" ${selectedIds.includes(m.userID) ? 'checked' : ''} style="accent-color:var(--primary);" />
+                <span class="team-avatar" style="width:22px;height:22px;font-size:0.6rem;background:${m.avatarColor || '#0B4F6C'}">${esc(m.initials)}</span>
+                ${esc(m.fullName)} <span style="color:var(--text-secondary);font-size:0.75rem;">(${esc(m.role)})</span>
+            </label>
+        `).join('');
+    }
+
+    function getSelectedMembers(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return [];
+        return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(cb => parseInt(cb.value));
+    }
+
+    // =================== Helpers ===================
+    function openModal(id) { document.getElementById(id)?.classList.add('active'); }
+    function closeModal(id) { document.getElementById(id)?.classList.remove('active'); }
+
+    function getStatusClass(status) {
+        const map = { 'Planning': 'planning', 'In Progress': 'in-progress', 'Review': 'review', 'Completed': 'completed', 'Delayed': 'delayed', 'Archived': 'archived' };
+        return map[status] || 'planning';
+    }
+
+    function esc(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function formatDate(dateStr) {
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    // =================== Global Handlers ===================
+    async function restoreProject(projectId) {
+        if (!confirm('Restore this project from archive?')) return;
+        try {
+            const res = await fetch(`/api/projects/${projectId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({ status: 'Planning' })
+            });
+            const result = await res.json();
+            if (result.success) {
+                if (IS_ADMIN) loadStats();
+                loadProjects();
+            } else {
+                alert('Error: ' + (result.message || 'Failed to restore'));
+            }
+        } catch (e) { console.error('Error:', e); alert('An error occurred.'); }
+    }
+
+    window._viewProject = viewProject;
+    window._editProject = CAN_CREATE ? openEditModal : function() {};
+    window._archiveProject = CAN_ARCHIVE ? archiveProject : function() {};
+    window._restoreProject = CAN_ARCHIVE ? restoreProject : function() {};
+    window._goToPage = function(page) { currentPage = page; loadProjects(); };
+})();
+</script>
+}

@@ -1,0 +1,322 @@
+@{
+    ViewData["Title"] = "Reports";
+    var userRole = ViewData["UserRole"]?.ToString() ?? "companyadmin";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/superadmin-reports.css" asp-append-version="true" />
+}
+
+<div class="page-reports">
+    <!-- Header -->
+    <div class="report-header">
+        <h1>Company Reports</h1>
+        <div class="report-header-actions">
+            <button class="btn-generate" onclick="generateReport()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                Generate
+            </button>
+            <button class="btn-print" onclick="printReport()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                Print Report
+            </button>
+            <button class="btn-print" onclick="downloadPDF()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Report Meta -->
+    <div class="report-meta" id="report-meta">
+        <span><strong>Report:</strong> Company Overview</span>
+        <span><strong>Generated:</strong> <span id="meta-generated">—</span></span>
+    </div>
+
+    <!-- Loading -->
+    <div class="report-loading" id="report-loading">
+        Loading report data...
+    </div>
+
+    <!-- Report Content -->
+    <div id="report-content" style="display:none;">
+
+        <!-- KPI Summary -->
+        <div class="report-kpi-grid" id="kpi-grid"></div>
+
+        <!-- Role Distribution + Subscription Info -->
+        <div class="report-chart-grid">
+            <div class="report-chart-card">
+                <h3>Users by Role</h3>
+                <div class="report-chart-container">
+                    <canvas id="role-chart"></canvas>
+                </div>
+            </div>
+            <div class="report-chart-card">
+                <h3>Subscription Details</h3>
+                <div id="subscription-details" style="padding: var(--spacing-md) 0;"></div>
+            </div>
+        </div>
+
+        <!-- Active Users Table -->
+        <section class="report-section">
+            <div class="report-section-header">
+                <h2>Team Members</h2>
+            </div>
+            <div class="report-section-body" style="padding:0;">
+                <table class="report-table" id="users-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Last Login</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+
+@section PageScripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', generateReport);
+
+        let roleChart = null;
+
+        async function generateReport() {
+        const loading = document.getElementById('report-loading');
+        const content = document.getElementById('report-content');
+        loading.style.display = 'flex';
+        content.style.display = 'none';
+
+        document.getElementById('meta-generated').textContent =
+        new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+
+        try {
+        const res = await fetch('/api/reports/company-overview', { credentials: 'same-origin' });
+        const json = await res.json();
+
+        if (json.success) {
+        renderReport(json.data);
+        loading.style.display = 'none';
+        content.style.display = 'block';
+        } else {
+        loading.textContent = 'Error: ' + (json.message || 'Unknown error');
+        }
+        } catch (err) {
+        console.error('Report error:', err);
+        loading.textContent = 'Failed to load report data.';
+        }
+        }
+
+        function renderReport(d) {
+        renderKPIs(d);
+        renderRoleChart(d.usersByRole || []);
+        renderSubscriptionDetails(d);
+        renderUsersTable(d.recentUsers || []);
+        }
+
+        function renderKPIs(d) {
+        const usagePct = d.maxUsers ? Math.round(d.activeUsers / d.maxUsers * 100) : 0;
+        document.getElementById('kpi-grid').innerHTML = `
+        <div class="report-kpi-card">
+        <div class="kpi-label">Total Users</div>
+        <div class="kpi-value">${d.totalUsers}</div>
+        <div class="kpi-sub"><span class="text-success">${d.activeUsers} active</span> · ${d.inactiveUsers} inactive</div>
+        </div>
+        <div class="report-kpi-card">
+        <div class="kpi-label">Active Logins (30 days)</div>
+        <div class="kpi-value">${d.recentLoginsLast30Days}</div>
+        <div class="kpi-sub">${d.totalUsers > 0 ? Math.round(d.recentLoginsLast30Days / d.totalUsers * 100) : 0}% of total users</div>
+        </div>
+        <div class="report-kpi-card">
+        <div class="kpi-label">Current Plan</div>
+        <div class="kpi-value">${esc(d.planName)}</div>
+        <div class="kpi-sub">${esc(d.subscriptionStatus)}</div>
+        </div>
+        <div class="report-kpi-card">
+        <div class="kpi-label">Seat Usage</div>
+        <div class="kpi-value">${d.activeUsers} / ${d.maxUsers || '∞'}</div>
+        <div class="kpi-sub">${d.maxUsers ? usagePct + '% capacity used' : 'Unlimited seats'}</div>
+        </div>
+        `;
+        }
+
+        function renderRoleChart(roles) {
+        const ctx = document.getElementById('role-chart').getContext('2d');
+        if (roleChart) roleChart.destroy();
+
+        if (!roles.length) {
+        ctx.canvas.parentElement.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-secondary);">No role data</div>';
+        return;
+        }
+
+        const roleColors = {
+        'CompanyAdmin': '#7C3AED',
+        'ProjectManager': '#2563EB',
+        'TeamMember': '#22C55E'
+        };
+
+        const labels = roles.map(r => r.roleName);
+        const values = roles.map(r => r.count);
+        const bgColors = labels.map(l => roleColors[l] || '#94A3B8');
+
+        roleChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+        labels: labels,
+        datasets: [{
+        data: values,
+        backgroundColor: bgColors,
+        borderWidth: 2,
+        borderColor: '#fff'
+        }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '55%',
+        plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 16, usePointStyle: true } }
+        }
+        }
+        });
+        }
+
+        function renderSubscriptionDetails(d) {
+        const container = document.getElementById('subscription-details');
+
+        const statusColors = {
+        'Active': 'var(--success)',
+        'Trial': '#7C3AED',
+        'Expired': 'var(--danger)',
+        'Cancelled': '#B45309'
+        };
+        const statusColor = statusColors[d.subscriptionStatus] || 'var(--text-secondary)';
+
+        container.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:var(--spacing-md);">
+        <div class="stat-bar-row">
+        <span class="stat-bar-label">Plan</span>
+        <span class="stat-bar-value" style="flex:1;text-align:left;font-size:0.9rem;">${esc(d.planName)}</span>
+        </div>
+        <div class="stat-bar-row">
+        <span class="stat-bar-label">Status</span>
+        <span style="flex:1;font-weight:600;font-size:0.85rem;color:${statusColor};">${esc(d.subscriptionStatus)}</span>
+        </div>
+        <div class="stat-bar-row">
+        <span class="stat-bar-label">Price</span>
+        <span class="stat-bar-value" style="flex:1;text-align:left;font-size:0.9rem;">₱${formatNumber(d.planPrice)} / ${esc(d.billingCycle || 'month')}</span>
+        </div>
+        <div class="stat-bar-row">
+        <span class="stat-bar-label">Start Date</span>
+        <span class="stat-bar-value" style="flex:1;text-align:left;font-size:0.85rem;">${d.subscriptionStart ? formatDate(d.subscriptionStart) : '—'}</span>
+        </div>
+        <div class="stat-bar-row">
+        <span class="stat-bar-label">End Date</span>
+        <span class="stat-bar-value" style="flex:1;text-align:left;font-size:0.85rem;">${d.subscriptionEnd ? formatDate(d.subscriptionEnd) : '—'}</span>
+        </div>
+        <div class="stat-bar-row">
+        <span class="stat-bar-label">Max Users</span>
+        <span class="stat-bar-value" style="flex:1;text-align:left;font-size:0.85rem;">${d.maxUsers || 'Unlimited'}</span>
+        </div>
+        <div class="stat-bar-row">
+        <span class="stat-bar-label">Max Projects</span>
+        <span class="stat-bar-value" style="flex:1;text-align:left;font-size:0.85rem;">${d.maxProjects || 'Unlimited'}</span>
+        </div>
+        </div>
+        `;
+        }
+
+        function renderUsersTable(users) {
+        const tbody = document.querySelector('#users-table tbody');
+        if (!users.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-secondary);">No user data available</td></tr>';
+        return;
+        }
+
+        const statusColors = { 'Active': 'var(--success)', 'Inactive': 'var(--danger)' };
+
+        tbody.innerHTML = users.map((u, i) => `
+        <tr>
+        <td>${i + 1}</td>
+        <td><strong>${esc(u.fullName)}</strong></td>
+        <td>${esc(u.email)}</td>
+        <td>${esc(u.roleName)}</td>
+        <td><span style="color:${statusColors[u.status] || 'var(--text-secondary)'};font-weight:600;font-size:0.82rem;">${esc(u.status)}</span></td>
+        <td>${u.lastLoginAt ? formatDate(u.lastLoginAt) : 'Never'}</td>
+        </tr>
+        `).join('');
+        }
+
+        // ── Print / PDF ──────────────────────────────
+        function printReport() {
+        window.print();
+        }
+
+        async function downloadPDF() {
+        const btn = event.currentTarget;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Generating...';
+        btn.disabled = true;
+
+        try {
+        const res = await fetch('/api/reports/company-overview/download-pdf', { credentials: 'same-origin' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Company-Report-${new Date().toISOString().slice(0, 10)}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        } catch (err) {
+        console.error('PDF generation error:', err);
+        alert('Failed to generate PDF. Please try Print Report instead.');
+        } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        }
+        }
+
+        // ── Helpers ──────────────────────────────────
+        function esc(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+        }
+
+        function formatNumber(num) {
+        if (num == null) return '0';
+        return Number(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function formatDate(dateStr) {
+        if (!dateStr) return '—';
+        return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        window.generateReport = generateReport;
+        window.printReport = printReport;
+        window.downloadPDF = downloadPDF;
+    </script>
+}

@@ -8,116 +8,168 @@
     margin: 0 auto;
 }
 
-/* Pipeline Section */
-.pipeline-section {
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-xl);
-}
-
-/* Pipeline Stages */
-.pipeline-stages {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-sm);
-    margin-top: var(--spacing-lg);
-    flex-wrap: wrap;
-}
-
-.pipeline-stage {
-    flex: 1;
-    min-width: 120px;
-    max-width: 180px;
-}
-
-.pipeline-stage.completed .stage-box {
-    background: var(--success-light);
-    border-color: var(--success);
-}
-
-.pipeline-stage.completed .stage-name {
-    color: var(--success);
-}
-
-.stage-box {
-    background: var(--surface);
-    border: 2px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-md);
-    text-align: center;
-    transition: all 0.3s ease;
-}
-
-.stage-box:hover {
-    border-color: var(--primary-blue);
-    box-shadow: var(--shadow-sm);
-}
-
-.stage-name {
-    display: block;
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: var(--text-primary);
-    margin-bottom: var(--spacing-xs);
-}
-
-.stage-count {
-    display: block;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary-blue);
-}
-
-.stage-label {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--text-muted);
-}
-
-/* Pipeline Connector */
-.pipeline-connector {
-    display: flex;
-    align-items: center;
-    color: var(--text-muted);
-}
-
-/* View Toggle */
+/* ========== View Toggle ========== */
 .view-toggle {
     display: flex;
-    gap: var(--spacing-xs);
-    margin-bottom: var(--spacing-lg);
+    gap: 2px;
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 2px;
 }
 
 .view-btn {
-    padding: var(--spacing-sm) var(--spacing-lg);
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    font-size: 0.875rem;
+    padding: 6px 14px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    font-weight: 500;
     color: var(--text-secondary);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .view-btn:hover {
-    background: var(--background);
+    color: var(--text-primary);
+    background: var(--surface);
 }
 
 .view-btn.active {
     background: var(--primary-blue);
     color: var(--text-light);
-    border-color: var(--primary-blue);
+    box-shadow: var(--shadow-sm);
 }
 
-/* Kanban Board */
+/* ========== Pipeline Summary ========== */
+.pipeline-summary {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.pipeline-loading {
+    text-align: center;
+    padding: var(--spacing-md);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.pipeline-stats {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xl);
+}
+
+.pipeline-stat-total {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-right: var(--spacing-xl);
+    border-right: 1px solid var(--border);
+}
+
+.pipeline-stat-total .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    line-height: 1;
+}
+
+.pipeline-stat-total .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.pipeline-stage-chips {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex: 1;
+}
+
+.stage-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+
+.stage-chip::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--chip-border);
+    border-radius: 3px;
+    transition: all var(--transition-fast);
+}
+
+.stage-chip.has-products::after {
+    background: var(--chip-color);
+    height: 3px;
+}
+
+.chip-icon {
+    font-size: 0.85rem;
+}
+
+.chip-top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.chip-name {
+    color: var(--chip-color);
+    font-weight: 600;
+    font-size: 0.82rem;
+}
+
+.chip-count {
+    color: var(--chip-color);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.chip-connector {
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    opacity: 0.3;
+    flex-shrink: 0;
+}
+
+/* ========== Kanban Board ========== */
 .kanban-board {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--spacing-lg);
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--spacing-md);
     min-height: 500px;
+    align-items: flex-start;
+}
+
+.kanban-loading {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: 60px 20px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
 }
 
 .kanban-column {
@@ -127,6 +179,7 @@
     display: flex;
     flex-direction: column;
     min-height: 400px;
+    border: 1px solid var(--border-light);
 }
 
 .column-header {
@@ -134,130 +187,871 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: var(--spacing-md);
-    padding-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
     border-bottom: 3px solid var(--primary-blue);
 }
 
+.column-header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.column-icon {
+    font-size: 1rem;
+}
+
 .column-title {
-    font-weight: 600;
-    font-size: 0.95rem;
+    font-weight: 700;
+    font-size: 0.88rem;
     color: var(--text-primary);
 }
 
 .column-count {
-    font-size: 0.75rem;
-    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    min-width: 22px;
+    text-align: center;
 }
 
 .column-content {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
     flex: 1;
+    min-height: 100px;
+    border-radius: var(--radius-md);
+    transition: background var(--transition-fast);
 }
 
-/* Product Card */
-.product-card {
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
-    padding: var(--spacing-md);
+.column-content.drag-over {
+    background: var(--blue-lightest);
+    border: 2px dashed var(--primary-blue);
+    border-radius: var(--radius-md);
+}
+
+.kanban-empty {
     display: flex;
-    gap: var(--spacing-md);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xl) var(--spacing-md);
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    text-align: center;
 }
 
-.product-card:hover {
+/* ========== Kanban Card ========== */
+.kanban-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.kanban-card:hover {
     box-shadow: var(--shadow-md);
     transform: translateY(-2px);
+    border-color: var(--blue-light);
 }
 
-.product-icon {
+.kanban-card.dragging {
+    opacity: 0.5;
+    transform: rotate(2deg);
+    box-shadow: var(--shadow-lg);
+}
+
+.kanban-card[draggable="true"] {
+    cursor: grab;
+}
+
+.kanban-card[draggable="true"]:active {
+    cursor: grabbing;
+}
+
+.k-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.k-card-code {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.k-card-actions {
+    display: flex;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.kanban-card:hover .k-card-actions {
+    opacity: 1;
+}
+
+.k-action-btn {
+    padding: 4px;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.k-action-btn:hover {
+    background: var(--blue-lightest);
+    border-color: var(--border);
+    color: var(--primary-blue);
+}
+
+.k-action-btn.danger:hover {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+.k-card-title {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--text-primary);
+    line-height: 1.3;
+    margin-bottom: 6px;
+}
+
+.k-card-project {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.k-card-progress {
+    display: flex;
+    gap: 2px;
+}
+
+.k-progress-step {
+    flex: 1;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background var(--transition-fast);
+}
+
+.k-progress-step.done {
+    background: var(--success);
+}
+
+.k-progress-step.active {
+    background: var(--primary-blue);
+}
+
+/* ========== Pipeline / Grid View ========== */
+.pipeline-view .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.pipeline-view .product-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.pipeline-view .product-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+    border-color: var(--blue-light);
+}
+
+.product-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+}
+
+.product-card-icon {
     width: 40px;
     height: 40px;
-    background: var(--blue-lightest);
     border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--primary-blue);
+    font-size: 1.2rem;
     flex-shrink: 0;
 }
 
-.product-content {
-    flex: 1;
-    min-width: 0;
-}
-
-.product-id {
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-}
-
-.product-name {
-    font-size: 0.9rem;
-    font-weight: 600;
+.product-card-title {
+    font-weight: 700;
+    font-size: 1rem;
     color: var(--text-primary);
-    margin: var(--spacing-xs) 0;
     line-height: 1.3;
 }
 
-.product-meta {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
+.product-card-code {
     font-size: 0.75rem;
     color: var(--text-muted);
+    font-family: var(--font-mono);
+    margin-top: 2px;
+}
+
+.product-card-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.product-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid var(--border-light);
+}
+
+.product-card-project {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+/* Stage Badge */
+.stage-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Stage Progress */
+.product-stage-progress {
     margin-top: var(--spacing-sm);
 }
 
-.product-meta svg {
-    width: 12px;
-    height: 12px;
+.stage-progress-bar {
+    display: flex;
+    gap: 3px;
 }
 
-.meta-item {
+.stage-progress-step {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background var(--transition-fast);
+}
+
+.stage-progress-step.completed {
+    background: var(--success);
+}
+
+.stage-progress-step.current {
+    background: var(--primary-blue);
+}
+
+/* Action Buttons (Grid View) */
+.action-btns {
+    display: flex;
+    gap: 4px;
+}
+
+.card-action-btn {
+    padding: 5px 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all var(--transition-fast);
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
 }
 
-.priority-badge {
-    padding: 2px 8px;
-    border-radius: var(--radius-full);
-    font-size: 0.65rem;
+.card-action-btn:hover {
+    background: var(--blue-lightest);
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+}
+
+.card-action-btn.delete:hover {
+    background: var(--danger-light);
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+/* ========== Pagination ========== */
+.pagination-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md) 0;
+    margin-top: var(--spacing-md);
+}
+
+.pagination-info {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.pagination-controls {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.pagination-page {
+    font-size: 0.85rem;
+    color: var(--text-primary);
     font-weight: 600;
+}
+
+/* ========== Modal Styles ========== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+    /* Override site.css hidden defaults – ProductLifecycle toggles via display */
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-container {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    width: 90%;
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+    animation: modalSlideIn 0.2s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 4px;
+    transition: color var(--transition-fast);
+}
+
+.modal-close:hover {
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: 24px;
+    max-height: 65vh;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+}
+
+/* ========== Form Styles ========== */
+.form-group {
+    margin-bottom: 14px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+}
+
+.form-group .required {
+    color: var(--danger);
+}
+
+.form-row {
+    display: flex;
+    gap: var(--spacing-md);
+}
+
+.form-input,
+.form-select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.88rem;
+    color: var(--text-primary);
+    background: var(--surface);
+    font-family: var(--font-ui);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-input:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(11, 79, 108, 0.1);
+}
+
+/* ========== Buttons ========== */
+.btn {
+    padding: 9px 18px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-ui);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: var(--primary-blue);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--blue-dark);
+}
+
+.btn-secondary {
+    background: var(--background);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--border-light);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: #DC2626;
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+    background: #059669;
+}
+
+.btn-sm {
+    padding: 5px 12px;
+    font-size: 0.78rem;
+}
+
+.btn-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========== View Product Modal Details ========== */
+.view-product-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.view-product-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.view-product-details {
+    margin-bottom: var(--spacing-lg);
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.priority-badge.high {
-    background: #FEE2E2;
-    color: #DC2626;
+.detail-value {
+    color: var(--text-primary);
+    font-size: 0.88rem;
 }
 
-.priority-badge.medium {
-    background: #FEF3C7;
-    color: #D97706;
+/* ========== Stage Timeline Progress ========== */
+.view-stage-progress {
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-light);
 }
 
-.priority-badge.low {
-    background: #DCFCE7;
-    color: #16A34A;
+.stage-timeline {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    position: relative;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .pipeline-stages {
-        flex-direction: column;
-    }
+.stage-timeline::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    height: 2px;
+    background: var(--border);
+    z-index: 0;
+}
 
-    .pipeline-connector {
-        transform: rotate(90deg);
-    }
+.timeline-step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    z-index: 1;
+}
 
+.timeline-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 2px solid var(--surface);
+    transition: all var(--transition-fast);
+}
+
+.timeline-step.done .timeline-dot {
+    background: var(--success);
+}
+
+.timeline-step.current .timeline-dot {
+    background: var(--primary-blue);
+    box-shadow: 0 0 0 4px var(--blue-lightest);
+}
+
+.timeline-label {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.2;
+    max-width: 70px;
+}
+
+.timeline-step.done .timeline-label {
+    color: var(--success);
+    font-weight: 600;
+}
+
+.timeline-step.current .timeline-label {
+    color: var(--primary-blue);
+    font-weight: 700;
+}
+
+/* ========== History Timeline ========== */
+.view-history-section {
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.history-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+    padding-left: 20px;
+}
+
+.history-timeline::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border-light);
+}
+
+.history-entry {
+    display: flex;
+    gap: var(--spacing-md);
+    padding: 10px 0;
+    position: relative;
+}
+
+.history-entry .history-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 4px;
+    position: absolute;
+    left: -20px;
+    border: 2px solid var(--surface);
+    z-index: 1;
+}
+
+.history-body {
+    flex: 1;
+}
+
+.history-stage-name {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+.history-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.history-remark {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    font-style: italic;
+    padding-left: 10px;
+    border-left: 2px solid var(--border-light);
+}
+
+/* ========== Advance Stage Section ========== */
+.advance-section {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--background);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-light);
+}
+
+.advance-controls {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* ========== Toast Notifications ========== */
+.plc-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 20px;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: white;
+    z-index: 2000;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.plc-toast.visible {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.plc-toast-success {
+    background: var(--success);
+}
+
+.plc-toast-error {
+    background: var(--danger);
+}
+
+.plc-toast-info {
+    background: var(--info);
+}
+
+/* ========== Spinner ========== */
+.tasks-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--primary-blue);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 1200px) {
     .kanban-board {
+        grid-template-columns: repeat(4, minmax(200px, 1fr));
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 1024px) {
+    .kanban-board {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    }
+
+    .pipeline-stats {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+    }
+
+    .pipeline-stat-total {
+        flex-direction: row;
+        gap: var(--spacing-sm);
+        padding-right: 0;
+        border-right: none;
+        padding-bottom: var(--spacing-sm);
+        border-bottom: 1px solid var(--border);
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .kanban-board {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .kanban-column {
+        min-height: auto;
+    }
+
+    .chip-connector {
+        display: none;
+    }
+
+    .pipeline-stage-chips {
+        gap: 0;
+        flex-wrap: wrap;
+    }
+
+    .stage-chip {
+        padding: 6px 10px;
+    }
+
+    .detail-grid {
         grid-template-columns: 1fr;
+    }
+
+    .stage-timeline {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .advance-controls {
+        flex-direction: column;
+        align-items: stretch;
     }
 }

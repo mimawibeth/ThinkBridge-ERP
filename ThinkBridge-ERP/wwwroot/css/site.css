@@ -75,6 +75,66 @@
 }
 
 /* ===========================================
+   Dark Theme Overrides
+   =========================================== */
+[data-theme="dark"] {
+  /* Primary Colors - slightly brighter for dark bg */
+  --primary-blue: #1A8DC5;
+  --blue-dark: #0B4F6C;
+  --blue-light: #3AAAD5;
+  --blue-lightest: rgba(26, 141, 197, 0.12);
+
+  /* Accent Colors */
+  --primary-orange: #FFa060;
+  --orange-light: #FFc08a;
+
+  /* Status Colors */
+  --success: #34d399;
+  --success-light: rgba(16, 185, 129, 0.12);
+  --warning: #fbbf24;
+  --warning-light: rgba(245, 158, 11, 0.12);
+  --danger: #f87171;
+  --danger-light: rgba(239, 68, 68, 0.12);
+  --info: #60a5fa;
+  --info-light: rgba(59, 130, 246, 0.12);
+
+  /* Neutral Colors */
+  --background: #0f1117;
+  --surface: #1a1d27;
+  --border: #2a2e3a;
+  --border-light: #22252f;
+
+  /* Text Colors */
+  --text-primary: #e4e6eb;
+  --text-secondary: #a0a5b4;
+  --text-muted: #6b7185;
+  --text-light: #FFFFFF;
+
+  /* Shadows - darker and more diffuse for dark theme */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+}
+
+/* Smooth transition when switching themes */
+[data-theme="dark"] *,
+[data-theme="dark"] *::before,
+[data-theme="dark"] *::after {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease, box-shadow 0.2s ease;
+}
+
+/* Dark theme specific element tweaks */
+[data-theme="dark"] img {
+  opacity: 0.92;
+}
+
+[data-theme="dark"] .form-input:focus,
+[data-theme="dark"] .form-select:focus {
+  box-shadow: 0 0 0 3px rgba(26, 141, 197, 0.2);
+}
+
+/* ===========================================
    Reset & Base Styles
    =========================================== */
 *,
@@ -387,6 +447,8 @@ body.sidebar-collapsed .sidebar .sign-out-link .nav-text {
 /* Sidebar Navigation */
 .sidebar-nav {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   padding: var(--spacing-sm) 0;
   overflow-y: auto;
 }
@@ -430,6 +492,38 @@ body.sidebar-collapsed .sidebar .sign-out-link .nav-text {
 .nav-text {
   transition: opacity var(--transition-fast);
   white-space: nowrap;
+}
+
+/* Sidebar Navigation Sections */
+.nav-section {
+  margin-bottom: var(--spacing-md);
+}
+
+.nav-section-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  margin-bottom: var(--spacing-xs);
+}
+
+.nav-section-bottom {
+  margin-top: auto;
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border);
+}
+
+/* Collapsed state for nav section labels */
+body.sidebar-collapsed .sidebar .nav-section-label {
+  opacity: 0;
+  visibility: hidden;
+  height: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
 }
 
 /* Sidebar Footer */
@@ -547,12 +641,23 @@ body.sidebar-collapsed .sidebar .sign-out-link .nav-text {
 .topbar-left {
   display: flex;
   align-items: center;
+  gap: var(--spacing-md);
 }
 
 .page-title {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--text-primary);
+}
+
+.topbar-date {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+  padding-right: var(--spacing-md);
+  border-right: 1px solid var(--border);
+  margin-right: var(--spacing-xs);
 }
 
 .topbar-center {
@@ -687,6 +792,8 @@ body.sidebar-collapsed .sidebar .sign-out-link .nav-text {
   padding: var(--spacing-md);
   border-bottom: 1px solid var(--border-light);
   transition: background var(--transition-fast);
+  position: relative;
+  cursor: pointer;
 }
 
 .notification-item:hover {
@@ -720,6 +827,34 @@ body.sidebar-collapsed .sidebar .sign-out-link .nav-text {
 .notification-icon.lifecycle {
   background: var(--warning-light);
   color: var(--warning);
+}
+
+.notification-icon.mention {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.notif-delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+}
+
+.notification-item:hover .notif-delete-btn {
+  opacity: 1;
+}
+
+.notif-delete-btn:hover {
+  color: var(--danger);
+  background: var(--danger-light, #fee2e2);
 }
 
 .notification-content {
@@ -776,6 +911,32 @@ body.sidebar-collapsed .sidebar .sign-out-link .nav-text {
   font-weight: 600;
   font-size: 0.8rem;
   color: var(--text-light);
+}
+
+/* Topbar User Info Display */
+.topbar-user-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+}
+
+.user-display-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.user-display-name {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.user-display-role {
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
 .dropdown-arrow {
@@ -983,6 +1144,11 @@ body.sidebar-collapsed .sidebar .sign-out-link .nav-text {
 .badge-delayed {
   background: var(--danger-light);
   color: var(--danger);
+}
+
+.badge-archived {
+  background: #e5e7eb;
+  color: #6b7280;
 }
 
 .badge-blocked {

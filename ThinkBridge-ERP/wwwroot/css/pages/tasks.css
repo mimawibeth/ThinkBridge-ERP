@@ -256,3 +256,210 @@
         overflow-x: auto;
     }
 }
+
+/* ========== Task Comments ========== */
+.task-comments-section {
+    border-top: 1px solid var(--border);
+    margin-top: 16px;
+    padding-top: 4px;
+}
+
+.comment-count {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.comments-list {
+    max-height: 280px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 12px;
+}
+
+.comment-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    transition: background var(--transition-fast);
+}
+
+.comment-item:hover {
+    background: var(--background);
+}
+
+.comment-item:hover .comment-actions {
+    opacity: 1;
+}
+
+.comment-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.68rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.comment-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.comment-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2px;
+}
+
+.comment-author {
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: var(--text-primary);
+}
+
+.comment-time {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+.comment-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.comment-action-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+}
+
+.comment-action-btn:hover {
+    background: var(--border);
+    color: var(--text-primary);
+}
+
+.comment-action-btn.danger:hover {
+    color: var(--danger);
+    background: rgba(239, 68, 68, 0.08);
+}
+
+.comment-text {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.mention-highlight {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--primary-blue);
+    font-weight: 600;
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+.comment-input-area {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+}
+
+.comment-textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    font-family: inherit;
+    resize: none;
+    background: var(--surface);
+    color: var(--text-primary);
+    transition: border-color var(--transition-fast);
+    line-height: 1.5;
+}
+
+.comment-textarea:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+}
+
+.comment-edit-textarea {
+    width: 100%;
+    border: 1px solid var(--primary-blue);
+    border-radius: var(--radius-md);
+    padding: 6px 10px;
+    font-size: 0.82rem;
+    font-family: inherit;
+    resize: none;
+    background: var(--surface);
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.comment-edit-textarea:focus {
+    outline: none;
+}
+
+/* @Mention Dropdown */
+.mention-dropdown {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    margin-bottom: 4px;
+}
+
+.mention-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    color: var(--text-primary);
+    transition: background var(--transition-fast);
+}
+
+.mention-item:hover,
+.mention-item.active {
+    background: var(--background);
+}
+
+.mention-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}

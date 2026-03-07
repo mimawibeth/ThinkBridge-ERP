@@ -1,0 +1,642 @@
+@model List<ThinkBridge_ERP.Models.Entities.SubscriptionPlan>
+@{
+    ViewData["Title"] = "ThinkBridge ERP - Enterprise Resource Planning";
+    ViewData["HideLayout"] = true;
+    ViewData["BodyClass"] = "landing-page";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/landing.css" asp-append-version="true" />
+}
+
+<!-- Navbar -->
+<header class="landing-nav">
+    <div class="landing-nav-inner">
+        <a href="/" class="landing-logo">
+            <img src="~/images/thinkBridge.png" alt="ThinkBridge" />
+            <span class="logo-text"><span class="logo-think">Think</span><span class="logo-bridge">Bridge</span></span>
+        </a>
+        <nav class="landing-nav-links desktop-nav">
+            <a href="#hero">Home</a>
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#cta">Contact</a>
+        </nav>
+        <div class="landing-nav-actions">
+            <a href="/Auth/Login" class="btn btn-ghost btn-sm">Log In</a>
+            <a href="/Subscription/SignUp" class="btn btn-primary btn-sm">
+                Sign Up
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </a>
+        </div>
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+    <!-- Mobile menu -->
+    <div class="mobile-nav" id="mobileNav">
+        <a href="#hero">Home</a>
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#cta">Contact</a>
+        <a href="/Auth/Login">Sign In</a>
+        <a href="/Subscription/SignUp" class="btn btn-primary btn-sm">Get Started</a>
+    </div>
+</header>
+
+<!-- Hero — Asymmetric split -->
+<section class="hero-section" id="hero">
+    <div class="hero-bg">
+        <div class="hero-blob hero-blob-1"></div>
+        <div class="hero-blob hero-blob-2"></div>
+        <div class="hero-line"></div>
+    </div>
+
+    <div class="hero-row">
+        <!-- Left Column: Text + Actions + Inline Stats -->
+        <div class="hero-text-col animate-fade-up">
+            <h1>Run your business<span class="text-gradient">smarter</span></h1>
+            <p class="hero-description">
+                Unify projects, tasks, teams, and knowledge into one powerful platform — so your work stays on track.
+            </p>
+            <div class="hero-actions">
+                <a href="/Subscription/SignUp" class="btn btn-primary btn-lg btn-glow">
+                    Get Started
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+                <a href="#features" class="btn btn-ghost-dark btn-lg">Learn more &darr;</a>
+            </div>
+
+            <!-- Inline Stats -->
+            <div class="hero-inline-stats">
+                <div class="hero-inline-stat">
+                    <span class="hero-inline-number">2,500+</span>
+                    <span class="hero-inline-label">Companies</span>
+                </div>
+                <div class="hero-inline-stat">
+                    <span class="hero-inline-number">99.9%</span>
+                    <span class="hero-inline-label">Uptime</span>
+                </div>
+                <div class="hero-inline-stat">
+                    <span class="hero-inline-number">4.9</span>
+                    <span class="hero-inline-label">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b"
+                             stroke-width="1">
+                            <polygon
+                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                            </polygon>
+                        </svg>
+                        Rating
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Dashboard Preview -->
+        <div class="hero-preview-col animate-fade-up">
+            <div class="dashboard-preview">
+                <div class="preview-window preview-tilt">
+                    <div class="preview-titlebar">
+                        <div class="preview-dots">
+                            <span class="dot dot-red"></span>
+                            <span class="dot dot-yellow"></span>
+                            <span class="dot dot-green"></span>
+                        </div>
+                        <span class="preview-title">dashboard</span>
+                    </div>
+                    <div class="preview-body">
+                        <div class="preview-stats-row">
+                            <div class="preview-stat-card">
+                                <div class="preview-stat-header">
+                                    <span class="preview-stat-dot" style="background:#0B4F6C"></span>
+                                    <span>Active Projects</span>
+                                </div>
+                                <div class="preview-stat-value">24</div>
+                            </div>
+                            <div class="preview-stat-card">
+                                <div class="preview-stat-header">
+                                    <span class="preview-stat-dot" style="background:#22c55e"></span>
+                                    <span>Tasks Done</span>
+                                </div>
+                                <div class="preview-stat-value">156</div>
+                            </div>
+                            <div class="preview-stat-card">
+                                <div class="preview-stat-header">
+                                    <span class="preview-stat-dot" style="background:#f97316"></span>
+                                    <span>Team Members</span>
+                                </div>
+                                <div class="preview-stat-value">38</div>
+                            </div>
+                            <div class="preview-stat-card">
+                                <div class="preview-stat-header">
+                                    <span class="preview-stat-dot" style="background:#3b82f6"></span>
+                                    <span>Uptime</span>
+                                </div>
+                                <div class="preview-stat-value">99.9%</div>
+                            </div>
+                        </div>
+                        <div class="preview-chart">
+                            <div class="chart-bar" style="height:70%"></div>
+                            <div class="chart-bar" style="height:55%"></div>
+                            <div class="chart-bar" style="height:80%"></div>
+                            <div class="chart-bar" style="height:45%"></div>
+                            <div class="chart-bar" style="height:65%"></div>
+                            <div class="chart-bar" style="height:90%"></div>
+                            <div class="chart-bar" style="height:50%"></div>
+                            <div class="chart-bar" style="height:75%"></div>
+                            <div class="chart-bar" style="height:60%"></div>
+                            <div class="chart-bar" style="height:85%"></div>
+                            <div class="chart-bar" style="height:40%"></div>
+                            <div class="chart-bar" style="height:70%"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Floating accent card -->
+                <div class="preview-toast">
+                    <div class="preview-toast-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
+                    <div class="preview-toast-text">
+                        <strong>Task completed</strong>
+                        <span>Design review — just now</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features — Bento grid -->
+<section class="features-section" id="features">
+    <div class="features-clip"></div>
+    <div class="section-container features-inner">
+        <div class="features-header animate-fade-up">
+            <div>
+                <span class="section-label">Features</span>
+                <h2>Everything you need,<br><span class="text-muted">nothing you don't.</span></h2>
+            </div>
+            <p>A complete suite of tools to manage your entire business from one place. No switching between apps.</p>
+        </div>
+        <div class="bento-grid">
+            <!-- Dashboard Analytics — span 4 -->
+            <div class="bento-card bento-span-4 animate-fade-up">
+                <div class="bento-card-top">
+                    <div class="feature-icon-wrap blue">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                    </div>
+                    <svg class="bento-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </div>
+                <h3>Dashboard Analytics</h3>
+                <p>Real-time KPIs, activity tracking, and intelligent reporting across your entire organization at a
+                    glance.</p>
+                </div>
+
+                <!-- Project Management — span 2 -->
+                <div class="bento-card bento-span-2 animate-fade-up">
+                    <div class="feature-icon-wrap orange">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </div>
+                    <h3>Project Management</h3>
+                    <p>Plan, track, and deliver with powerful tools.</p>
+                </div>
+
+                <!-- Task Management — span 2 -->
+                <div class="bento-card bento-span-2 animate-fade-up">
+                    <div class="feature-icon-wrap green">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 11 12 14 22 4"></polyline>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
+                    </div>
+                    <h3>Task Management</h3>
+                    <p>Assign, prioritize, and monitor with smart workflows.</p>
+                </div>
+
+                <!-- Product Lifecycle — span 2 -->
+                <div class="bento-card bento-span-2 animate-fade-up">
+                    <div class="feature-icon-wrap purple">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 6v6l4 2"></path>
+                        </svg>
+                    </div>
+                    <h3>Product Lifecycle</h3>
+                    <p>Ideation through retirement, seamlessly managed.</p>
+                </div>
+
+                <!-- Team Collaboration — span 2 -->
+                <div class="bento-card bento-span-2 animate-fade-up">
+                    <div class="feature-icon-wrap teal">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                    </div>
+                    <h3>Team Collaboration</h3>
+                    <p>Roles, departments, and shared workspaces.</p>
+                </div>
+
+                <!-- Knowledge Base — span 4, horizontal -->
+                <div class="bento-card bento-span-4 bento-horizontal animate-fade-up">
+                    <div class="feature-icon-wrap red bento-icon-shrink">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="bento-horizontal-text">
+                        <h3>Knowledge Base</h3>
+                        <p>Centralize documentation, guides, and institutional knowledge. Keep your team aligned and
+                            informed.</p>
+                        </div>
+                        <svg class="bento-arrow bento-arrow-right" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Trust — Horizontal marquee-style -->
+        <section class="trust-section" id="trust">
+            <div class="section-container">
+                <div class="trust-card-row animate-fade-up">
+                    <div class="trust-col">
+                        <div class="trust-col-header">
+                            <div class="trust-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                </svg>
+                            </div>
+                            <h4>Enterprise Security</h4>
+                        </div>
+                        <p>Role-based access control with fine-grained permissions and audit trails.</p>
+                        <div class="trust-metric">
+                            <span class="trust-metric-value">256-bit</span>
+                            <span class="trust-metric-label">Encryption</span>
+                        </div>
+                    </div>
+                    <div class="trust-col">
+                        <div class="trust-col-header">
+                            <div class="trust-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                </svg>
+                            </div>
+                            <h4>Lightning Fast</h4>
+                        </div>
+                        <p>Optimized for speed with fast response times and smooth user experience.</p>
+                        <div class="trust-metric">
+                            <span class="trust-metric-value">&lt;100ms</span>
+                            <span class="trust-metric-label">Response</span>
+                        </div>
+                    </div>
+                    <div class="trust-col">
+                        <div class="trust-col-header">
+                            <div class="trust-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <line x1="18" y1="20" x2="18" y2="10"></line>
+                                    <line x1="12" y1="20" x2="12" y2="4"></line>
+                                    <line x1="6" y1="20" x2="6" y2="14"></line>
+                                </svg>
+                            </div>
+                            <h4>Actionable Insights</h4>
+                        </div>
+                        <p>Comprehensive analytics and intelligent reporting dashboards.</p>
+                        <div class="trust-metric">
+                            <span class="trust-metric-value">50+</span>
+                            <span class="trust-metric-label">Reports</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing — Offset cards -->
+        <section class="pricing-section" id="pricing">
+            <div class="pricing-clip"></div>
+            <div class="section-container pricing-inner">
+                <div class="pricing-header-split animate-fade-up">
+                    <span class="section-label">Pricing</span>
+                    <h2>Simple pricing,<br><span class="text-muted">powerful results.</span></h2>
+                </div>
+                <div class="pricing-grid">
+                    @if (Model != null)
+                    {
+                        @foreach (var plan in Model.Where(p => p.Price > 0))
+                        {
+                            var isPopular = plan.PlanName == "Professional";
+                            <div class="pricing-card animate-fade-up @(isPopular ? "pricing-card-popular" : "")">
+                                @if (isPopular)
+                                {
+                                    <div class="pricing-accent-bar"></div>
+                                }
+                                <div class="pricing-card-inner">
+                                    <div class="pricing-header">
+                                        <div class="pricing-name-row">
+                                            <h3>@plan.PlanName</h3>
+                                            @if (isPopular)
+                                            {
+                                                <span class="popular-tag">Popular</span>
+                                            }
+                                        </div>
+                                        <p class="pricing-desc">
+                                            @(plan.PlanName == "Starter" ? "For small teams getting started" :
+                                            plan.PlanName == "Professional" ? "For growing teams that need more" :
+                                            "For large organizations at scale")
+                                        </p>
+                                        <div class="pricing-amount">
+                                            <span class="price-currency">₱</span>
+                                            <span class="price">@plan.Price.ToString("N0")</span>
+                                            <span class="billing-cycle">/ month</span>
+                                        </div>
+                                    </div>
+                                    <ul class="pricing-features">
+                                        <li>
+                                            <span class="check-icon">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                     stroke-width="3">
+                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                </svg>
+                                            </span>
+                                            @(plan.MaxUsers.HasValue ? $"Up to {plan.MaxUsers} users" : "Unlimited users")
+                                        </li>
+                                        <li>
+                                            <span class="check-icon">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                     stroke-width="3">
+                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                </svg>
+                                            </span>
+                                            @(plan.MaxProjects.HasValue ? $"Up to {plan.MaxProjects} projects" : "Unlimited projects")
+                                        </li>
+                                        <li>
+                                            <span class="check-icon">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                     stroke-width="3">
+                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                </svg>
+                                            </span>
+                                            All ERP modules included
+                                        </li>
+                                        <li>
+                                            <span class="check-icon">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                     stroke-width="3">
+                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                </svg>
+                                            </span>
+                                            Full collaboration features
+                                        </li>
+                                    </ul>
+                                    <a href="/Subscription/SignUp?planId=@plan.PlanID"
+                                           class="btn @(isPopular ? "btn-primary" : "btn-outline") btn-lg pricing-cta">
+                                        Subscribe Now
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA — Full-bleed asymmetric -->
+        <section class="cta-section" id="cta">
+            <div class="section-container">
+                <div class="cta-card animate-fade-up">
+                    <div class="cta-glow"></div>
+                    <div class="cta-glow-bottom"></div>
+                    <div class="cta-content">
+                        <div class="cta-row">
+                            <div class="cta-text">
+                                <h2>Ready to transform<br>your workflow?</h2>
+                                <p>Get started with ThinkBridge ERP today. Choose a plan that works for you.</p>
+                            </div>
+                            <a href="/Subscription/SignUp" class="btn btn-white btn-lg cta-btn">
+                                Sign Up Now
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                </svg>
+                            </a>
+                        </div>
+                        <div class="cta-contact">
+                            <div class="cta-contact-item">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                                    </path>
+                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                                <span>support@thinkbridge.com</span>
+                            </div>
+                            <div class="cta-contact-item">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path
+                                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z">
+                                    </path>
+                                </svg>
+                                <span>+63 912 345 6789</span>
+                            </div>
+                            <div class="cta-contact-item">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                     stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                <span>Davao City, Philippines</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="landing-footer">
+            <div class="section-container">
+                <div class="footer-content">
+                    <div class="footer-brand">
+                        <a href="/" class="landing-logo">
+                            <img src="~/images/thinkBridge.png" alt="ThinkBridge" />
+                            <span class="logo-text"><span class="logo-think">Think</span><span
+                                class="logo-bridge">Bridge</span></span>
+                            </a>
+                            <span class="footer-copy">&copy; @DateTime.Now.Year ThinkBridge ERP</span>
+                        </div>
+                        <div class="footer-links">
+                            <a href="#" onclick="event.preventDefault(); document.getElementById('privacy-modal').classList.add('active');">Privacy</a>
+                            <a href="#" onclick="event.preventDefault(); document.getElementById('terms-modal').classList.add('active');">Terms</a>
+                            <a href="#cta">Contact</a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+
+<!-- Privacy Policy Modal -->
+<div class="signup-modal-overlay" id="privacy-modal">
+    <div class="signup-modal" style="max-width:620px; text-align:left; max-height:80vh; overflow-y:auto; padding:36px 32px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+            <h3 style="font-size:1.25rem; font-weight:700; color:#1e293b; margin:0;">Privacy Policy</h3>
+            <button onclick="document.getElementById('privacy-modal').classList.remove('active');" style="background:none; border:none; cursor:pointer; padding:4px; color:#94a3b8;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div style="font-size:0.9rem; color:#475569; line-height:1.75;">
+            <p><strong>Effective Date:</strong> March 1, 2026</p>
+            <p>ThinkBridge ERP ("we", "our", "us") is committed to protecting your privacy. This policy explains how we collect, use, and safeguard your information.</p>
+
+            <h4 style="margin-top:16px; color:#1e293b;">1. Information We Collect</h4>
+            <p>We collect information you provide directly, such as your name, email address, company name, and billing details when you create an account or subscribe to a plan.</p>
+
+            <h4 style="margin-top:16px; color:#1e293b;">2. How We Use Your Information</h4>
+            <p>We use your information to provide and maintain our services, process transactions, send service-related communications, and improve our platform.</p>
+
+            <h4 style="margin-top:16px; color:#1e293b;">3. Data Security</h4>
+            <p>We implement 256-bit encryption and industry-standard security measures to protect your data. Access to personal information is restricted to authorized personnel only.</p>
+
+            <h4 style="margin-top:16px; color:#1e293b;">4. Data Sharing</h4>
+            <p>We do not sell or rent your personal information. We may share data with trusted service providers who assist in operating our platform, subject to confidentiality agreements.</p>
+
+            <h4 style="margin-top:16px; color:#1e293b;">5. Your Rights</h4>
+            <p>You may access, update, or request deletion of your personal data at any time by contacting us at <strong>support&#64;thinkbridge.com</strong>.</p>
+
+            <h4 style="margin-top:16px; color:#1e293b;">6. Contact Us</h4>
+            <p>If you have questions about this Privacy Policy, please contact us at <strong>support&#64;thinkbridge.com</strong>.</p>
+        </div>
+        <div style="margin-top:20px; text-align:right;">
+            <button onclick="document.getElementById('privacy-modal').classList.remove('active');" class="btn btn-primary btn-sm">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Terms of Service Modal -->
+<div class="signup-modal-overlay" id="terms-modal">
+    <div class="signup-modal" style="max-width:620px; text-align:left; max-height:80vh; overflow-y:auto; padding:36px 32px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+            <h3 style="font-size:1.25rem; font-weight:700; color:#1e293b; margin:0;">Terms of Service</h3>
+            <button onclick="document.getElementById('terms-modal').classList.remove('active');" style="background:none; border:none; cursor:pointer; padding:4px; color:#94a3b8;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div style="font-size:0.9rem; color:#475569; line-height:1.75;">
+            <p><strong>Effective Date:</strong> March 1, 2026</p>
+            <p>By accessing or using ThinkBridge ERP, you agree to be bound by these Terms of Service.</p>
+
+            <h4 style="margin-top:16px; color:#1e293b;">1. Account Registration</h4>
+            <p>You must provide accurate and complete information when creating an account. You are responsible for maintaining the security of your account credentials.</p>
+
+            <h4 style="margin-top:16px; color:#1e293b;">2. Subscription &amp; Billing</h4>
+            <p>Paid plans are billed monthly. You may cancel at any time, and your access will continue until the end of the current billing period. Refunds are handled on a case-by-case basis.</p>
+
+            <h4 style="margin-top:16px; color:#1e293b;">3. Acceptable Use</h4>
+            <p>You agree not to misuse the platform, attempt unauthorized access, or use the service for any unlawful purpose. We reserve the right to suspend accounts that violate these terms.</p>
+
+            <h4 style="margin-top:16px; color:#1e293b;">4. Intellectual Property</h4>
+            <p>All content, features, and functionality of ThinkBridge ERP are owned by us and protected by intellectual property laws. Your data remains yours.</p>
+
+            <h4 style="margin-top:16px; color:#1e293b;">5. Limitation of Liability</h4>
+            <p>ThinkBridge ERP is provided "as is." We are not liable for any indirect, incidental, or consequential damages arising from your use of the platform.</p>
+
+            <h4 style="margin-top:16px; color:#1e293b;">6. Changes to Terms</h4>
+            <p>We may update these terms from time to time. Continued use of the service constitutes acceptance of the revised terms.</p>
+
+            <h4 style="margin-top:16px; color:#1e293b;">7. Contact</h4>
+            <p>For questions regarding these Terms, reach us at <strong>support&#64;thinkbridge.com</strong>.</p>
+        </div>
+        <div style="margin-top:20px; text-align:right;">
+            <button onclick="document.getElementById('terms-modal').classList.remove('active');" class="btn btn-primary btn-sm">Close</button>
+        </div>
+    </div>
+</div>
+
+            @section PageScripts {
+                <script>
+                                                                                                                            // Mobile menu toggle
+                                                                                                                            const toggle = document.getElementById('mobileMenuToggle');
+                                                                                                                            const mobileNav = document.getElementById('mobileNav');
+                                                                                                                            if (toggle && mobileNav) {
+                                                                                                                                toggle.addEventListener('click', () => {
+                                                                                                                                    mobileNav.classList.toggle('open');
+                                                                                                                                    toggle.classList.toggle('active');
+                                                                                                                                });
+                                                                                                                                // Close on link click
+                                                                                                                                mobileNav.querySelectorAll('a').forEach(a => {
+                                                                                                                                    a.addEventListener('click', () => {
+                                                                                                                                        mobileNav.classList.remove('open');
+                                                                                                                                        toggle.classList.remove('active');
+                                                                                                                                    });
+                                                                                                                                });
+                                                                                                                            }
+
+                                                                                                                            // Intersection Observer for scroll animations
+                                                                                                                            const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+                                                                                                                            const observer = new IntersectionObserver((entries) => {
+                                                                                                                                entries.forEach(entry => {
+                                                                                                                                    if (entry.isIntersecting) {
+                                                                                                                                        entry.target.classList.add('visible');
+                                                                                                                                        observer.unobserve(entry.target);
+                                                                                                                                    }
+                                                                                                                                });
+                                                                                                                            }, observerOptions);
+                                                                                                                            document.querySelectorAll('.animate-fade-up').forEach(el => observer.observe(el));
+
+                                                                                                                            // Smooth scroll for anchor links
+                                                                                                                            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                                                                                                                                anchor.addEventListener('click', function (e) {
+                                                                                                                                    e.preventDefault();
+                                                                                                                                    const target = document.querySelector(this.getAttribute('href'));
+                                                                                                                                    if (target) {
+                                                                                                                                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                                                                                                                    }
+                                                                                                                                });
+                                                                                                                            });
+
+                                                                                                                            // Close modals on overlay click or Escape key
+                                                                                                                            document.querySelectorAll('#privacy-modal, #terms-modal').forEach(overlay => {
+                                                                                                                                overlay.addEventListener('click', function (e) {
+                                                                                                                                    if (e.target === this) this.classList.remove('active');
+                                                                                                                                });
+                                                                                                                            });
+                                                                                                                            document.addEventListener('keydown', function (e) {
+                                                                                                                                if (e.key === 'Escape') {
+                                                                                                                                    document.getElementById('privacy-modal').classList.remove('active');
+                                                                                                                                    document.getElementById('terms-modal').classList.remove('active');
+                                                                                                                                }
+                                                                                                                            });
+                </script>
+            }

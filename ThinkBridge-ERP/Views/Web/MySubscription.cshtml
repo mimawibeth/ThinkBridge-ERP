@@ -1,0 +1,271 @@
+@{
+    ViewData["Title"] = "My Subscription";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/my-subscription.css" asp-append-version="true" />
+}
+
+<div class="page-subscription">
+    <!-- Loading State -->
+    <div id="subscription-loading" class="subscription-loading">
+        <p>Loading subscription details...</p>
+    </div>
+
+    <!-- No Subscription State -->
+    <div id="subscription-empty" class="subscription-empty" style="display:none;">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 4H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path>
+            <path d="M1 10h22"></path>
+        </svg>
+        <h3>No Active Subscription</h3>
+        <p>Your company does not have an active subscription plan.</p>
+    </div>
+
+    <!-- Subscription Content -->
+    <div id="subscription-content" style="display:none;">
+        <!-- Plan Overview Card -->
+        <div class="sub-card plan-card">
+            <div class="plan-header">
+                <div class="plan-info">
+                    <span class="plan-badge" id="plan-status">Active</span>
+                    <h2 class="plan-name" id="plan-name">—</h2>
+                    <p class="plan-company" id="plan-company">—</p>
+                </div>
+                <div class="plan-actions">
+                    <div class="plan-price">
+                        <span class="price-amount" id="plan-price">$0</span>
+                        <span class="price-cycle" id="plan-cycle">/month</span>
+                    </div>
+                    <button class="btn btn-outline-primary btn-sm" id="btn-payment-history"
+                            onclick="openModal('paymentHistoryModal')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <path d="M12 8v4l3 3"></path>
+                            <circle cx="12" cy="12" r="10"></circle>
+                        </svg>
+                        Payment History
+                    </button>
+                </div>
+            </div>
+            <div class="plan-dates">
+                <div class="date-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <div>
+                        <span class="date-label">Start Date</span>
+                        <span class="date-value" id="plan-start">—</span>
+                    </div>
+                </div>
+                <div class="date-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <div>
+                        <span class="date-label">Expiry Date</span>
+                        <span class="date-value" id="plan-end">—</span>
+                    </div>
+                </div>
+                <div class="date-item">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    <div>
+                        <span class="date-label">Days Remaining</span>
+                        <span class="date-value" id="plan-days-left">—</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usage Cards -->
+        <div class="usage-grid">
+            <div class="sub-card usage-card">
+                <div class="usage-header">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <h3>Users</h3>
+                </div>
+                <div class="usage-stats">
+                    <div class="usage-numbers">
+                        <span class="usage-current" id="usage-users">0</span>
+                        <span class="usage-separator">/</span>
+                        <span class="usage-max" id="usage-max-users">∞</span>
+                    </div>
+                    <div class="usage-bar">
+                        <div class="usage-bar-fill" id="usage-users-bar" style="width: 0%"></div>
+                    </div>
+                    <span class="usage-label">Active users in your company</span>
+                </div>
+            </div>
+            <div class="sub-card usage-card">
+                <div class="usage-header">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <h3>Projects</h3>
+                </div>
+                <div class="usage-stats">
+                    <div class="usage-numbers">
+                        <span class="usage-current" id="usage-projects">0</span>
+                        <span class="usage-separator">/</span>
+                        <span class="usage-max" id="usage-max-projects">∞</span>
+                    </div>
+                    <div class="usage-bar">
+                        <div class="usage-bar-fill" id="usage-projects-bar" style="width: 0%"></div>
+                    </div>
+                    <span class="usage-label">Active projects in your company</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plan Features -->
+        <div class="sub-card features-card">
+            <h3 class="features-title">Plan Features</h3>
+            <div class="features-list" id="features-list"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment History Modal -->
+<div class="modal-overlay" id="paymentHistoryModal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h2>Payment History</h2>
+            <button class="modal-close" onclick="closeModal('paymentHistoryModal')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div id="payment-history-loading" class="payment-history-loading">
+                <p>Loading payment history...</p>
+            </div>
+            <div id="payment-history-empty" class="payment-history-empty" style="display:none;">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                    <line x1="2" y1="10" x2="22" y2="10"></line>
+                </svg>
+                <p>No payment records found.</p>
+            </div>
+            <div id="payment-history-content" style="display:none;">
+                <table class="payment-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Invoice #</th>
+                            <th>Plan</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="payment-history-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Receipt Modal -->
+<div class="modal-overlay" id="receiptModal">
+    <div class="modal modal-md">
+        <div class="modal-header modal-header-primary">
+            <div>
+                <h2>Payment Receipt</h2>
+                <p class="modal-subtitle" id="receipt-invoice-number">—</p>
+            </div>
+            <button class="modal-close" onclick="closeModal('receiptModal')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body" id="receipt-body">
+            <div id="receipt-loading" class="payment-history-loading">
+                <p>Loading receipt...</p>
+            </div>
+            <div id="receipt-content" style="display:none;">
+                <div class="receipt-section">
+                    <h4 class="receipt-section-title">Company</h4>
+                    <p class="receipt-value" id="receipt-company">—</p>
+                </div>
+                <div class="receipt-grid">
+                    <div class="receipt-section">
+                        <h4 class="receipt-section-title">Plan</h4>
+                        <p class="receipt-value" id="receipt-plan">—</p>
+                    </div>
+                    <div class="receipt-section">
+                        <h4 class="receipt-section-title">Billing Cycle</h4>
+                        <p class="receipt-value" id="receipt-cycle">—</p>
+                    </div>
+                </div>
+                <div class="receipt-divider"></div>
+                <div class="receipt-grid">
+                    <div class="receipt-section">
+                        <h4 class="receipt-section-title">Amount Paid</h4>
+                        <p class="receipt-value receipt-amount" id="receipt-amount">—</p>
+                    </div>
+                    <div class="receipt-section">
+                        <h4 class="receipt-section-title">Payment Method</h4>
+                        <p class="receipt-value" id="receipt-method">—</p>
+                    </div>
+                </div>
+                <div class="receipt-grid">
+                    <div class="receipt-section">
+                        <h4 class="receipt-section-title">Status</h4>
+                        <p id="receipt-status-wrap"><span class="receipt-status" id="receipt-status">—</span></p>
+                    </div>
+                    <div class="receipt-section">
+                        <h4 class="receipt-section-title">Date Paid</h4>
+                        <p class="receipt-value" id="receipt-date">—</p>
+                    </div>
+                </div>
+                <div class="receipt-divider"></div>
+                <div class="receipt-grid">
+                    <div class="receipt-section">
+                        <h4 class="receipt-section-title">Provider</h4>
+                        <p class="receipt-value" id="receipt-provider">—</p>
+                    </div>
+                    <div class="receipt-section">
+                        <h4 class="receipt-section-title">Transaction ID</h4>
+                        <p class="receipt-value receipt-txn" id="receipt-txn">—</p>
+                    </div>
+                </div>
+                <div class="receipt-grid">
+                    <div class="receipt-section">
+                        <h4 class="receipt-section-title">Subscription Period</h4>
+                        <p class="receipt-value" id="receipt-period">—</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('receiptModal')">Close</button>
+            <button class="btn btn-primary" id="btn-print-receipt" onclick="window.printReceipt()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                Print Receipt
+            </button>
+        </div>
+    </div>
+</div>
+
+@section PageScripts {
+    <script src="~/js/pages/my-subscription.js" asp-append-version="true"></script>
+}

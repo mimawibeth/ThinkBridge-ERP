@@ -1,0 +1,474 @@
+/* ==========================================
+   ThinkBridge ERP - Reports Page Styles
+   ========================================== */
+
+/* Page Container */
+.page-reports {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+/* Report Cards Grid */
+.report-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.report-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg) var(--spacing-md);
+}
+
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.report-header h3 {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin: 0;
+}
+
+.trend {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+}
+
+.trend.positive {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.trend.negative {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+.trend.neutral {
+    background: var(--border);
+    color: var(--text-secondary);
+}
+
+.report-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.report-subtext {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: var(--spacing-xs);
+}
+
+/* Mini Chart */
+.mini-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 40px;
+    margin-top: var(--spacing-md);
+}
+
+.mini-chart .chart-bar {
+    flex: 1;
+    background: var(--border);
+    border-radius: 2px;
+}
+
+.mini-chart .chart-bar.current {
+    background: var(--primary-blue);
+}
+
+/* Circular Progress */
+.circular-progress {
+    width: 44px;
+    height: 44px;
+    margin-top: var(--spacing-sm);
+}
+
+.circular-progress svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.circular-progress .bg {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 3;
+}
+
+.circular-progress .progress {
+    fill: none;
+    stroke: var(--success);
+    stroke-width: 3;
+    stroke-linecap: round;
+}
+
+.circular-progress .progress.blue {
+    stroke: var(--primary-blue);
+}
+
+/* Charts Grid */
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+}
+
+.chart-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg) var(--spacing-xl);
+}
+
+.chart-section.wide {
+    grid-column: span 2;
+}
+
+.chart-container {
+    margin-top: var(--spacing-md);
+}
+
+/* Project Bars */
+.project-bars {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.project-bar-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.project-bar-item.at-risk .project-label {
+    color: var(--danger);
+}
+
+.project-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.bar-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.bar-wrapper .bar {
+    flex: 1;
+    height: 8px;
+    background: var(--border);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.bar-wrapper .bar.completed {
+    background: var(--success);
+}
+
+.bar-wrapper .bar.in-progress {
+    background: var(--warning);
+}
+
+.bar-wrapper .bar.at-risk {
+    background: var(--danger);
+}
+
+.bar-value {
+    font-size: 0.85rem;
+    font-weight: 600;
+    min-width: 40px;
+    text-align: right;
+}
+
+/* Task Distribution */
+.task-distribution {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.distribution-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.distribution-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+.distribution-color.completed {
+    background: var(--success);
+}
+
+.distribution-color.in-progress {
+    background: var(--warning);
+}
+
+.distribution-color.review {
+    background: var(--info);
+}
+
+.distribution-color.not-started {
+    background: var(--text-muted);
+}
+
+.distribution-label {
+    flex: 1;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.distribution-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.distribution-percent {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    min-width: 40px;
+    text-align: right;
+}
+
+/* Stacked Bar */
+.stacked-bar {
+    display: flex;
+    height: 24px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.bar-segment {
+    height: 100%;
+}
+
+.bar-segment.completed {
+    background: var(--success);
+}
+
+.bar-segment.in-progress {
+    background: var(--warning);
+}
+
+.bar-segment.review {
+    background: var(--info);
+}
+
+.bar-segment.not-started {
+    background: var(--text-muted);
+}
+
+/* Revenue Bars (vertical bar chart) */
+.revenue-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--spacing-sm);
+    height: 220px;
+    padding-top: var(--spacing-md);
+}
+
+.revenue-bar-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+}
+
+.revenue-bar-track {
+    flex: 1;
+    width: 100%;
+    max-width: 48px;
+    background: var(--border);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+}
+
+.revenue-bar-fill {
+    width: 100%;
+    background: var(--primary-blue);
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    min-height: 2px;
+    transition: height 0.5s ease;
+}
+
+.revenue-bar-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.revenue-bar-value {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Team Performance Table */
+.member-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.member-avatar {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--primary-blue), var(--blue-light));
+    color: white;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.member-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.mini-progress {
+    width: 60px;
+    height: 6px;
+    background: var(--border);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: var(--spacing-sm);
+}
+
+.mini-progress .progress-fill {
+    height: 100%;
+    background: var(--success);
+    border-radius: var(--radius-full);
+}
+
+.mini-progress .progress-fill.warning {
+    background: var(--warning);
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-full);
+}
+
+.status-badge.excellent {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.status-badge.good {
+    background: var(--info-light);
+    color: var(--info);
+}
+
+.status-badge.needs-attention {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+/* Filter Select */
+.filter-select {
+    padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-sm) var(--spacing-sm);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    font-size: 0.875rem;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 8px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(11, 79, 108, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .report-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .chart-section.wide {
+        grid-column: span 1;
+    }
+
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .report-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .member-cell {
+        flex-wrap: wrap;
+    }
+
+    .data-table {
+        font-size: 0.8rem;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: var(--spacing-sm);
+    }
+}
+
+/* Loading & Empty States */
+.loading-placeholder {
+    text-align: center;
+    padding: var(--spacing-xl) var(--spacing-lg);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-xl) var(--spacing-lg);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}

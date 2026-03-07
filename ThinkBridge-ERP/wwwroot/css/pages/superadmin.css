@@ -3,12 +3,18 @@
    Role-specific overrides and unique components
    ========================================== */
 
-/* Page Containers */
+/* Page Containers – .main-content already provides padding */
 .page-companies,
 .page-subscriptions,
 .page-payments {
     max-width: 1400px;
     margin: 0 auto;
+    padding: 0;
+}
+
+/* Hide notification bell for Super Admin */
+.superadmin-topbar .notification-wrapper {
+    display: none;
 }
 
 /* Avatar */
@@ -20,6 +26,185 @@
 .superadmin-dashboard .kpi-icon.purple {
     background: #EDE9FE;
     color: #7C3AED;
+}
+
+/* ── Static KPI Cards (no hover effects) ── */
+.superadmin-dashboard .kpi-card {
+    cursor: default;
+    transition: none;
+}
+
+.superadmin-dashboard .kpi-card:hover {
+    box-shadow: none;
+    transform: none;
+}
+
+/* ── Dashboard Chart Grid Layouts ── */
+.dashboard-grid-2col {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.dashboard-grid-1col {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* ── Chart Section Card ── */
+.chart-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-section .section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+}
+
+.chart-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.chart-legend {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.legend-dot.revenue-dot {
+    background: #0B4F6C;
+}
+
+.legend-dot.companies-dot {
+    background: #22c55e;
+}
+
+/* Canvas Container */
+.chart-container {
+    position: relative;
+    height: 260px;
+    width: 100%;
+    margin-bottom: var(--spacing-md);
+}
+
+.chart-container-doughnut {
+    height: 220px;
+    max-width: 220px;
+    margin: 0 auto var(--spacing-md);
+}
+
+/* Chart Summary Row */
+.chart-summary {
+    display: flex;
+    gap: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-light);
+}
+
+.chart-summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.chart-summary-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+.chart-summary-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.chart-summary-value.positive {
+    color: var(--success);
+}
+
+.chart-summary-value.negative {
+    color: var(--danger);
+}
+
+/* ── Subscription Legend ── */
+.sub-legend {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+    padding-top: var(--spacing-sm);
+}
+
+.sub-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: var(--background);
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem !important;
+    line-height: 1.3;
+}
+
+.sub-legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.sub-legend-plan {
+    flex: 1;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.82rem !important;
+}
+
+.sub-legend-count {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.82rem !important;
+    min-width: 16px;
+    text-align: right;
+}
+
+.sub-legend-pct {
+    color: var(--text-muted);
+    font-size: 0.75rem !important;
+    font-weight: 400;
+    min-width: 32px;
+    text-align: right;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+    .dashboard-grid-2col {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Badge Variants */
@@ -320,6 +505,125 @@
     font-weight: 500;
     padding: 4px 10px;
     border-radius: var(--radius-full);
+}
+
+/* Status Indicator (dot + bold text) — scoped to data-table to override site.css */
+.data-table .status-indicator {
+    position: static !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 6px;
+    width: auto !important;
+    height: auto !important;
+    border: none !important;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.data-table .status-indicator::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    min-width: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.data-table .status-indicator.active {
+    color: var(--success);
+}
+
+.data-table .status-indicator.active::before {
+    background: var(--success);
+}
+
+.data-table .status-indicator.inactive {
+    color: var(--text-secondary);
+}
+
+.data-table .status-indicator.inactive::before {
+    background: var(--text-secondary);
+}
+
+.data-table .status-indicator.pending {
+    color: #B45309;
+}
+
+.data-table .status-indicator.pending::before {
+    background: #B45309;
+}
+
+.data-table .status-indicator.completed {
+    color: var(--success);
+}
+
+.data-table .status-indicator.completed::before {
+    background: var(--success);
+}
+
+.data-table .status-indicator.paid {
+    color: var(--success);
+}
+
+.data-table .status-indicator.paid::before {
+    display: none;
+}
+
+.data-table .status-indicator.failed {
+    color: var(--danger);
+}
+
+.data-table .status-indicator.failed::before {
+    background: var(--danger);
+}
+
+.data-table .status-indicator.trial {
+    color: #6D28D9;
+}
+
+.data-table .status-indicator.trial::before {
+    background: #6D28D9;
+}
+
+.data-table .status-indicator.cancelled,
+.data-table .status-indicator.expired {
+    color: var(--text-secondary);
+}
+
+.data-table .status-indicator.cancelled::before,
+.data-table .status-indicator.expired::before {
+    background: var(--text-secondary);
+}
+
+/* Plan Text Colors */
+.data-table .plan-text {
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.data-table .plan-text.enterprise {
+    color: #7C3AED;
+}
+
+.data-table .plan-text.professional {
+    color: #2563EB;
+}
+
+.data-table .plan-text.starter {
+    color: #D97706;
+}
+
+.data-table .plan-text.trial {
+    color: #6D28D9;
+}
+
+/* Clickable Table Rows */
+.data-table tbody tr.clickable-row {
+    cursor: pointer;
+}
+
+.data-table tbody tr.clickable-row:hover {
+    background: var(--hover-bg, rgba(0, 0, 0, 0.03));
 }
 
 /* Action Buttons */

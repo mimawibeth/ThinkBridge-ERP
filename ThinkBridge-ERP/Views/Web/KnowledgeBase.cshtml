@@ -1,0 +1,404 @@
+﻿@{
+    ViewData["Title"] = "Knowledge Base";
+    var userRole = ViewData["UserRole"]?.ToString() ?? "teammember";
+    var canCreate = userRole == "companyadmin" || userRole == "projectmanager";
+    var canApprove = userRole == "companyadmin";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/knowledge-base.css" asp-append-version="true" />
+}
+
+<div class="page-knowledge-base">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-filters">
+            <div class="search-box">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" class="search-input" id="kb-search-input" placeholder="Search knowledge base..." />
+            </div>
+            @if (canApprove)
+            {
+                <div class="header-status-filter">
+                    <select id="kb-status-filter" class="form-select form-select-sm">
+                        <option value="">All Statuses</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Pending">Pending Approval</option>
+                        <option value="Draft">Drafts</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+            }
+            else if (userRole == "projectmanager")
+            {
+                <div class="header-status-filter">
+                    <select id="kb-status-filter" class="form-select form-select-sm">
+                        <option value="">All My Articles</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Pending">Pending Approval</option>
+                        <option value="Draft">My Drafts</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                </div>
+            }
+        </div>
+        @if (canCreate)
+        {
+            <button class="btn btn-primary" id="new-article-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                New Article
+            </button>
+        }
+    </div>
+
+    <!-- Stats Bar (Admin & PM) -->
+    @if (canCreate)
+    {
+        <div class="kb-stats-bar" id="kb-stats-bar">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-total">0</div>
+                <div class="stat-label">Total Articles</div>
+            </div>
+            <div class="stat-card stat-approved">
+                <div class="stat-value" id="stat-approved">0</div>
+                <div class="stat-label">Approved</div>
+            </div>
+            @if (canApprove)
+            {
+                <div class="stat-card stat-pending">
+                    <div class="stat-value" id="stat-pending">0</div>
+                    <div class="stat-label">Pending Review</div>
+                </div>
+            }
+            <div class="stat-card stat-draft">
+                <div class="stat-value" id="stat-draft">0</div>
+                <div class="stat-label">Drafts</div>
+            </div>
+            <div class="stat-card stat-categories">
+                <div class="stat-value" id="stat-categories">0</div>
+                <div class="stat-label">Categories</div>
+            </div>
+        </div>
+    }
+
+    <!-- Knowledge Base Layout -->
+    <div class="kb-layout">
+        <!-- Categories Sidebar -->
+        <aside class="kb-sidebar">
+            <h3 class="sidebar-title">Categories</h3>
+            <ul class="category-list" id="category-list">
+                <li class="category-item active" data-folder-id="0">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>All Articles</span>
+                    <span class="category-count" id="all-articles-count">0</span>
+                </li>
+            </ul>
+            @if (canCreate)
+            {
+                <button class="btn btn-sm btn-secondary kb-add-category-btn" id="add-category-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Add Category
+                </button>
+            }
+
+            @if (canApprove)
+            {
+                <div class="kb-sidebar-section" style="margin-top: var(--spacing-lg);">
+                    <h3 class="sidebar-title">Admin Actions</h3>
+                    <ul class="category-list">
+                        <li class="category-item kb-pending-link" id="pending-review-link">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <span>Pending Review</span>
+                            <span class="category-count badge-warning" id="pending-count-badge">0</span>
+                        </li>
+                    </ul>
+                </div>
+            }
+        </aside>
+
+        <!-- Articles Grid -->
+        <div class="kb-content">
+            <div class="kb-loading" id="kb-loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Loading articles...</p>
+            </div>
+
+            <div class="kb-empty" id="kb-empty" style="display: none;">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                     style="color: var(--text-muted);">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                <h3>No articles found</h3>
+                <p id="kb-empty-message">There are no articles in this category yet.</p>
+            </div>
+
+            <div class="articles-grid" id="articles-grid"></div>
+
+            <div class="kb-pagination" id="kb-pagination" style="display: none;">
+                <span class="pagination-info" id="kb-page-info">Showing 1-9 of 0</span>
+                <div id="kb-pagination-controls" style="display: flex; gap: 4px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Article Modal -->
+<div class="modal-overlay" id="article-form-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h2 id="article-form-title">Create New Article</h2>
+            <button class="modal-close" data-modal-close>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="article-form" class="article-form">
+                <input type="hidden" id="article-form-id" value="0" />
+                <div class="form-group">
+                    <label for="article-title">Article Title <span class="required">*</span></label>
+                    <input type="text" id="article-title" class="form-input" placeholder="Enter article title"
+                           required />
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="article-category">Category <span class="required">*</span></label>
+                        <select id="article-category" class="form-select" required>
+                            <option value="">Select Category</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="article-project">Project (Optional)</label>
+                        <select id="article-project" class="form-select">
+                            <option value="">No Project</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="article-summary">Summary</label>
+                    <textarea id="article-summary" class="form-textarea" rows="2"
+                              placeholder="Brief description of the article"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="article-content">Content <span class="required">*</span></label>
+                    <textarea id="article-content" class="form-textarea" rows="10"
+                              placeholder="Write your article content here..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="article-tags">Tags</label>
+                    <input type="text" id="article-tags" class="form-input"
+                           placeholder="e.g. api, integration, tutorial (comma-separated)" />
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-modal-close>Cancel</button>
+            @if (userRole == "projectmanager")
+            {
+                <button class="btn btn-secondary" id="save-draft-btn">Save as Draft</button>
+                <button class="btn btn-primary" id="submit-article-btn">Submit for Approval</button>
+            }
+            else if (canApprove)
+            {
+                <button class="btn btn-secondary" id="save-draft-btn">Save as Draft</button>
+                <button class="btn btn-primary" id="submit-article-btn">Publish Article</button>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- View Article Modal -->
+<div class="modal-overlay" id="view-article-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header modal-header-primary">
+            <div>
+                <h2 id="view-article-title">Article Title</h2>
+                <p class="modal-subtitle" id="view-article-category">Category</p>
+            </div>
+            <button class="modal-close" data-modal-close>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="detail-section">
+                <h4 class="detail-section-title">Article Information</h4>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Author</span>
+                        <span class="detail-value" id="view-article-author">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Published</span>
+                        <span class="detail-value" id="view-article-date">-</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status</span>
+                        <span id="view-article-status-badge"></span>
+                    </div>
+                    <div class="detail-item" id="view-article-project-section" style="display:none;">
+                        <span class="detail-label">Project</span>
+                        <span class="detail-value" id="view-article-project">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="detail-section">
+                <h4 class="detail-section-title">Summary</h4>
+                <p class="detail-description" id="view-article-description">-</p>
+            </div>
+            <div class="detail-section">
+                <h4 class="detail-section-title">Content</h4>
+                <div class="article-content-preview" id="view-article-content">
+                    <p>Loading...</p>
+                </div>
+            </div>
+            <div class="detail-section" id="view-article-tags-section">
+                <h4 class="detail-section-title">Tags</h4>
+                <div class="tag-list" id="view-article-tags"></div>
+            </div>
+            <div class="detail-section kb-comments-section">
+                <h4 class="detail-section-title">
+                    Comments & Feedback
+                    <span class="comment-count-badge" id="view-comment-count">0</span>
+                </h4>
+                <div class="kb-comments-list" id="kb-comments-list"></div>
+                <div class="kb-comment-form">
+                    <textarea id="kb-comment-input" class="form-textarea" rows="2"
+                              placeholder="Add a comment or feedback..."></textarea>
+                    <button class="btn btn-sm btn-primary" id="kb-add-comment-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                        Post Comment
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-modal-close>Close</button>
+            <div id="view-admin-actions" style="display:none;">
+                <button class="btn btn-warning" id="view-request-revision-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="1 4 1 10 7 10"></polyline>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                    </svg>
+                    Request Revision
+                </button>
+                <button class="btn btn-danger" id="view-reject-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    Reject
+                </button>
+                <button class="btn btn-success" id="view-approve-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    Approve
+                </button>
+            </div>
+            <button class="btn btn-primary" id="view-edit-btn" style="display:none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                Edit Article
+            </button>
+            <button class="btn btn-warning" id="view-archive-btn" style="display:none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="21 8 21 21 3 21 3 8"></polyline>
+                    <rect x="1" y="3" width="22" height="5"></rect>
+                    <line x1="10" y1="12" x2="14" y2="12"></line>
+                </svg>
+                Archive
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Approval Reason Modal -->
+<div class="modal-overlay" id="approval-reason-modal">
+    <div class="modal modal-sm">
+        <div class="modal-header">
+            <h2 id="approval-reason-title">Provide Reason</h2>
+            <button class="modal-close" data-modal-close>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="approval-reason-text">Reason / Feedback</label>
+                <textarea id="approval-reason-text" class="form-textarea" rows="4"
+                          placeholder="Provide a reason or feedback..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-modal-close>Cancel</button>
+            <button class="btn btn-primary" id="approval-reason-submit">Submit</button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Category Modal -->
+<div class="modal-overlay" id="add-category-modal">
+    <div class="modal modal-sm">
+        <div class="modal-header">
+            <h2>Add Category</h2>
+            <button class="modal-close" data-modal-close>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="new-category-name">Category Name <span class="required">*</span></label>
+                <input type="text" id="new-category-name" class="form-input" placeholder="Enter category name"
+                       required />
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-modal-close>Cancel</button>
+            <button class="btn btn-primary" id="save-category-btn">Create Category</button>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="current-user-role" value="@userRole" />
+
+@section PageScripts {
+    <script src="~/js/pages/knowledge-base.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,336 @@
+@{
+    ViewData["Title"] = "Reports";
+    var userRole = ViewData["UserRole"]?.ToString() ?? "projectmanager";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/superadmin-reports.css" asp-append-version="true" />
+}
+
+<div class="page-reports">
+    <!-- Header -->
+    <div class="report-header">
+        <h1>Project Reports</h1>
+        <div class="report-header-actions">
+            <div class="date-filter">
+                <label for="period-select">Period</label>
+                <select id="period-select" class="filter-select" onchange="generateReport()">
+                    <option value="month" selected>Last Month</option>
+                    <option value="week">Last Week</option>
+                    <option value="quarter">Last Quarter</option>
+                    <option value="year">Last Year</option>
+                </select>
+            </div>
+            <button class="btn-generate" onclick="generateReport()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                Generate
+            </button>
+            <button class="btn-print" onclick="printReport()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                Print Report
+            </button>
+            <button class="btn-print" onclick="downloadPDF()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Report Meta -->
+    <div class="report-meta" id="report-meta">
+        <span><strong>Report:</strong> Project Manager Overview</span>
+        <span><strong>Period:</strong> <span id="meta-period">Last Month</span></span>
+        <span><strong>Generated:</strong> <span id="meta-generated">—</span></span>
+    </div>
+
+    <!-- Loading -->
+    <div class="report-loading" id="report-loading">
+        Loading report data...
+    </div>
+
+    <!-- Report Content (hidden until data loads) -->
+    <div id="report-content" style="display:none;">
+
+        <!-- KPI Summary -->
+        <div class="report-kpi-grid" id="kpi-grid"></div>
+
+        <!-- Project Progress + Task Distribution -->
+        <div class="report-chart-grid">
+            <div class="report-chart-card">
+                <h3>Project Progress</h3>
+                <div class="report-chart-container">
+                    <canvas id="project-chart"></canvas>
+                </div>
+            </div>
+            <div class="report-chart-card">
+                <h3>Task Distribution</h3>
+                <div class="report-chart-container">
+                    <canvas id="task-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Performance Table -->
+        <section class="report-section">
+            <div class="report-section-header">
+                <h2>Team Performance</h2>
+            </div>
+            <div class="report-section-body" style="padding:0;">
+                <table class="report-table" id="team-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Member</th>
+                            <th>Assigned</th>
+                            <th>Completed</th>
+                            <th>Completion Rate</th>
+                            <th>On-Time</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+
+@section PageScripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', generateReport);
+
+        let projectChart = null;
+        let taskChart = null;
+
+        async function generateReport() {
+        const loading = document.getElementById('report-loading');
+        const content = document.getElementById('report-content');
+        loading.style.display = 'flex';
+        content.style.display = 'none';
+
+        const period = document.getElementById('period-select').value;
+        const periodLabels = { week: 'Last Week', month: 'Last Month', quarter: 'Last Quarter', year: 'Last Year' };
+        document.getElementById('meta-period').textContent = periodLabels[period] || period;
+        document.getElementById('meta-generated').textContent =
+        new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+
+        try {
+        const [dashRes, projRes, taskRes, teamRes] = await Promise.all([
+        apiFetch(`/api/reports/dashboard?period=${period}`),
+        apiFetch('/api/reports/project-progress'),
+        apiFetch('/api/reports/task-distribution'),
+        apiFetch('/api/reports/team-performance')
+        ]);
+
+        if (dashRes.success) renderKPIs(dashRes.data);
+        if (projRes.success) renderProjectChart(projRes.data);
+        if (taskRes.success) renderTaskChart(taskRes.data);
+        if (teamRes.success) renderTeamTable(teamRes.data);
+
+        loading.style.display = 'none';
+        content.style.display = 'block';
+        } catch (err) {
+        console.error('Report error:', err);
+        loading.textContent = 'Failed to load report data.';
+        }
+        }
+
+        async function apiFetch(url) {
+        const res = await fetch(url, { credentials: 'same-origin' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+        }
+
+        // ── KPIs ──────────────────────────────────────
+        function renderKPIs(d) {
+        document.getElementById('kpi-grid').innerHTML = `
+        <div class="report-kpi-card">
+        <div class="kpi-label">Tasks Completed</div>
+        <div class="kpi-value">${d.tasksCompleted} <span style="font-size:0.9rem;color:var(--text-secondary);">/ ${d.totalTasks}</span></div>
+        <div class="kpi-sub">${d.totalTasks > 0 ? Math.round(d.tasksCompleted / d.totalTasks * 100) : 0}% completion rate</div>
+        </div>
+        <div class="report-kpi-card">
+        <div class="kpi-label">On-Time Delivery</div>
+        <div class="kpi-value">${d.onTimeDeliveryPercent}%</div>
+        <div class="kpi-sub">of completed tasks delivered on time</div>
+        </div>
+        <div class="report-kpi-card">
+        <div class="kpi-label">Team Utilization</div>
+        <div class="kpi-value">${d.teamUtilizationPercent}%</div>
+        <div class="kpi-sub">members with active tasks</div>
+        </div>
+        <div class="report-kpi-card">
+        <div class="kpi-label">Blockers</div>
+        <div class="kpi-value">${d.blockersResolved} <span style="font-size:0.9rem;color:var(--text-secondary);">/ ${d.totalBlockers}</span></div>
+        <div class="kpi-sub"><span class="${d.totalBlockers - d.blockersResolved > 0 ? 'text-danger' : 'text-success'}">${d.totalBlockers - d.blockersResolved} unresolved</span></div>
+        </div>
+        `;
+        }
+
+        // ── Project Progress Chart ────────────────────
+        function renderProjectChart(projects) {
+        const ctx = document.getElementById('project-chart').getContext('2d');
+        if (projectChart) projectChart.destroy();
+
+        if (!projects || projects.length === 0) {
+        ctx.canvas.parentElement.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-secondary);">No project data available</div>';
+        return;
+        }
+
+        const labels = projects.map(p => p.projectName.length > 20 ? p.projectName.substring(0, 20) + '…' : p.projectName);
+        const values = projects.map(p => p.progress);
+        const colors = projects.map(p => {
+        if (p.status === 'Completed') return 'rgba(34,197,94,0.7)';
+        if (p.progress >= 70) return 'rgba(59,130,246,0.7)';
+        if (p.progress >= 40) return 'rgba(234,179,8,0.7)';
+        return 'rgba(239,68,68,0.7)';
+        });
+
+        projectChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+        labels: labels,
+        datasets: [{
+        label: 'Progress %',
+        data: values,
+        backgroundColor: colors,
+        borderRadius: 4,
+        borderSkipped: false,
+        barThickness: 28
+        }]
+        },
+        options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => `${ctx.parsed.x}%` } }
+        },
+        scales: {
+        x: { min: 0, max: 100, ticks: { callback: v => v + '%', font: { size: 11 } }, grid: { color: 'rgba(0,0,0,0.04)' } },
+        y: { ticks: { font: { size: 11 } }, grid: { display: false } }
+        }
+        }
+        });
+        }
+
+        // ── Task Distribution Chart ───────────────────
+        function renderTaskChart(d) {
+        const ctx = document.getElementById('task-chart').getContext('2d');
+        if (taskChart) taskChart.destroy();
+
+        const labels = ['Completed', 'In Progress', 'In Review', 'Not Started'];
+        const values = [d.completed, d.inProgress, d.inReview, d.notStarted];
+        const bgColors = ['#22C55E', '#EAB308', '#3B82F6', '#94A3B8'];
+
+        taskChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+        labels: labels,
+        datasets: [{
+        data: values,
+        backgroundColor: bgColors,
+        borderWidth: 2,
+        borderColor: '#fff'
+        }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '55%',
+        plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 16, usePointStyle: true } }
+        }
+        }
+        });
+        }
+
+        // ── Team Performance Table ────────────────────
+        function renderTeamTable(members) {
+        const tbody = document.querySelector('#team-table tbody');
+        if (!members || members.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-secondary);">No team data available</td></tr>';
+        return;
+        }
+
+        tbody.innerHTML = members.map((m, i) => `
+        <tr>
+        <td>${i + 1}</td>
+        <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:30px;height:30px;border-radius:50%;background:${m.avatarColor || '#0B4F6C'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:600;">${esc(m.initials)}</div>
+        <span style="font-weight:500;">${esc(m.fullName)}</span>
+        </div>
+        </td>
+        <td>${m.tasksAssigned}</td>
+        <td>${m.tasksCompleted}</td>
+        <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+        <div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden;max-width:80px;">
+        <div style="height:100%;width:${m.completionRate}%;background:${m.completionRate >= 70 ? 'var(--success)' : m.completionRate >= 40 ? '#EAB308' : 'var(--danger)'};border-radius:3px;"></div>
+        </div>
+        <span style="font-weight:600;font-size:0.82rem;">${m.completionRate}%</span>
+        </div>
+        </td>
+        <td>${m.onTimePercent}%</td>
+        </tr>
+        `).join('');
+        }
+
+        // ── Print / PDF ──────────────────────────────
+        function printReport() {
+        window.print();
+        }
+
+        async function downloadPDF() {
+        const btn = event.currentTarget;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Generating...';
+        btn.disabled = true;
+
+        try {
+        const period = document.getElementById('period-select').value;
+        const res = await fetch(`/api/reports/download-pdf?period=${period}`, { credentials: 'same-origin' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `PM-Report-${new Date().toISOString().slice(0, 10)}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        } catch (err) {
+        console.error('PDF generation error:', err);
+        alert('Failed to generate PDF. Please try Print Report instead.');
+        } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        }
+        }
+
+        // ── Helpers ──────────────────────────────────
+        function esc(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+        }
+
+        window.generateReport = generateReport;
+        window.printReport = printReport;
+        window.downloadPDF = downloadPDF;
+    </script>
+}

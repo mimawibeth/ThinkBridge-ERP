@@ -1,0 +1,523 @@
+/* ThinkBridge ERP - Full Schema (Current) */
+
+-- =========================
+-- 1) CORE / SECURITY
+-- =========================
+CREATE TABLE dbo.Company (
+    CompanyID     INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    CompanyName   NVARCHAR(150) NOT NULL,
+    Industry      NVARCHAR(100) NULL,
+    Status        NVARCHAR(20)  NOT NULL DEFAULT 'Pending',
+    CreatedAt     DATETIME2     NOT NULL DEFAULT GETUTCDATE()
+);
+
+CREATE TABLE dbo.[User] (
+    UserID        INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    CompanyID     INT NULL,  -- NULL for Super Admin
+    Fname         NVARCHAR(150) NOT NULL,
+    Lname         NVARCHAR(150) NOT NULL,
+    Email         NVARCHAR(150) NOT NULL,
+    Password      NVARCHAR(255) NOT NULL,
+    Phone         NVARCHAR(30) NULL,
+    AvatarUrl     NVARCHAR(255) NULL,
+    IsSuperAdmin  BIT NOT NULL DEFAULT 0,
+    Status        NVARCHAR(20)  NOT NULL DEFAULT 'Active',
+    MustChangePassword BIT NOT NULL DEFAULT 1,
+    LastLoginAt   DATETIME2     NULL,
+    CreatedAt     DATETIME2     NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_User_Company
+        FOREIGN KEY (CompanyID) REFERENCES dbo.Company(CompanyID)
+);
+CREATE UNIQUE INDEX UX_User_Email ON dbo.[User](Email);
+
+CREATE TABLE dbo.[Role] (
+    RoleID        INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    RoleName      NVARCHAR(50)  NOT NULL,
+    Description   NVARCHAR(255) NULL
+);
+
+CREATE TABLE dbo.UserRole (
+    UserRoleID    INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    UserID        INT NOT NULL,
+    RoleID        INT NOT NULL,
+    AssignedAt    DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_UserRole_User
+        FOREIGN KEY (UserID) REFERENCES dbo.[User](UserID),
+    CONSTRAINT FK_UserRole_Role
+        FOREIGN KEY (RoleID) REFERENCES dbo.[Role](RoleID)
+);
+
+CREATE TABLE dbo.[Module] (
+    ModuleID      INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    ModuleName    NVARCHAR(50)  NOT NULL,
+    Description   NVARCHAR(255) NULL
+);
+
+CREATE TABLE dbo.Permission (
+    PermissionID  INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    ModuleID      INT NOT NULL,
+    PermissionKey NVARCHAR(80)  NOT NULL,
+    Description   NVARCHAR(255) NULL,
+    CONSTRAINT FK_Permission_Module
+        FOREIGN KEY (ModuleID) REFERENCES dbo.[Module](ModuleID)
+);
+
+CREATE TABLE dbo.RolePermission (
+    RolePermissionID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    RoleID           INT NOT NULL,
+    PermissionID     INT NOT NULL,
+    CONSTRAINT FK_RolePermission_Role
+        FOREIGN KEY (RoleID) REFERENCES dbo.[Role](RoleID),
+    CONSTRAINT FK_RolePermission_Permission
+        FOREIGN KEY (PermissionID) REFERENCES dbo.Permission(PermissionID)
+);
+
+CREATE TABLE dbo.SystemSetting (
+    SettingID     INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    CompanyID     INT NOT NULL,
+    SettingKey    NVARCHAR(80)  NOT NULL,
+    SettingValue  NVARCHAR(255) NOT NULL,
+    UpdatedAt     DATETIME2     NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_SystemSetting_Company
+        FOREIGN KEY (CompanyID) REFERENCES dbo.Company(CompanyID)
+);
+
+CREATE TABLE dbo.AuditLog (
+    LogID         INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    CompanyID     INT NULL,
+    UserID        INT NOT NULL,
+    Action        NVARCHAR(120) NOT NULL,
+    EntityName    NVARCHAR(60)  NOT NULL,
+    EntityID      INT NOT NULL,
+    IPAddress     NVARCHAR(45)  NULL,
+    CreatedAt     DATETIME2     NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_AuditLog_Company
+        FOREIGN KEY (CompanyID) REFERENCES dbo.Company(CompanyID),
+    CONSTRAINT FK_AuditLog_User
+        FOREIGN KEY (UserID) REFERENCES dbo.[User](UserID)
+);
+
+-- =========================
+-- 2) BILLING
+-- =========================
+CREATE TABLE dbo.SubscriptionPlan (
+    PlanID        INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    PlanName      NVARCHAR(80) NOT NULL,
+    Price         DECIMAL(12,2) NOT NULL,
+    BillingCycle  NVARCHAR(20) NOT NULL,
+    MaxUsers      INT NULL,
+    MaxProjects   INT NULL,
+    IsActive      BIT NOT NULL DEFAULT 1
+);
+
+CREATE TABLE dbo.Subscription (
+    SubscriptionID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    CompanyID      INT NOT NULL,
+    PlanID         INT NOT NULL,
+    Status         NVARCHAR(20) NOT NULL DEFAULT 'Trial',
+    StartDate      DATE NOT NULL,
+    EndDate        DATE NULL,
+    CONSTRAINT FK_Subscription_Company
+        FOREIGN KEY (CompanyID) REFERENCES dbo.Company(CompanyID),
+    CONSTRAINT FK_Subscription_Plan
+        FOREIGN KEY (PlanID) REFERENCES dbo.SubscriptionPlan(PlanID)
+);
+
+CREATE TABLE dbo.Invoice (
+    InvoiceID       INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    SubscriptionID  INT NOT NULL,
+    InvoiceNumber   NVARCHAR(50) NOT NULL,
+    Amount          DECIMAL(12,2) NOT NULL,
+    DueDate         DATE NOT NULL,
+    PaidDate        DATE NULL,
+    Status          NVARCHAR(20) NOT NULL DEFAULT 'Pending',
+    CreatedAt       DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_Invoice_Subscription
+        FOREIGN KEY (SubscriptionID) REFERENCES dbo.Subscription(SubscriptionID)
+);
+
+CREATE TABLE dbo.PaymentTransaction (
+    PaymentID       INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    SubscriptionID  INT NOT NULL,
+    InvoiceID       INT NULL,
+    Provider        NVARCHAR(40) NOT NULL DEFAULT 'PayMongo',
+    ExternalTransactionID NVARCHAR(255) NULL,
+    CheckoutSessionID NVARCHAR(255) NULL,
+    PaymentMethod   NVARCHAR(40) NULL,
+    Amount          DECIMAL(12,2) NOT NULL,
+    Currency        NVARCHAR(10) NOT NULL DEFAULT 'PHP',
+    Status          NVARCHAR(20) NOT NULL DEFAULT 'Pending',
+    PaidAt          DATETIME2 NULL,
+    CreatedAt       DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_PaymentTransaction_Subscription
+        FOREIGN KEY (SubscriptionID) REFERENCES dbo.Subscription(SubscriptionID),
+    CONSTRAINT FK_PaymentTransaction_Invoice
+        FOREIGN KEY (InvoiceID) REFERENCES dbo.Invoice(InvoiceID)
+);
+
+-- =========================
+-- 3) PROJECT MANAGEMENT
+-- =========================
+CREATE TABLE dbo.Project (
+    ProjectID     INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    CompanyID     INT NOT NULL,
+    ProjectCode   NVARCHAR(50) NULL,
+    ProjectName   NVARCHAR(150) NOT NULL,
+    Description   NVARCHAR(MAX) NULL,
+    Status        NVARCHAR(20) NOT NULL DEFAULT 'Planning',
+    Progress      DECIMAL(5,2) NULL DEFAULT 0,
+    Category      NVARCHAR(50) NULL,
+    StartDate     DATE NULL,
+    DueDate       DATE NULL,
+    CreatedBy     INT NOT NULL,
+    CreatedAt     DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_Project_Company
+        FOREIGN KEY (CompanyID) REFERENCES dbo.Company(CompanyID),
+    CONSTRAINT FK_Project_CreatedBy
+        FOREIGN KEY (CreatedBy) REFERENCES dbo.[User](UserID)
+);
+
+CREATE TABLE dbo.ProjectMember (
+    ProjectMemberID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    ProjectID       INT NOT NULL,
+    UserID          INT NOT NULL,
+    MemberRole      NVARCHAR(30) NULL,
+    JoinedAt        DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_ProjectMember_Project
+        FOREIGN KEY (ProjectID) REFERENCES dbo.Project(ProjectID),
+    CONSTRAINT FK_ProjectMember_User
+        FOREIGN KEY (UserID) REFERENCES dbo.[User](UserID)
+);
+
+CREATE TABLE dbo.Task (
+    TaskID        INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    ProjectID     INT NOT NULL,
+    Title         NVARCHAR(150) NOT NULL,
+    Description   NVARCHAR(MAX) NULL,
+    Status        NVARCHAR(20)  NOT NULL DEFAULT 'To Do',
+    Priority      NVARCHAR(10)  NULL DEFAULT 'Medium',
+    StartDate     DATE NULL,
+    DueDate       DATE NULL,
+    EstimatedHours DECIMAL(8,2) NULL,
+    ActualHours   DECIMAL(8,2) NULL,
+    CreatedBy     INT NOT NULL,
+    CreatedAt     DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_Task_Project
+        FOREIGN KEY (ProjectID) REFERENCES dbo.Project(ProjectID),
+    CONSTRAINT FK_Task_CreatedBy
+        FOREIGN KEY (CreatedBy) REFERENCES dbo.[User](UserID)
+);
+
+CREATE TABLE dbo.TaskAssignment (
+    TaskAssignmentID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    TaskID           INT NOT NULL,
+    UserID           INT NOT NULL,
+    AssignedAt       DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_TaskAssignment_Task
+        FOREIGN KEY (TaskID) REFERENCES dbo.Task(TaskID),
+    CONSTRAINT FK_TaskAssignment_User
+        FOREIGN KEY (UserID) REFERENCES dbo.[User](UserID)
+);
+
+CREATE TABLE dbo.TaskUpdate (
+    UpdateID     INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    TaskID       INT NOT NULL,
+    UserID       INT NOT NULL,
+    [UpdateText] NVARCHAR(MAX) NOT NULL,
+    NewStatus    NVARCHAR(20)  NULL,
+    CreatedAt    DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_TaskUpdate_Task
+        FOREIGN KEY (TaskID) REFERENCES dbo.Task(TaskID),
+    CONSTRAINT FK_TaskUpdate_User
+        FOREIGN KEY (UserID) REFERENCES dbo.[User](UserID)
+);
+
+CREATE TABLE dbo.TaskComment (
+    TaskCommentID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    TaskID        INT NOT NULL,
+    UserID        INT NOT NULL,
+    Content       NVARCHAR(MAX) NOT NULL,
+    IsEdited      BIT NOT NULL DEFAULT 0,
+    CreatedAt     DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt     DATETIME2 NULL,
+    CONSTRAINT FK_TaskComment_Task
+        FOREIGN KEY (TaskID) REFERENCES dbo.Task(TaskID) ON DELETE CASCADE,
+    CONSTRAINT FK_TaskComment_User
+        FOREIGN KEY (UserID) REFERENCES dbo.[User](UserID)
+);
+CREATE INDEX IX_TaskComment_TaskID ON dbo.TaskComment(TaskID);
+CREATE INDEX IX_TaskComment_UserID ON dbo.TaskComment(UserID);
+
+-- =========================
+-- 4) PLM
+-- =========================
+CREATE TABLE dbo.Product (
+    ProductID     INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    CompanyID     INT NOT NULL,
+    ProjectID     INT NULL,
+    ProductCode   NVARCHAR(50) NULL,
+    ProductName   NVARCHAR(150) NOT NULL,
+    Description   NVARCHAR(MAX) NULL,
+    Status        NVARCHAR(20) NOT NULL DEFAULT 'Concept',
+    CreatedAt     DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_Product_Company
+        FOREIGN KEY (CompanyID) REFERENCES dbo.Company(CompanyID),
+    CONSTRAINT FK_Product_Project
+        FOREIGN KEY (ProjectID) REFERENCES dbo.Project(ProjectID) ON DELETE SET NULL
+);
+
+CREATE TABLE dbo.ProductVersion (
+    VersionID     INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    ProductID     INT NOT NULL,
+    VersionLabel  NVARCHAR(30) NOT NULL,
+    ReleaseDate   DATE NULL,
+    Notes         NVARCHAR(MAX) NULL,
+    CONSTRAINT FK_ProductVersion_Product
+        FOREIGN KEY (ProductID) REFERENCES dbo.Product(ProductID)
+);
+
+CREATE TABLE dbo.LifecycleStage (
+    StageID      INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    StageName    NVARCHAR(50) NOT NULL,
+    StageOrder   INT NULL
+);
+
+CREATE TABLE dbo.ProductHistory (
+    HistoryID    INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    ProductID    INT NOT NULL,
+    StageID      INT NOT NULL,
+    ChangedBy    INT NOT NULL,
+    ChangedAt    DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    Remarks      NVARCHAR(MAX) NULL,
+    CONSTRAINT FK_ProductHistory_Product
+        FOREIGN KEY (ProductID) REFERENCES dbo.Product(ProductID),
+    CONSTRAINT FK_ProductHistory_Stage
+        FOREIGN KEY (StageID) REFERENCES dbo.LifecycleStage(StageID),
+    CONSTRAINT FK_ProductHistory_User
+        FOREIGN KEY (ChangedBy) REFERENCES dbo.[User](UserID)
+);
+
+CREATE TABLE dbo.ChangeRequest (
+    CRID         INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    ProductID    INT NOT NULL,
+    RequestedBy  INT NOT NULL,
+    Title        NVARCHAR(150) NOT NULL,
+    Description  NVARCHAR(MAX) NULL,
+    Status       NVARCHAR(20)  NOT NULL DEFAULT 'Pending',
+    CreatedAt    DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_ChangeRequest_Product
+        FOREIGN KEY (ProductID) REFERENCES dbo.Product(ProductID),
+    CONSTRAINT FK_ChangeRequest_User
+        FOREIGN KEY (RequestedBy) REFERENCES dbo.[User](UserID)
+);
+
+-- =========================
+-- 5) KMS
+-- =========================
+CREATE TABLE dbo.Folder (
+    FolderID          INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    CompanyID         INT NOT NULL,
+    ParentFolderID    INT NULL,
+    FolderName        NVARCHAR(150) NOT NULL,
+    CreatedAt         DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_Folder_Company
+        FOREIGN KEY (CompanyID) REFERENCES dbo.Company(CompanyID),
+    CONSTRAINT FK_Folder_Parent
+        FOREIGN KEY (ParentFolderID) REFERENCES dbo.Folder(FolderID)
+);
+
+CREATE TABLE dbo.Document (
+    DocumentID      INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    CompanyID       INT NOT NULL,
+    FolderID        INT NOT NULL,
+    ProjectID       INT NULL,
+    Title           NVARCHAR(200) NOT NULL,
+    Description     NVARCHAR(MAX) NULL,
+    FileType        NVARCHAR(20)  NOT NULL,
+    UploadedBy      INT NOT NULL,
+    ApprovalStatus  NVARCHAR(20)  NOT NULL DEFAULT 'Pending',
+    ApprovedBy      INT NULL,
+    CreatedAt       DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_Document_Company
+        FOREIGN KEY (CompanyID) REFERENCES dbo.Company(CompanyID),
+    CONSTRAINT FK_Document_Folder
+        FOREIGN KEY (FolderID) REFERENCES dbo.Folder(FolderID),
+    CONSTRAINT FK_Document_Project
+        FOREIGN KEY (ProjectID) REFERENCES dbo.Project(ProjectID) ON DELETE SET NULL,
+    CONSTRAINT FK_Document_UploadedBy
+        FOREIGN KEY (UploadedBy) REFERENCES dbo.[User](UserID),
+    CONSTRAINT FK_Document_ApprovedBy
+        FOREIGN KEY (ApprovedBy) REFERENCES dbo.[User](UserID)
+);
+
+CREATE TABLE dbo.DocumentAccess (
+    DocAccessID   INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    DocumentID    INT NOT NULL,
+    RoleID        INT NOT NULL,
+    AccessLevel   NVARCHAR(20) NOT NULL,
+    CONSTRAINT FK_DocumentAccess_Document
+        FOREIGN KEY (DocumentID) REFERENCES dbo.Document(DocumentID),
+    CONSTRAINT FK_DocumentAccess_Role
+        FOREIGN KEY (RoleID) REFERENCES dbo.[Role](RoleID)
+);
+
+CREATE TABLE dbo.Tag (
+    TagID       INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    CompanyID   INT NOT NULL,
+    TagName     NVARCHAR(60) NOT NULL,
+    CONSTRAINT FK_Tag_Company
+        FOREIGN KEY (CompanyID) REFERENCES dbo.Company(CompanyID)
+);
+
+CREATE TABLE dbo.DocumentTag (
+    DocTagID     INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    DocumentID   INT NOT NULL,
+    TagID        INT NOT NULL,
+    CONSTRAINT FK_DocumentTag_Document
+        FOREIGN KEY (DocumentID) REFERENCES dbo.Document(DocumentID),
+    CONSTRAINT FK_DocumentTag_Tag
+        FOREIGN KEY (TagID) REFERENCES dbo.Tag(TagID)
+);
+
+CREATE TABLE dbo.DocumentVersion (
+    DocVersionID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    DocumentID   INT NOT NULL,
+    VersionLabel NVARCHAR(30) NOT NULL,
+    FilePath     NVARCHAR(500) NOT NULL,
+    FileSize     BIGINT NULL,
+    UploadedBy   INT NOT NULL,
+    UploadedAt   DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_DocumentVersion_Document
+        FOREIGN KEY (DocumentID) REFERENCES dbo.Document(DocumentID),
+    CONSTRAINT FK_DocumentVersion_User
+        FOREIGN KEY (UploadedBy) REFERENCES dbo.[User](UserID)
+);
+
+-- =========================
+-- 6) COLLABORATION
+-- =========================
+CREATE TABLE dbo.[Post] (
+    PostID      INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    CompanyID   INT NOT NULL,
+    ProjectID   INT NULL,
+    CreatedBy   INT NOT NULL,
+    Content     NVARCHAR(MAX) NOT NULL,
+    CreatedAt   DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_Post_Company
+        FOREIGN KEY (CompanyID) REFERENCES dbo.Company(CompanyID),
+    CONSTRAINT FK_Post_Project
+        FOREIGN KEY (ProjectID) REFERENCES dbo.Project(ProjectID),
+    CONSTRAINT FK_Post_User
+        FOREIGN KEY (CreatedBy) REFERENCES dbo.[User](UserID)
+);
+
+CREATE TABLE dbo.PostDocument (
+    PostDocID    INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    PostID       INT NOT NULL,
+    DocumentID   INT NOT NULL,
+    CONSTRAINT FK_PostDocument_Post
+        FOREIGN KEY (PostID) REFERENCES dbo.[Post](PostID),
+    CONSTRAINT FK_PostDocument_Document
+        FOREIGN KEY (DocumentID) REFERENCES dbo.Document(DocumentID)
+);
+
+CREATE TABLE dbo.Comment (
+    CommentID    INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    PostID       INT NOT NULL,
+    UserID       INT NOT NULL,
+    Content      NVARCHAR(MAX) NOT NULL,
+    CreatedAt    DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_Comment_Post
+        FOREIGN KEY (PostID) REFERENCES dbo.[Post](PostID),
+    CONSTRAINT FK_Comment_User
+        FOREIGN KEY (UserID) REFERENCES dbo.[User](UserID)
+);
+
+CREATE TABLE dbo.Notification (
+    NotificationID INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    UserID         INT NOT NULL,
+    NotifType      NVARCHAR(40) NULL,
+    Message        NVARCHAR(500) NOT NULL,
+    IsRead         BIT NOT NULL DEFAULT 0,
+    CreatedAt      DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_Notification_User
+        FOREIGN KEY (UserID) REFERENCES dbo.[User](UserID)
+);
+
+-- =========================
+-- 7) REPORTS
+-- =========================
+CREATE TABLE dbo.Report (
+    ReportID      INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    CompanyID     INT NOT NULL,
+    CreatedBy     INT NOT NULL,
+    ReportName    NVARCHAR(150) NOT NULL,
+    ReportType    NVARCHAR(50) NOT NULL,
+    Parameters    NVARCHAR(MAX) NULL,
+    CreatedAt     DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    CONSTRAINT FK_Report_Company
+        FOREIGN KEY (CompanyID) REFERENCES dbo.Company(CompanyID),
+    CONSTRAINT FK_Report_User
+        FOREIGN KEY (CreatedBy) REFERENCES dbo.[User](UserID)
+);
+
+-- =========================
+-- 8) CALENDAR
+-- =========================
+CREATE TABLE dbo.CalendarEvent (
+    EventID       INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    CompanyID     INT NOT NULL,
+    ProjectID     INT NULL,
+    CreatedBy     INT NOT NULL,
+    Title         NVARCHAR(200) NOT NULL,
+    Description   NVARCHAR(2000) NULL,
+    StartDate     DATETIME2 NOT NULL,
+    EndDate       DATETIME2 NOT NULL,
+    AllDay        BIT NOT NULL DEFAULT 0,
+    Location      NVARCHAR(50) NULL,
+    Priority      NVARCHAR(20) NOT NULL DEFAULT 'Medium',
+    Color         NVARCHAR(20) NULL,
+    CreatedAt     DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    UpdatedAt     DATETIME2 NULL,
+    CONSTRAINT FK_CalendarEvent_Company
+        FOREIGN KEY (CompanyID) REFERENCES dbo.Company(CompanyID),
+    CONSTRAINT FK_CalendarEvent_Project
+        FOREIGN KEY (ProjectID) REFERENCES dbo.Project(ProjectID) ON DELETE SET NULL,
+    CONSTRAINT FK_CalendarEvent_User
+        FOREIGN KEY (CreatedBy) REFERENCES dbo.[User](UserID)
+);
+
+-- =========================
+-- SEED DATA
+-- =========================
+
+-- Seed Roles
+INSERT INTO dbo.[Role] (RoleName, Description) VALUES
+('SuperAdmin', 'Platform administrator with full access'),
+('CompanyAdmin', 'Company administrator with full company access'),
+('ProjectManager', 'Manages projects and team members'),
+('TeamMember', 'Regular team member');
+
+-- Seed Lifecycle Stages
+INSERT INTO dbo.LifecycleStage (StageName, StageOrder) VALUES
+('Concept', 1),
+('Design', 2),
+('Development', 3),
+('Testing', 4),
+('Production', 5);
+
+-- Seed Subscription Plans
+INSERT INTO dbo.SubscriptionPlan (PlanName, Price, BillingCycle, MaxUsers, MaxProjects, IsActive) VALUES
+('Trial', 0.00, 'Monthly', 5, 3, 0),
+('Starter', 999.00, 'Monthly', 35, 100, 1),
+('Professional', 2499.00, 'Monthly', 75, 500, 1),
+('Enterprise', 4999.00, 'Monthly', NULL, NULL, 1);
+
+-- Seed Super Admin (password: Thinkbridge@123 - hashed with BCrypt)
+INSERT INTO dbo.[User] (CompanyID, Fname, Lname, Email, Password, IsSuperAdmin, Status, MustChangePassword) VALUES
+(NULL, 'Super', 'Admin', 'superadmin@thinkbridge.com', '$2a$11$HAUg98czHouH.kt4CQcZbOE2GFiwGVnZF0gMv2GVY5lokSKReiDUy', 1, 'Active', 0);
+
+-- Assign Super Admin role
+INSERT INTO dbo.UserRole (UserID, RoleID) VALUES (1, 1);
+
+GO

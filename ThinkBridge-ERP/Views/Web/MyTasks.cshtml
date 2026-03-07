@@ -1,0 +1,792 @@
+@{
+    ViewData["Title"] = "My Tasks";
+    var userRole = ViewData["UserRole"]?.ToString() ?? "teammember";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/mytasks.css" asp-append-version="true" />
+}
+
+<div class="page-mytasks">
+    <!-- Page Header (same pattern as Projects / Dashboard) -->
+    <div class="page-header">
+        <div class="header-filters">
+            <div class="search-box">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" class="search-input" id="task-search" placeholder="Search my tasks..." />
+            </div>
+            <div class="filter-dropdown">
+                <select class="form-select" id="status-filter"
+                        style="min-width:150px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);color:var(--text-primary);font-size:0.85rem;">
+                    <option value="">All Status</option>
+                    <option value="To Do">To Do</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="In Review">In Review</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </div>
+            <div class="filter-dropdown">
+                <select class="form-select" id="priority-filter"
+                        style="min-width:150px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);color:var(--text-primary);font-size:0.85rem;">
+                    <option value="">All Priority</option>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Urgent">Urgent</option>
+                </select>
+            </div>
+            <div class="filter-dropdown">
+                <select class="form-select" id="project-filter"
+                        style="min-width:150px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);color:var(--text-primary);font-size:0.85rem;">
+                    <option value="">All Projects</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Stats Pills -->
+    <section class="task-stats" id="task-stats">
+        <div class="stat-pill">
+            <span class="stat-count" id="stat-total">--</span>
+            <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-pill in-progress">
+            <span class="stat-count" id="stat-inprogress">--</span>
+            <span class="stat-label">In Progress</span>
+        </div>
+        <div class="stat-pill completed">
+            <span class="stat-count" id="stat-completed">--</span>
+            <span class="stat-label">Completed</span>
+        </div>
+        <div class="stat-pill overdue">
+            <span class="stat-count" id="stat-overdue">--</span>
+            <span class="stat-label">Overdue</span>
+        </div>
+    </section>
+
+    <!-- Tasks Cards List -->
+    <section class="tasks-section" id="tasks-section">
+        <div class="tasks-loading-state">
+            <div class="tasks-spinner"></div>
+            <span>Loading your tasks...</span>
+        </div>
+    </section>
+
+    <!-- Pagination -->
+    <div class="tasks-pagination" id="pagination-bar" style="display:none;">
+        <span class="tasks-pagination-info" id="pagination-info"></span>
+        <div class="tasks-pagination-controls">
+            <button class="tasks-page-btn" id="prev-page" onclick="changePage(-1)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            <span class="tasks-page-num" id="page-display"></span>
+            <button class="tasks-page-btn" id="next-page" onclick="changePage(1)">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- View Task Detail Modal -->
+    <div class="modal-overlay" id="view-task-modal">
+        <div class="modal modal-container" style="max-width:650px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="view-task-title">Task Details</h2>
+                <button class="modal-close" onclick="closeViewTaskModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="view-task-body"></div>
+            <div class="modal-footer" id="view-task-footer"></div>
+        </div>
+    </div>
+
+    <!-- Add Update Modal -->
+    <div class="modal-overlay" id="update-modal">
+        <div class="modal modal-container" style="max-width:480px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Add Progress Update</h2>
+                <button class="modal-close" onclick="closeUpdateModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="update-task-id" />
+                <div class="form-group">
+                    <label>New Status</label>
+                    <select id="update-status" class="form-select">
+                        <option value="To Do">To Do</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="In Review">In Review</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Hours Worked</label>
+                    <input type="number" id="update-hours" class="form-input" placeholder="0" step="0.5" min="0" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeUpdateModal()">Cancel</button>
+                <button class="btn btn-primary" id="submit-update-btn" onclick="submitUpdate()">Submit Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const userRole = '@userRole';
+    const currentUserId = parseInt('@User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value');
+    const isAdmin = userRole === 'companyadmin' || userRole === 'superadmin';
+    let currentPage = 1;
+    let totalPages = 1;
+    let allProjects = [];
+    let currentViewTaskId = null;
+    let mentionableUsers = [];
+    let mentionDropdownVisible = false;
+
+    const avatarColors = ['#0B4F6C', '#FF8E3C', '#10B981', '#6D28D9', '#EF4444', '#3B82F6', '#EC4899', '#14B8A6'];
+    function getAvatarColor(id, color) { return color || avatarColors[(id || 0) % avatarColors.length]; }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadProjects();
+        loadStats();
+        loadTasks();
+
+        let searchTimer;
+        document.getElementById('task-search').addEventListener('input', () => {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => { currentPage = 1; loadTasks(); }, 400);
+        });
+        document.getElementById('status-filter').addEventListener('change', () => { currentPage = 1; loadTasks(); loadStats(); });
+        document.getElementById('priority-filter').addEventListener('change', () => { currentPage = 1; loadTasks(); });
+        document.getElementById('project-filter').addEventListener('change', () => { currentPage = 1; loadTasks(); loadStats(); });
+    });
+
+    /* ===================== Data Fetching ===================== */
+
+    async function loadProjects() {
+        try {
+            const res = await fetch('/api/projects?pageSize=100');
+            const json = await res.json();
+            if (json.success) {
+                allProjects = json.data;
+                const sel = document.getElementById('project-filter');
+                allProjects.forEach(p => {
+                    sel.innerHTML += `<option value="${p.projectID}">${escapeHtml(p.projectName)}</option>`;
+                });
+            }
+        } catch (e) { console.error('Failed to load projects', e); }
+    }
+
+    async function loadStats() {
+        try {
+            const projectId = document.getElementById('project-filter')?.value;
+            let url = '/api/tasks/stats';
+            if (projectId) url += `?projectId=${projectId}`;
+            const res = await fetch(url);
+            const json = await res.json();
+            if (json.success) {
+                const d = json.data;
+                document.getElementById('stat-total').textContent = d.totalTasks;
+                document.getElementById('stat-inprogress').textContent = d.inProgressTasks;
+                document.getElementById('stat-completed').textContent = d.completedTasks;
+                document.getElementById('stat-overdue').textContent = d.overdueTasks;
+            }
+        } catch (e) { console.error('Failed to load stats', e); }
+    }
+
+    async function loadTasks() {
+        const search = document.getElementById('task-search').value;
+        const status = document.getElementById('status-filter').value;
+        const priority = document.getElementById('priority-filter').value;
+        const projectId = document.getElementById('project-filter').value;
+
+        let url = `/api/tasks?page=${currentPage}&pageSize=20`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
+        if (status) url += `&status=${encodeURIComponent(status)}`;
+        if (priority) url += `&priority=${encodeURIComponent(priority)}`;
+        if (projectId) url += `&projectId=${projectId}`;
+
+        try {
+            const res = await fetch(url);
+            const json = await res.json();
+            if (json.success) {
+                renderTasks(json.data);
+                totalPages = json.pagination.totalPages || 1;
+                renderPagination(json.pagination);
+            } else {
+                renderError('Failed to load tasks');
+            }
+        } catch (e) {
+            console.error('Failed to load tasks', e);
+            renderError('Error loading tasks');
+        }
+    }
+
+    /* ===================== Rendering ===================== */
+
+    function renderTasks(tasks) {
+        const container = document.getElementById('tasks-section');
+
+        if (!tasks || tasks.length === 0) {
+            container.innerHTML = `
+                <div class="tasks-empty-state">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    <h3>No tasks found</h3>
+                    <p>No tasks match your current filters, or you haven't been assigned any tasks yet.</p>
+                </div>`;
+            return;
+        }
+
+        // Group tasks: overdue > due soon (this week) > upcoming > completed
+        const now = new Date();
+        const weekFromNow = new Date(); weekFromNow.setDate(weekFromNow.getDate() + 7);
+
+        const overdue = [], dueSoon = [], upcoming = [], completed = [];
+        tasks.forEach(t => {
+            if (t.status === 'Completed') { completed.push(t); return; }
+            if (t.dueDate && new Date(t.dueDate) < now) { overdue.push(t); return; }
+            if (t.dueDate && new Date(t.dueDate) <= weekFromNow) { dueSoon.push(t); return; }
+            upcoming.push(t);
+        });
+
+        let html = '';
+
+        if (overdue.length > 0) {
+            html += renderGroup('Overdue', overdue.length, 'overdue',
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>', overdue);
+        }
+
+        if (dueSoon.length > 0) {
+            html += renderGroup('Due This Week', dueSoon.length, 'due-soon',
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>', dueSoon);
+        }
+
+        if (upcoming.length > 0) {
+            html += renderGroup('Upcoming', upcoming.length, 'upcoming',
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>', upcoming);
+        }
+
+        if (completed.length > 0) {
+            html += renderGroup('Completed', completed.length, 'completed',
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>', completed);
+        }
+
+        container.innerHTML = html;
+    }
+
+    function renderGroup(title, count, cls, iconSvg, tasks) {
+        const isCompleted = cls === 'completed';
+        return `
+        <div class="task-group">
+            <h3 class="group-title ${cls}">
+                ${iconSvg}
+                ${title} (${count})
+            </h3>
+            <div class="task-cards ${isCompleted ? 'completed-tasks' : ''}">
+                ${tasks.map(t => renderTaskCard(t, isCompleted)).join('')}
+            </div>
+        </div>`;
+    }
+
+    function renderTaskCard(t, isCompletedGroup) {
+        const isCompleted = t.status === 'Completed';
+        const isOverdue = t.dueDate && new Date(t.dueDate) < new Date() && !isCompleted;
+        const dueDateStr = t.dueDate
+            ? new Date(t.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            : null;
+        const priorityCls = (t.priority || 'Medium').toLowerCase();
+
+        if (isCompletedGroup) {
+            return `
+            <div class="task-card completed" onclick="viewTask(${t.taskID})">
+                <div class="task-header">
+                    <span class="task-id">TASK-${String(t.taskID).padStart(3, '0')}</span>
+                    <span class="status-badge completed">Completed</span>
+                </div>
+                <h4 class="task-title">${escapeHtml(t.title)}</h4>
+                <div class="task-meta">
+                    <span class="task-project">${escapeHtml(t.projectName)}</span>
+                    ${dueDateStr ? '<span class="completed-date">Completed</span>' : ''}
+                </div>
+            </div>`;
+        }
+
+        // Status select options
+        const statusOptions = ['To Do', 'In Progress', 'In Review', 'Completed'];
+        const statusOptionsHtml = statusOptions.map(s =>
+            `<option value="${s}" ${t.status === s ? 'selected' : ''}>${s}</option>`
+        ).join('');
+
+        const statusSelectCls = t.status === 'In Progress' ? 'in-progress'
+            : t.status === 'In Review' ? 'review'
+                : t.status === 'Completed' ? 'completed'
+                    : 'todo';
+
+        return `
+        <div class="task-card ${isOverdue ? 'overdue' : ''}" onclick="viewTask(${t.taskID})">
+            <div class="task-header">
+                <span class="task-id">TASK-${String(t.taskID).padStart(3, '0')}</span>
+                <span class="priority-badge ${priorityCls}">${escapeHtml(t.priority || 'Medium')}</span>
+            </div>
+            <h4 class="task-title">${escapeHtml(t.title)}</h4>
+            ${t.description ? `<p class="task-description">${escapeHtml(t.description).substring(0, 120)}${(t.description || '').length > 120 ? '...' : ''}</p>` : ''}
+            <div class="task-meta">
+                <span class="task-project">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    ${escapeHtml(t.projectName)}
+                </span>
+                ${dueDateStr ? `
+                <span class="task-due ${isOverdue ? 'overdue' : ''}">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    ${isOverdue ? 'Overdue &mdash; ' : 'Due '}${dueDateStr}
+                </span>` : ''}
+            </div>
+            <div class="task-actions" onclick="event.stopPropagation()">
+                <select class="status-select ${statusSelectCls}" onchange="quickStatusUpdate(${t.taskID}, this.value, this)">
+                    ${statusOptionsHtml}
+                </select>
+                <button class="btn-small" onclick="openUpdateModal(${t.taskID}, '${t.status}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                    Update
+                </button>
+                <button class="btn-small" onclick="viewTask(${t.taskID})">View Details</button>
+            </div>
+        </div>`;
+    }
+
+    function renderError(msg) {
+        document.getElementById('tasks-section').innerHTML = `
+            <div class="tasks-empty-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <h3>${msg}</h3>
+                <p>Please try refreshing the page.</p>
+            </div>`;
+    }
+
+    function renderPagination(p) {
+        const bar = document.getElementById('pagination-bar');
+        if (p.totalCount === 0 || p.totalPages <= 1) { bar.style.display = 'none'; return; }
+        bar.style.display = 'flex';
+        document.getElementById('pagination-info').textContent = `Showing ${(p.page - 1) * p.pageSize + 1}\u2013${Math.min(p.page * p.pageSize, p.totalCount)} of ${p.totalCount}`;
+        document.getElementById('page-display').textContent = `${p.page} / ${p.totalPages}`;
+        document.getElementById('prev-page').disabled = p.page <= 1;
+        document.getElementById('next-page').disabled = p.page >= p.totalPages;
+    }
+
+    function changePage(delta) {
+        currentPage = Math.max(1, Math.min(totalPages, currentPage + delta));
+        loadTasks();
+    }
+
+    /* ===================== Status Update ===================== */
+
+    async function quickStatusUpdate(taskId, newStatus, selectEl) {
+        try {
+            const res = await fetch(`/api/tasks/${taskId}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+            let json;
+            try { json = await res.json(); } catch (_) { json = null; }
+            if (json && json.success) {
+                loadTasks();
+                loadStats();
+            } else {
+                alert(json?.message || `Error ${res.status}: Failed to update status.`);
+                loadTasks();
+            }
+        } catch (e) {
+            console.error('Status update error:', e);
+            alert('Failed to update status.');
+            loadTasks();
+        }
+    }
+
+    /* ===================== Update Modal ===================== */
+
+    function openUpdateModal(taskId, currentStatus) {
+        document.getElementById('update-task-id').value = taskId;
+        document.getElementById('update-status').value = currentStatus;
+        document.getElementById('update-hours').value = '';
+        document.getElementById('update-modal').classList.add('active');
+    }
+
+    function closeUpdateModal() {
+        document.getElementById('update-modal').classList.remove('active');
+    }
+
+    async function submitUpdate() {
+        const taskId = document.getElementById('update-task-id').value;
+        const newStatus = document.getElementById('update-status').value;
+        const hours = document.getElementById('update-hours').value;
+
+        const btn = document.getElementById('submit-update-btn');
+        btn.disabled = true;
+        btn.textContent = 'Submitting...';
+
+        try {
+            const statusRes = await fetch(`/api/tasks/${taskId}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+            let statusJson;
+            try { statusJson = await statusRes.json(); } catch (_) { statusJson = null; }
+
+            if (statusJson && statusJson.success) {
+                if (hours && parseFloat(hours) > 0) {
+                    try {
+                        await fetch(`/api/tasks/${taskId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ actualHours: parseFloat(hours) })
+                        });
+                    } catch (e) { console.error('Failed to update hours', e); }
+                }
+                closeUpdateModal();
+                loadTasks();
+                loadStats();
+            } else {
+                alert(statusJson?.message || 'Failed to update status.');
+            }
+        } catch (e) {
+            console.error('Submit update error:', e);
+            alert('Network error. Please try again.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Submit Update';
+        }
+    }
+
+    /* ===================== View Task Detail Modal ===================== */
+
+    async function viewTask(taskId) {
+        try {
+            const res = await fetch(`/api/tasks/${taskId}`);
+            const json = await res.json();
+            if (!json.success) { alert(json.message); return; }
+
+            const t = json.data;
+            const updates = json.updates || [];
+            const isOverdue = t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'Completed';
+
+            let html = `
+                <div class="task-detail-row"><div class="task-detail-label">Project</div><div class="task-detail-value">${escapeHtml(t.projectName)}</div></div>
+                <div class="task-detail-row"><div class="task-detail-label">Status</div><div class="task-detail-value"><span class="badge ${getStatusClass(t.status)}">${t.status}</span></div></div>
+                <div class="task-detail-row"><div class="task-detail-label">Priority</div><div class="task-detail-value"><span class="badge ${getPriorityClass(t.priority)}">${t.priority}</span></div></div>
+                ${t.description ? `<div class="task-detail-row"><div class="task-detail-label">Description</div><div class="task-detail-value">${escapeHtml(t.description)}</div></div>` : ''}
+                <div class="task-detail-row"><div class="task-detail-label">Assignees</div><div class="task-detail-value">${t.assignees?.length ? t.assignees.map(a => escapeHtml(a.fullName)).join(', ') : 'Unassigned'}</div></div>
+                <div class="task-detail-row"><div class="task-detail-label">Due Date</div><div class="task-detail-value ${isOverdue ? 'overdue-text' : ''}">${t.dueDate ? new Date(t.dueDate).toLocaleDateString() : '\u2014'}${isOverdue ? ' (Overdue)' : ''}</div></div>
+                <div class="task-detail-row"><div class="task-detail-label">Estimated Hrs</div><div class="task-detail-value">${t.estimatedHours ?? '\u2014'}</div></div>
+                <div class="task-detail-row"><div class="task-detail-label">Actual Hrs</div><div class="task-detail-value">${t.actualHours ?? '\u2014'}</div></div>
+                <div class="task-detail-row"><div class="task-detail-label">Created By</div><div class="task-detail-value">${escapeHtml(t.createdByName)}</div></div>
+            `;
+
+            if (updates.length > 0) {
+                html += `<h4 style="margin-top:20px;margin-bottom:8px;font-size:0.9rem;">Activity Log</h4>`;
+                html += `<ul class="task-updates-list">` + updates.map(u => `
+                    <li class="task-update-item">
+                        <div class="task-update-avatar">${u.initials}</div>
+                        <div class="task-update-content">
+                            <div class="task-update-user">${escapeHtml(u.userName)}</div>
+                            <div class="task-update-text">${escapeHtml(u.updateText)}</div>
+                            <div class="task-update-time">${new Date(u.createdAt).toLocaleString()}</div>
+                        </div>
+                    </li>
+                `).join('') + `</ul>`;
+            }
+
+            // Comments section
+            html += `
+                <div class="task-comments-section">
+                    <h4 style="margin-top:20px;margin-bottom:12px;font-size:0.9rem;display:flex;align-items:center;gap:6px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        Comments <span class="comment-count" id="comment-count"></span>
+                    </h4>
+                    <div id="comments-list" class="comments-list"><div style="text-align:center;color:var(--text-muted);font-size:0.82rem;padding:12px;">Loading comments...</div></div>
+                    <div class="comment-input-area">
+                        <div class="comment-input-wrapper" style="position:relative;">
+                            <textarea id="comment-input" class="comment-textarea" placeholder="Write a comment... Use @@ to mention someone" rows="2"></textarea>
+                            <div id="mention-dropdown" class="mention-dropdown" style="display:none;"></div>
+                        </div>
+                        <button class="btn btn-primary btn-sm" id="post-comment-btn" onclick="postComment()" style="margin-top:6px;align-self:flex-end;">Post Comment</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('view-task-title').textContent = t.title;
+            document.getElementById('view-task-body').innerHTML = html;
+
+            // Load comments and mentionable users
+            currentViewTaskId = taskId;
+            loadTaskComments(taskId);
+            loadMentionableUsers(taskId);
+            setupMentionInput();
+            document.getElementById('view-task-body').innerHTML = html;
+
+            let footerHtml = `
+                <select class="tm-status-select" id="view-task-status-select">
+                    <option value="To Do" ${t.status === 'To Do' ? 'selected' : ''}>To Do</option>
+                    <option value="In Progress" ${t.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                    <option value="In Review" ${t.status === 'In Review' ? 'selected' : ''}>In Review</option>
+                    <option value="Completed" ${t.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                </select>
+                <button class="btn btn-primary" onclick="updateStatusFromView(${t.taskID})">Update Status</button>
+                <button class="btn btn-secondary" onclick="closeViewTaskModal()">Close</button>`;
+            document.getElementById('view-task-footer').innerHTML = footerHtml;
+            document.getElementById('view-task-modal').classList.add('active');
+        } catch (e) { alert('Failed to load task details.'); }
+    }
+
+    async function updateStatusFromView(taskId) {
+        const status = document.getElementById('view-task-status-select').value;
+        await quickStatusUpdate(taskId, status);
+        closeViewTaskModal();
+    }
+
+    function closeViewTaskModal() { document.getElementById('view-task-modal').classList.remove('active'); currentViewTaskId = null; }
+
+    // ========== Task Comments ==========
+    async function loadTaskComments(taskId) {
+        try {
+            const res = await fetch(`/api/tasks/${taskId}/comments`);
+            const json = await res.json();
+            if (!json.success) return;
+
+            const container = document.getElementById('comments-list');
+            const countEl = document.getElementById('comment-count');
+            const comments = json.data || [];
+            countEl.textContent = comments.length > 0 ? `(${comments.length})` : '';
+
+            if (comments.length === 0) {
+                container.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:0.82rem;padding:16px;">No comments yet. Be the first to comment.</div>';
+                return;
+            }
+
+            container.innerHTML = comments.map(c => renderCommentItem(c)).join('');
+            container.scrollTop = container.scrollHeight;
+        } catch (e) { console.error('Failed to load comments', e); }
+    }
+
+    function renderCommentItem(c) {
+        const timeAgo = getTimeAgo(new Date(c.createdAt));
+        const editedLabel = c.isEdited ? ' <span style="color:var(--text-muted);font-size:0.72rem;">(edited)</span>' : '';
+        const actionsHtml = (c.canEdit || c.canDelete) ? `
+            <div class="comment-actions">
+                ${c.canEdit ? `<button class="comment-action-btn" onclick="editComment(${c.taskCommentID})" title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>` : ''}
+                ${c.canDelete ? `<button class="comment-action-btn danger" onclick="deleteComment(${c.taskCommentID})" title="Delete"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>` : ''}
+            </div>` : '';
+
+        let content = escapeHtml(c.content).replace(/@@(\w+\s\w+)/g, '<span class="mention-highlight">@@$1</span>');
+
+        return `
+            <div class="comment-item" id="comment-${c.taskCommentID}" data-comment-id="${c.taskCommentID}" data-content="${escapeHtml(c.content)}">
+                <div class="comment-avatar" style="background:${getAvatarColor(c.userID, c.avatarColor)}">${c.initials}</div>
+                <div class="comment-body">
+                    <div class="comment-header">
+                        <span class="comment-author">${escapeHtml(c.userName)}</span>
+                        <span class="comment-time">${timeAgo}${editedLabel}</span>
+                        ${actionsHtml}
+                    </div>
+                    <div class="comment-text" id="comment-text-${c.taskCommentID}">${content}</div>
+                </div>
+            </div>`;
+    }
+
+    async function postComment() {
+        const input = document.getElementById('comment-input');
+        const content = input.value.trim();
+        if (!content || !currentViewTaskId) return;
+
+        const mentionedIds = [];
+        const mentionRegex = /@@(\w+\s\w+)/g;
+        let match;
+        while ((match = mentionRegex.exec(content)) !== null) {
+            const mentioned = mentionableUsers.find(u => u.fullName.toLowerCase() === match[1].toLowerCase());
+            if (mentioned) mentionedIds.push(mentioned.userID);
+        }
+
+        const btn = document.getElementById('post-comment-btn');
+        btn.disabled = true;
+        try {
+            const res = await fetch(`/api/tasks/${currentViewTaskId}/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: content, mentionedUserIds: mentionedIds })
+            });
+            const json = await res.json();
+            if (json.success) {
+                input.value = '';
+                loadTaskComments(currentViewTaskId);
+            } else { alert(json.message); }
+        } catch (e) { alert('Failed to post comment.'); }
+        finally { btn.disabled = false; }
+    }
+
+    function editComment(commentId) {
+        const el = document.getElementById(`comment-${commentId}`);
+        const textEl = document.getElementById(`comment-text-${commentId}`);
+        const originalContent = el.dataset.content;
+
+        textEl.innerHTML = `
+            <textarea class="comment-edit-textarea" id="edit-input-${commentId}" rows="2">${originalContent}</textarea>
+            <div style="display:flex;gap:6px;margin-top:4px;">
+                <button class="btn btn-primary btn-sm" onclick="saveEditComment(${commentId})">Save</button>
+                <button class="btn btn-secondary btn-sm" onclick="loadTaskComments(currentViewTaskId)">Cancel</button>
+            </div>`;
+    }
+
+    async function saveEditComment(commentId) {
+        const input = document.getElementById(`edit-input-${commentId}`);
+        const content = input.value.trim();
+        if (!content) return;
+
+        try {
+            const res = await fetch(`/api/tasks/comments/${commentId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: content })
+            });
+            const json = await res.json();
+            if (json.success) { loadTaskComments(currentViewTaskId); }
+            else { alert(json.message); }
+        } catch (e) { alert('Failed to update comment.'); }
+    }
+
+    async function deleteComment(commentId) {
+        if (!confirm('Delete this comment?')) return;
+        try {
+            const res = await fetch(`/api/tasks/comments/${commentId}`, { method: 'DELETE' });
+            const json = await res.json();
+            if (json.success) { loadTaskComments(currentViewTaskId); }
+            else { alert(json.message); }
+        } catch (e) { alert('Failed to delete comment.'); }
+    }
+
+    async function loadMentionableUsers(taskId) {
+        try {
+            const res = await fetch(`/api/tasks/${taskId}/mentionable-users`);
+            const json = await res.json();
+            if (json.success) mentionableUsers = json.data || [];
+        } catch (e) { console.error('Failed to load mentionable users', e); }
+    }
+
+    function setupMentionInput() {
+        setTimeout(() => {
+            const input = document.getElementById('comment-input');
+            if (!input) return;
+
+            input.addEventListener('input', function () {
+                const val = this.value;
+                const cursorPos = this.selectionStart;
+                const textBefore = val.substring(0, cursorPos);
+                const mentionMatch = textBefore.match(/@@([\w]*)$/);
+
+                if (mentionMatch) {
+                    const query = mentionMatch[1].toLowerCase();
+                    const filtered = mentionableUsers.filter(u => u.fullName.toLowerCase().includes(query));
+                    showMentionDropdown(filtered, mentionMatch.index, cursorPos);
+                } else {
+                    hideMentionDropdown();
+                }
+            });
+
+            input.addEventListener('keydown', function (e) {
+                if (!mentionDropdownVisible) return;
+                const dropdown = document.getElementById('mention-dropdown');
+                const items = dropdown.querySelectorAll('.mention-item');
+                let active = dropdown.querySelector('.mention-item.active');
+                let idx = Array.from(items).indexOf(active);
+
+                if (e.key === 'ArrowDown') { e.preventDefault(); idx = Math.min(idx + 1, items.length - 1); items.forEach(i => i.classList.remove('active')); items[idx]?.classList.add('active'); }
+                else if (e.key === 'ArrowUp') { e.preventDefault(); idx = Math.max(idx - 1, 0); items.forEach(i => i.classList.remove('active')); items[idx]?.classList.add('active'); }
+                else if (e.key === 'Enter' && active) { e.preventDefault(); active.click(); }
+                else if (e.key === 'Escape') { hideMentionDropdown(); }
+            });
+        }, 100);
+    }
+
+    function showMentionDropdown(users, startIdx, cursorPos) {
+        const dropdown = document.getElementById('mention-dropdown');
+        if (!users.length) { hideMentionDropdown(); return; }
+
+        dropdown.innerHTML = users.slice(0, 8).map((u, i) => `
+            <div class="mention-item ${i === 0 ? 'active' : ''}" data-user-id="${u.userID}" data-name="${u.fullName}" data-start="${startIdx}" data-cursor="${cursorPos}"
+                 onclick="insertMention(this)">
+                <div class="mention-avatar" style="background:${getAvatarColor(u.userID, u.avatarColor)}">${u.initials}</div>
+                <span>${escapeHtml(u.fullName)}</span>
+            </div>
+        `).join('');
+        dropdown.style.display = 'block';
+        mentionDropdownVisible = true;
+    }
+
+    function hideMentionDropdown() {
+        const dropdown = document.getElementById('mention-dropdown');
+        if (dropdown) dropdown.style.display = 'none';
+        mentionDropdownVisible = false;
+    }
+
+    function insertMention(el) {
+        const input = document.getElementById('comment-input');
+        const name = el.dataset.name;
+        const startIdx = parseInt(el.dataset.start);
+        const cursorPos = parseInt(el.dataset.cursor);
+
+        const before = input.value.substring(0, startIdx);
+        const after = input.value.substring(cursorPos);
+        input.value = before + '@@' + name + ' ' + after;
+        input.focus();
+        input.selectionStart = input.selectionEnd = startIdx + name.length + 2;
+        hideMentionDropdown();
+    }
+
+    function getTimeAgo(date) {
+        const seconds = Math.floor((new Date() - date) / 1000);
+        if (seconds < 60) return 'Just now';
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        const days = Math.floor(hours / 24);
+        if (days < 7) return `${days}d ago`;
+        return date.toLocaleDateString();
+    }
+
+    /* ===================== Helpers ===================== */
+
+    function getStatusClass(status) {
+        const map = { 'To Do': 'badge-todo', 'In Progress': 'badge-inprogress', 'In Review': 'badge-inreview', 'Completed': 'badge-completed' };
+        return map[status] || '';
+    }
+
+    function getPriorityClass(priority) {
+        const map = { 'Low': 'badge-low', 'Medium': 'badge-medium', 'High': 'badge-high', 'Urgent': 'badge-urgent' };
+        return map[priority] || '';
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+</script>

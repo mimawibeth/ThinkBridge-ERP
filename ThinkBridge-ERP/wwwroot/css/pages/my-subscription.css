@@ -1,0 +1,497 @@
+/* ==========================================
+   ThinkBridge ERP - My Subscription Page Styles
+   ========================================== */
+
+.page-subscription {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+/* Loading / Empty State */
+.subscription-loading,
+.subscription-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    color: var(--text-muted);
+    gap: var(--spacing-md);
+}
+
+.subscription-empty svg {
+    color: var(--text-muted);
+    opacity: 0.5;
+}
+
+.subscription-empty h3 {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.subscription-empty p {
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+/* Sub Card */
+.sub-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+}
+
+/* Plan Card */
+.plan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-xl);
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.plan-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.plan-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: fit-content;
+}
+
+.plan-badge.active {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.plan-badge.trial {
+    background: var(--info-light);
+    color: var(--info);
+}
+
+.plan-badge.expired {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+.plan-badge.pending {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.plan-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.plan-company {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.plan-price {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+}
+
+.price-amount {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+}
+
+.price-cycle {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+/* Plan Dates */
+.plan-dates {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-md);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--border);
+}
+
+.date-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.date-item svg {
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.date-item div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.date-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    color: var(--text-muted);
+}
+
+.date-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Usage Grid */
+.usage-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+}
+
+.usage-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.usage-header svg {
+    color: var(--primary-blue);
+}
+
+.usage-header h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.usage-stats {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.usage-numbers {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.usage-current {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.usage-separator {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+}
+
+.usage-max {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.usage-bar {
+    height: 8px;
+    background: var(--background);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.usage-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-blue), var(--blue-light));
+    border-radius: var(--radius-full);
+    transition: width 0.6s ease;
+}
+
+.usage-bar-fill.warning {
+    background: linear-gradient(90deg, var(--warning), #F59E0B);
+}
+
+.usage-bar-fill.danger {
+    background: linear-gradient(90deg, var(--danger), #EF4444);
+}
+
+.usage-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* Features Card */
+.features-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-md);
+}
+
+.features-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.feature-item svg {
+    flex-shrink: 0;
+    color: var(--success);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .plan-dates {
+        grid-template-columns: 1fr;
+    }
+
+    .usage-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .features-list {
+        grid-template-columns: 1fr;
+    }
+
+    .plan-header {
+        flex-direction: column;
+    }
+
+    .plan-actions {
+        align-items: flex-start;
+    }
+}
+
+/* ─── Plan Actions (price + button) ─── */
+.plan-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--spacing-sm);
+}
+
+.btn-outline-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid var(--primary-blue);
+    color: var(--primary-blue);
+    background: transparent;
+    border-radius: var(--radius-md);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.btn-outline-primary:hover {
+    background: var(--primary-blue);
+    color: #fff;
+}
+
+.btn-outline-primary svg {
+    flex-shrink: 0;
+}
+
+/* ─── Payment History Modal ─── */
+.payment-history-loading,
+.payment-history-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-muted);
+    gap: var(--spacing-sm);
+}
+
+.payment-history-empty svg {
+    opacity: 0.4;
+}
+
+/* Payment Table */
+.payment-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.payment-table thead th {
+    text-align: left;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-muted);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.payment-table tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+    vertical-align: middle;
+}
+
+.payment-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.payment-table tbody tr:hover {
+    background: var(--background);
+}
+
+/* Payment Status Badges */
+.payment-status {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: var(--radius-full);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    white-space: nowrap;
+}
+
+.payment-status.status-paid {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.payment-status.status-pending {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.payment-status.status-failed {
+    background: var(--danger-light);
+    color: var(--danger);
+}
+
+/* Receipt Button */
+.btn-receipt {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.btn-receipt:hover {
+    background: var(--background);
+    color: var(--primary-blue);
+}
+
+/* ─── Receipt Modal ─── */
+.receipt-section {
+    margin-bottom: var(--spacing-md);
+}
+
+.receipt-section-title {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--text-muted);
+    margin: 0 0 4px;
+}
+
+.receipt-value {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    margin: 0;
+    word-break: break-word;
+}
+
+.receipt-amount {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+}
+
+.receipt-txn {
+    font-size: 0.8rem;
+    font-family: monospace;
+    word-break: break-all;
+}
+
+.receipt-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 var(--spacing-lg);
+}
+
+.receipt-divider {
+    height: 1px;
+    background: var(--border);
+    margin: var(--spacing-sm) 0 var(--spacing-md);
+}
+
+.receipt-status {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.receipt-status.status-paid {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.receipt-status.status-pending {
+    background: var(--warning-light);
+    color: var(--warning);
+}
+
+.receipt-status.status-failed {
+    background: var(--danger-light);
+    color: var(--danger);
+}

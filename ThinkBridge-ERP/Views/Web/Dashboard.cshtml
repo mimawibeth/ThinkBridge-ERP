@@ -1,0 +1,482 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    var userRole = ViewData["UserRole"]?.ToString() ?? "companyadmin";
+    var userName = ViewData["UserName"]?.ToString() ?? "Admin";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/dashboard.css" asp-append-version="true" />
+}
+
+<div class="page-dashboard companyadmin-dashboard">
+    <!-- Welcome Section -->
+    <section class="welcome-section">
+        <h1 class="welcome-title">Welcome back, <span id="dash-username">@userName</span>!</h1>
+        <p class="welcome-subtitle">Here's an overview of your projects and activities.</p>
+    </section>
+
+    <!-- KPI Stat Cards -->
+    <section class="kpi-section" id="kpi-section">
+        <div class="kpi-card">
+            <div class="kpi-left">
+                <div class="kpi-icon blue">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </div>
+                <div class="kpi-label-group">
+                    <span class="kpi-label">Products</span>
+                    <span class="kpi-change neutral" id="kpi-products-sub">Loading...</span>
+                </div>
+            </div>
+            <span class="kpi-value" id="kpi-products">—</span>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-left">
+                <div class="kpi-icon green">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </div>
+                <div class="kpi-label-group">
+                    <span class="kpi-label">Projects</span>
+                    <span class="kpi-change neutral" id="kpi-projects-sub">Loading...</span>
+                </div>
+            </div>
+            <span class="kpi-value" id="kpi-projects">—</span>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-left">
+                <div class="kpi-icon purple">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                </div>
+                <div class="kpi-label-group">
+                    <span class="kpi-label">Tasks</span>
+                    <span class="kpi-change neutral" id="kpi-tasks-sub">Loading...</span>
+                </div>
+            </div>
+            <span class="kpi-value" id="kpi-tasks">—</span>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-left">
+                <div class="kpi-icon orange">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                </div>
+                <div class="kpi-label-group">
+                    <span class="kpi-label">Team Members</span>
+                    <span class="kpi-change neutral" id="kpi-members-sub">Loading...</span>
+                </div>
+            </div>
+            <span class="kpi-value" id="kpi-members">—</span>
+        </div>
+    </section>
+
+    <!-- Project Progress & Task Overview (side by side) -->
+    <div class="charts-grid">
+        <section class="chart-section">
+            <div class="section-header">
+                <h2 class="section-title">Project Progress</h2>
+                <a href="@Url.Action("Projects", "Web")" class="view-all-link">
+                    View all
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+            </div>
+            <div class="chart-container" style="position:relative;height:280px;">
+                <canvas id="projectProgressChart"></canvas>
+            </div>
+        </section>
+
+        <section class="chart-section">
+            <div class="section-header">
+                <h2 class="section-title">Task Overview</h2>
+            </div>
+            <div class="chart-container"
+                 style="position:relative;height:280px;display:flex;align-items:center;justify-content:center;">
+                <canvas id="taskStatusChart"></canvas>
+            </div>
+            <div class="chart-legend" id="task-chart-legend"></div>
+        </section>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="dashboard-grid" style="margin-top:24px;">
+        <!-- Recent Projects Section -->
+        <section class="dashboard-section recent-projects">
+            <div class="section-header">
+                <h2 class="section-title">Recent Projects</h2>
+                <a href="@Url.Action("Projects", "Web")" class="view-all-link">
+                    View all
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+            </div>
+            <div class="projects-list" id="recent-projects-list">
+                <div style="text-align:center;padding:32px;color:var(--text-secondary);">Loading projects...</div>
+            </div>
+        </section>
+
+        <!-- Team Members -->
+        <section class="dashboard-section recent-activity">
+            <div class="section-header">
+                <h2 class="section-title">Team Members</h2>
+            </div>
+            <div class="team-members-list" id="team-members-section">
+                <div style="text-align:center;padding:32px;color:var(--text-secondary);">Loading team...</div>
+            </div>
+        </section>
+    </div>
+</div>
+
+@section PageScripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script>
+        (function () {
+        'use strict';
+
+        // Chart instances
+        let taskStatusChart, projectProgressChart;
+
+        // Shared chart defaults
+        const chartColors = {
+        active: '#3b82f6',
+        completed: '#10b981',
+        planning: '#8b5cf6',
+        delayed: '#ef4444',
+        todo: '#94a3b8',
+        inProgress: '#f59e0b',
+        overdue: '#ef4444'
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+        loadKpiCards();
+        loadDashboardStats();
+        loadRecentProjects();
+        loadTeamMembers();
+        scheduleMonthlyKpiRefresh();
+        });
+
+        async function loadKpiCards() {
+        try {
+        const [projRes, taskRes, userRes, prodRes] = await Promise.all([
+        fetch('/api/projects/stats', { credentials: 'same-origin' }),
+        fetch('/api/tasks/stats', { credentials: 'same-origin' }),
+        fetch('/api/companyadmin/users/stats', { credentials: 'same-origin' }),
+        fetch('/api/products/pipeline', { credentials: 'same-origin' })
+        ]);
+        const proj = await projRes.json();
+        const task = await taskRes.json();
+        const user = await userRes.json();
+        const prod = await prodRes.json();
+
+        if (proj.success) {
+        const d = proj.data;
+        document.getElementById('kpi-projects').textContent = d.totalProjects;
+        const active = d.activeProjects || 0;
+        const delayed = d.delayedProjects || 0;
+        document.getElementById('kpi-projects-sub').textContent = `${active} active` + (delayed > 0 ? ` · ${delayed} delayed` : '');
+        document.getElementById('kpi-projects-sub').className = 'kpi-change ' + (delayed > 0 ? 'warning' : 'positive');
+        }
+
+        if (task.success) {
+        const t = task.data;
+        document.getElementById('kpi-tasks').textContent = t.totalTasks;
+        const done = t.completedTasks || 0;
+        const pct = t.totalTasks > 0 ? Math.round(done / t.totalTasks * 100) : 0;
+        document.getElementById('kpi-tasks-sub').textContent = `${pct}% completed`;
+        document.getElementById('kpi-tasks-sub').className = 'kpi-change ' + (pct >= 50 ? 'positive' : 'neutral');
+        }
+
+        if (user.success) {
+        const u = user.data;
+        document.getElementById('kpi-members').textContent = u.totalUsers;
+        document.getElementById('kpi-members-sub').textContent = `${u.activeUsers} active · ${u.projectManagers} PMs`;
+        document.getElementById('kpi-members-sub').className = 'kpi-change neutral';
+        }
+
+        if (prod.success) {
+        const stages = prod.data || [];
+        const total = stages.reduce((s, st) => s + st.productCount, 0);
+        document.getElementById('kpi-products').textContent = total;
+        const inProd = stages.find(s => s.stageName === 'Production');
+        document.getElementById('kpi-products-sub').textContent = `${inProd ? inProd.productCount : 0} in production`;
+        document.getElementById('kpi-products-sub').className = 'kpi-change positive';
+        }
+        } catch (e) { console.error('Error loading KPIs:', e); }
+        }
+
+        function scheduleMonthlyKpiRefresh() {
+        const now = new Date();
+        const currentMonth = `${now.getFullYear()}-${now.getMonth()}`;
+        const lastRefresh = localStorage.getItem('kpi-last-refresh-month');
+        if (lastRefresh && lastRefresh !== currentMonth) {
+        loadKpiCards();
+        }
+        localStorage.setItem('kpi-last-refresh-month', currentMonth);
+
+        // Check every 60 minutes if the month has changed
+        setInterval(() => {
+        const check = new Date();
+        const checkMonth = `${check.getFullYear()}-${check.getMonth()}`;
+        const stored = localStorage.getItem('kpi-last-refresh-month');
+        if (stored !== checkMonth) {
+        localStorage.setItem('kpi-last-refresh-month', checkMonth);
+        loadKpiCards();
+        }
+        }, 60 * 60 * 1000);
+        }
+
+        async function loadDashboardStats() {
+        try {
+        const [projRes, taskRes] = await Promise.all([
+        fetch('/api/projects/stats', { credentials: 'same-origin' }),
+        fetch('/api/tasks/stats', { credentials: 'same-origin' })
+        ]);
+        const projResult = await projRes.json();
+        const taskResult = await taskRes.json();
+
+        if (taskResult.success) {
+        const t = taskResult.data;
+        renderTaskStatusChart(t);
+        }
+
+        // Load project progress bar chart
+        loadProjectProgressChart();
+
+        } catch (e) { console.error('Error loading stats:', e); }
+        }
+
+        function renderTaskStatusChart(t) {
+        const ctx = document.getElementById('taskStatusChart').getContext('2d');
+        const data = [t.todoTasks, t.inProgressTasks, t.completedTasks, t.overdueTasks];
+        const labels = ['To Do', 'In Progress', 'Completed', 'Overdue'];
+        const colors = [chartColors.todo, chartColors.inProgress, chartColors.completed, chartColors.overdue];
+        const total = t.totalTasks || 0;
+
+        if (taskStatusChart) taskStatusChart.destroy();
+        taskStatusChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+        labels: labels,
+        datasets: [{
+        data: data,
+        backgroundColor: colors,
+        borderWidth: 0,
+        hoverOffset: 6
+        }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: {
+        legend: { display: false },
+        tooltip: {
+        backgroundColor: '#1e293b',
+        titleFont: { family: 'Outfit', size: 13 },
+        bodyFont: { family: 'Outfit', size: 12 },
+        padding: 10,
+        cornerRadius: 8,
+        callbacks: {
+        label: function (ctx) {
+        const pct = total > 0 ? Math.round(ctx.raw / total * 100) : 0;
+        return ` ${ctx.label}: ${ctx.raw} (${pct}%)`;
+        }
+        }
+        }
+        }
+        },
+        plugins: [{
+        id: 'centerText',
+        afterDraw(chart) {
+        const { ctx, width, height } = chart;
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = '700 1.8rem Outfit, sans-serif';
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim() || '#1e293b';
+        ctx.fillText(total, width / 2, height / 2 - 8);
+        ctx.font = '400 0.75rem Outfit, sans-serif';
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim() || '#64748b';
+        ctx.fillText('Tasks', width / 2, height / 2 + 14);
+        ctx.restore();
+        }
+        }]
+        });
+
+        // Custom legend
+        document.getElementById('task-chart-legend').innerHTML = labels.map((l, i) => `
+        <div class="legend-item">
+        <span class="legend-dot" style="background:${colors[i]}"></span>
+        <span class="legend-label">${l}</span>
+        <span class="legend-value">${data[i]}</span>
+        </div>
+        `).join('');
+        }
+
+        async function loadProjectProgressChart() {
+        try {
+        const res = await fetch('/api/projects?page=1&pageSize=8', { credentials: 'same-origin' });
+        const result = await res.json();
+        if (result.success && result.data.length > 0) {
+        const projects = result.data;
+        const ctx = document.getElementById('projectProgressChart').getContext('2d');
+
+        const barColors = projects.map(p => {
+        if (p.status === 'Completed') return chartColors.completed;
+        if (p.status === 'Delayed') return chartColors.delayed;
+        if (p.status === 'Planning') return chartColors.planning;
+        return chartColors.active;
+        });
+
+        if (projectProgressChart) projectProgressChart.destroy();
+        projectProgressChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+        labels: projects.map(p => p.projectName.length > 20 ? p.projectName.substring(0, 18) + '...' : p.projectName),
+        datasets: [{
+        label: 'Progress %',
+        data: projects.map(p => p.progress || 0),
+        backgroundColor: barColors,
+        borderRadius: 6,
+        borderSkipped: false,
+        barThickness: 28,
+        maxBarThickness: 36
+        }]
+        },
+        options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+        x: {
+        beginAtZero: true,
+        max: 100,
+        grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
+        ticks: {
+        font: { family: 'Outfit', size: 11 },
+        color: '#94a3b8',
+        callback: v => v + '%'
+        }
+        },
+        y: {
+        grid: { display: false },
+        ticks: {
+        font: { family: 'Outfit', size: 12 },
+        color: '#64748b'
+        }
+        }
+        },
+        plugins: {
+        legend: { display: false },
+        tooltip: {
+        backgroundColor: '#1e293b',
+        titleFont: { family: 'Outfit', size: 13 },
+        bodyFont: { family: 'Outfit', size: 12 },
+        padding: 10,
+        cornerRadius: 8,
+        callbacks: {
+        label: function (ctx) {
+        return ` Progress: ${ctx.raw}%`;
+        }
+        }
+        }
+        }
+        }
+        });
+        }
+        } catch (e) { console.error('Error loading project progress:', e); }
+        }
+
+        async function loadRecentProjects() {
+        try {
+        const res = await fetch('/api/projects?page=1&pageSize=5', { credentials: 'same-origin' });
+        const result = await res.json();
+        if (result.success && result.data.length > 0) {
+        const el = document.getElementById('recent-projects-list');
+        el.innerHTML = result.data.map(p => `
+        <div class="project-card" style="cursor:pointer;" onclick="window.location.href='@Url.Action("Projects", "Web")'">
+        <div class="project-header">
+        <span class="badge badge-${getStatusClass(p.status)}">${esc(p.status)}</span>
+        </div>
+        <h3 class="project-name">${esc(p.projectName)}</h3>
+        <div class="project-progress">
+        <div class="progress-bar">
+        <div class="progress-fill" style="width: ${p.progress || 0}%"></div>
+        </div>
+        <span class="progress-text">${p.progress || 0}%</span>
+        </div>
+        <div class="project-footer">
+        <div class="project-team">
+        ${(p.members || []).slice(0, 3).map(m => `<span class="team-avatar" style="background:${m.avatarColor || '#0B4F6C'}">${esc(m.initials)}</span>`).join('')}
+        ${(p.members || []).length > 3 ? `<span class="team-avatar-more">+${p.members.length - 3}</span>` : ''}
+        </div>
+        <div class="project-date">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        ${p.dueDate ? formatDate(p.dueDate) : 'No due date'}
+        </div>
+        </div>
+        </div>
+        `).join('');
+        } else {
+        document.getElementById('recent-projects-list').innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-secondary);">No projects yet. Create your first project!</div>';
+        }
+        } catch (e) { console.error('Error loading projects:', e); }
+        }
+
+        async function loadTeamMembers() {
+        try {
+        const res = await fetch('/api/projects/team-members', { credentials: 'same-origin' });
+        const result = await res.json();
+        if (result.success && result.data.length > 0) {
+        document.getElementById('team-members-section').innerHTML = result.data.map(m => `
+        <div class="team-member-card">
+        <div class="team-member-avatar" style="background:${m.avatarColor || '#0B4F6C'}">${esc(m.initials)}</div>
+        <div class="team-member-info">
+        <span class="team-member-name">${esc(m.fullName)}</span>
+        <span class="team-member-role">${esc(m.role)}</span>
+        </div>
+        </div>
+        `).join('');
+        } else {
+        document.getElementById('team-members-section').innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-secondary);">No team members found.</div>';
+        }
+        } catch (e) { console.error('Error loading team members:', e); }
+        }
+
+        function getStatusClass(status) {
+        const map = { 'Planning': 'planning', 'In Progress': 'in-progress', 'Review': 'review', 'Completed': 'completed', 'Delayed': 'delayed', 'Archived': 'archived' };
+        return map[status] || 'planning';
+        }
+
+        function esc(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+        }
+
+        function formatDate(dateStr) {
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+        })();
+    </script>
+}

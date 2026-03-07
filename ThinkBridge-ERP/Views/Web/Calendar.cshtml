@@ -1,0 +1,235 @@
+@{
+    ViewData["Title"] = "Calendar";
+    var userRole = ViewData["UserRole"]?.ToString() ?? "teammember";
+    var canManage = userRole == "companyadmin" || userRole == "projectmanager";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/calendar.css" asp-append-version="true" />
+}
+
+<div class="page-calendar">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <div class="calendar-nav">
+                <button class="btn btn-icon" id="cal-prev" title="Previous">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <button class="btn btn-secondary btn-sm" id="cal-today">Today</button>
+                <button class="btn btn-icon" id="cal-next" title="Next">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+            <h2 class="calendar-title" id="cal-title">February 2026</h2>
+        </div>
+        <div class="header-right">
+            <div class="header-filters">
+                <select id="cal-project-filter" class="form-select form-select-sm">
+                    <option value="">All Projects</option>
+                </select>
+                <div class="view-toggle">
+                    <button class="btn btn-sm view-btn active" data-view="month">Month</button>
+                    <button class="btn btn-sm view-btn" data-view="week">Week</button>
+                    <button class="btn btn-sm view-btn" data-view="list">List</button>
+                </div>
+            </div>
+            @if (canManage)
+            {
+                <button class="btn btn-primary" id="cal-add-event-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Add Event</span>
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- Calendar Container -->
+    <div class="calendar-container">
+        <!-- Month View -->
+        <div class="calendar-month-view" id="cal-month-view">
+            <div class="calendar-weekdays">
+                <div class="weekday-header">Sun</div>
+                <div class="weekday-header">Mon</div>
+                <div class="weekday-header">Tue</div>
+                <div class="weekday-header">Wed</div>
+                <div class="weekday-header">Thu</div>
+                <div class="weekday-header">Fri</div>
+                <div class="weekday-header">Sat</div>
+            </div>
+            <div class="calendar-grid" id="cal-grid">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+
+        <!-- Week View -->
+        <div class="calendar-week-view hidden" id="cal-week-view">
+            <div class="week-header" id="week-header">
+                <!-- Dynamically populated -->
+            </div>
+            <div class="week-body" id="week-body">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+
+        <!-- List View -->
+        <div class="calendar-list-view hidden" id="cal-list-view">
+            <div class="list-container" id="cal-list-container">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="calendar-loading hidden" id="cal-loading">
+            <div class="loading-spinner"></div>
+            <p>Loading events...</p>
+        </div>
+
+        <!-- Empty State (for list view) -->
+        <div class="calendar-empty hidden" id="cal-empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                 style="color: var(--text-muted);">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <h3>No events found</h3>
+            <p>There are no events for the selected period.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Event Detail Modal -->
+<div class="modal-overlay" id="event-detail-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h2 id="event-detail-title">Event Details</h2>
+            <button class="modal-close" data-modal-close>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body" id="event-detail-body">
+            <!-- Dynamically populated -->
+        </div>
+        <div class="modal-footer" id="event-detail-footer">
+            @if (canManage)
+            {
+                <button class="btn btn-secondary" id="event-edit-btn" onclick="calEditEvent()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    Edit
+                </button>
+                <button class="btn btn-danger" id="event-delete-btn" onclick="calDeleteEvent()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    Delete
+                </button>
+            }
+            <button class="btn btn-secondary" data-modal-close>Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Event Form Modal (Create/Edit) -->
+<div class="modal-overlay" id="event-form-modal">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h2 id="event-form-title">Add Event</h2>
+            <button class="modal-close" data-modal-close>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="event-form" onsubmit="return false;">
+                <input type="hidden" id="event-form-id" value="" />
+                <div class="form-group">
+                    <label for="event-title">Title <span class="required">*</span></label>
+                    <input type="text" class="form-input" id="event-title" placeholder="Event title"
+                           maxlength="200" required />
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="event-start">Start Date <span class="required">*</span></label>
+                        <input type="datetime-local" class="form-input" id="event-start" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="event-end">End Date <span class="required">*</span></label>
+                        <input type="datetime-local" class="form-input" id="event-end" required />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="event-priority">Priority</label>
+                        <select class="form-select" id="event-priority">
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="event-project">Project</label>
+                        <select class="form-select" id="event-project">
+                            <option value="">No Project</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="event-location">Location</label>
+                    <input type="text" class="form-input" id="event-location" placeholder="Location (optional)"
+                           maxlength="50" />
+                </div>
+                <div class="form-group">
+                    <label for="event-color">Color</label>
+                    <div class="color-picker-row">
+                        <button type="button" class="color-swatch" data-color="#0B4F6C" style="background:#0B4F6C;"
+                                title="Blue"></button>
+                        <button type="button" class="color-swatch" data-color="#10B981" style="background:#10B981;"
+                                title="Green"></button>
+                        <button type="button" class="color-swatch" data-color="#F59E0B" style="background:#F59E0B;"
+                                title="Yellow"></button>
+                        <button type="button" class="color-swatch" data-color="#EF4444" style="background:#EF4444;"
+                                title="Red"></button>
+                        <button type="button" class="color-swatch" data-color="#8B5CF6" style="background:#8B5CF6;"
+                                title="Purple"></button>
+                        <button type="button" class="color-swatch" data-color="#FF8E3C" style="background:#FF8E3C;"
+                                title="Orange"></button>
+                    </div>
+                    <input type="hidden" id="event-color" value="#0B4F6C" />
+                </div>
+                <div class="form-group">
+                    <label for="event-description">Description</label>
+                    <textarea class="form-textarea" id="event-description" rows="3"
+                              placeholder="Event description (optional)" maxlength="2000"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" data-modal-close>Cancel</button>
+            <button class="btn btn-primary" id="event-save-btn" onclick="calSaveEvent()">Save Event</button>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="current-user-role" value="@userRole" />
+
+@section PageScripts {
+    <script src="~/js/pages/calendar.js" asp-append-version="true"></script>
+}

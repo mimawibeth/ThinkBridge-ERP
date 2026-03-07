@@ -1,0 +1,648 @@
+/* =================================
+   Subscriptions Page Styles
+   Follows Companies page pattern
+   ================================= */
+
+/* Page Container */
+.page-subscriptions {
+    padding: 0;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ======== Stats Section ======== */
+.page-subscriptions .stats-section {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.page-subscriptions .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.page-subscriptions .stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.page-subscriptions .stat-icon.blue {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3B82F6;
+}
+
+.page-subscriptions .stat-icon.green {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+}
+
+.page-subscriptions .stat-icon.orange {
+    background: rgba(245, 158, 11, 0.1);
+    color: #F59E0B;
+}
+
+.page-subscriptions .stat-icon.purple {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8B5CF6;
+}
+
+.page-subscriptions .stat-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.page-subscriptions .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.page-subscriptions .stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* ======== Plans Management Section ======== */
+.plans-management-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.plans-management-section .section-header,
+.subscriptions-section .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+/* ======== Table Section (shared) ======== */
+.table-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+.page-subscriptions .data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.page-subscriptions .data-table th,
+.page-subscriptions .data-table td {
+    padding: var(--spacing-md);
+    text-align: left;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.page-subscriptions .data-table th {
+    background: var(--background);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+}
+
+.page-subscriptions .data-table tbody tr:hover {
+    background: var(--background);
+}
+
+.page-subscriptions .data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.page-subscriptions .data-table.compact th,
+.page-subscriptions .data-table.compact td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 0.85rem;
+}
+
+.loading-cell {
+    text-align: center;
+    padding: 40px var(--spacing-md) !important;
+    color: var(--text-secondary);
+}
+
+/* ======== Filters Section ======== */
+.page-subscriptions .filters-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.page-subscriptions .search-box {
+    position: relative;
+    flex: 1;
+    max-width: 320px;
+}
+
+.page-subscriptions .search-box svg {
+    position: absolute;
+    left: var(--spacing-sm);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+
+.page-subscriptions .search-input {
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-sm) 40px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    background: var(--surface);
+    font-family: var(--font-ui);
+}
+
+.page-subscriptions .search-input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.page-subscriptions .filter-group {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.page-subscriptions .filter-select {
+    padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-sm) var(--spacing-sm);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    font-size: 0.875rem;
+    cursor: pointer;
+    appearance: none;
+    font-family: var(--font-ui);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 8px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+}
+
+/* ======== Company Cell ======== */
+.page-subscriptions .company-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.page-subscriptions .company-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--primary-blue) 0%, #1D4ED8 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.page-subscriptions .company-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.page-subscriptions .company-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.page-subscriptions .company-email {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* ======== Badges ======== */
+.page-subscriptions .plan-badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    display: inline-block;
+}
+
+.page-subscriptions .plan-badge.enterprise {
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    color: #92400E;
+}
+
+.page-subscriptions .plan-badge.professional {
+    background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
+    color: #1E40AF;
+}
+
+.page-subscriptions .plan-badge.starter {
+    background: var(--border);
+    color: var(--text-secondary);
+}
+
+.page-subscriptions .plan-badge.trial {
+    background: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%);
+    color: #6D28D9;
+}
+
+.page-subscriptions .status-badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    display: inline-block;
+}
+
+.page-subscriptions .status-badge.active {
+    background: var(--success-light);
+    color: var(--success);
+}
+
+.page-subscriptions .status-badge.trial {
+    background: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%);
+    color: #6D28D9;
+}
+
+.page-subscriptions .status-badge.expired {
+    background: var(--warning-light);
+    color: #B45309;
+}
+
+.page-subscriptions .status-badge.cancelled {
+    background: var(--danger-light, #FEE2E2);
+    color: var(--danger, #DC2626);
+}
+
+.page-subscriptions .status-badge.inactive {
+    background: var(--border);
+    color: var(--text-secondary);
+}
+
+.page-subscriptions .status-badge.pending {
+    background: var(--warning-light);
+    color: #B45309;
+}
+
+.page-subscriptions .status-badge.suspended {
+    background: var(--danger-light, #FEE2E2);
+    color: var(--danger, #DC2626);
+}
+
+/* ======== Action Buttons ======== */
+.page-subscriptions .action-buttons {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.page-subscriptions .btn-icon {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.page-subscriptions .btn-icon:hover {
+    background: var(--background);
+    color: var(--text-primary);
+}
+
+/* ======== Table Footer & Pagination ======== */
+.page-subscriptions .table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md);
+    border-top: 1px solid var(--border);
+}
+
+.page-subscriptions .table-info {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.page-subscriptions .pagination {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.page-subscriptions .page-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all var(--transition-fast);
+}
+
+.page-subscriptions .page-btn:hover {
+    background: var(--background);
+}
+
+.page-subscriptions .page-btn.active {
+    background: var(--primary-blue);
+    color: white;
+    border-color: var(--primary-blue);
+}
+
+/* ======== Text Utilities ======== */
+.page-subscriptions .text-muted {
+    color: var(--text-muted, #9CA3AF);
+}
+
+.page-subscriptions .text-danger {
+    color: var(--danger, #DC2626);
+    font-weight: 600;
+}
+
+/* ======== Modal Styles ======== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: var(--spacing-lg);
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.modal.modal-lg {
+    max-width: 720px;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    transition: color var(--transition-fast);
+}
+
+.modal-close:hover {
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: var(--spacing-lg);
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-top: 1px solid var(--border);
+}
+
+/* ======== Form Styles (inside modals) ======== */
+.page-subscriptions .form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.page-subscriptions .form-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.page-subscriptions .form-label.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.page-subscriptions .form-input,
+.page-subscriptions .form-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-family: var(--font-ui);
+    background: var(--surface);
+    color: var(--text-primary);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.page-subscriptions .form-input:focus,
+.page-subscriptions .form-select:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.page-subscriptions .form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 36px;
+}
+
+.page-subscriptions .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+}
+
+.page-subscriptions .form-hint {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted, #9CA3AF);
+    margin-top: 4px;
+}
+
+/* ======== Edit Sub Company Info ======== */
+.edit-sub-company-info {
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--border);
+}
+
+/* ======== Danger Zone ======== */
+.modal-danger-zone {
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border);
+}
+
+.modal-danger-zone .form-hint {
+    margin-top: 6px;
+}
+
+.btn.btn-outline.danger {
+    color: var(--danger, #DC2626);
+    border-color: var(--danger, #DC2626);
+}
+
+.btn.btn-outline.danger:hover {
+    background: var(--danger, #DC2626);
+    color: white;
+}
+
+/* ======== Detail Modal ======== */
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.detail-section {
+    margin-bottom: var(--spacing-md);
+}
+
+.detail-section h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-sm) 0;
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 0.85rem;
+}
+
+.detail-row span:first-child {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.detail-row span:last-child {
+    color: var(--text-primary);
+}
+
+/* ======== Responsive ======== */
+@media (max-width: 1024px) {
+    .page-subscriptions .stats-section {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .page-subscriptions .filters-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .page-subscriptions .search-box {
+        max-width: 100%;
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-subscriptions .stats-section {
+        grid-template-columns: 1fr;
+    }
+
+    .page-subscriptions .data-table {
+        font-size: 0.85rem;
+    }
+
+    .page-subscriptions .data-table th,
+    .page-subscriptions .data-table td {
+        padding: var(--spacing-sm);
+    }
+
+    .page-subscriptions .company-avatar {
+        width: 32px;
+        height: 32px;
+        font-size: 0.75rem;
+    }
+
+    .page-subscriptions .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .modal {
+        max-width: calc(100vw - 32px);
+    }
+
+    .modal.modal-lg {
+        max-width: calc(100vw - 32px);
+    }
+}

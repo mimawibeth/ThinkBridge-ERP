@@ -1,4 +1,4 @@
-/* ==========================================
+﻿/* ==========================================
    ThinkBridge ERP - Knowledge Base Page Styles
    ========================================== */
 
@@ -6,6 +6,53 @@
 .page-knowledge-base {
     max-width: 1400px;
     margin: 0 auto;
+}
+
+/*  Stats Bar  */
+.kb-stats-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.kb-stats-bar .stat-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    padding: var(--spacing-md) var(--spacing-lg);
+    text-align: center;
+}
+
+.kb-stats-bar .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.kb-stats-bar .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.kb-stats-bar .stat-approved .stat-value { color: var(--success); }
+.kb-stats-bar .stat-pending .stat-value { color: var(--warning, #f59e0b); }
+.kb-stats-bar .stat-draft .stat-value { color: var(--text-secondary); }
+.kb-stats-bar .stat-categories .stat-value { color: var(--primary-blue); }
+
+/*  Header status filter  */
+.header-status-filter {
+    min-width: 180px;
+}
+
+.header-status-filter .form-select-sm {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    border-radius: var(--radius-md);
 }
 
 /* Knowledge Base Layout */
@@ -79,6 +126,8 @@
     background: var(--background);
     padding: 2px 8px;
     border-radius: var(--radius-full);
+    flex-shrink: 0;
+    flex-grow: 0;
 }
 
 .category-item.active .category-count {
@@ -86,10 +135,68 @@
     color: var(--text-light);
 }
 
+.badge-warning {
+    background: #fef3c7 !important;
+    color: #d97706 !important;
+}
+
+.kb-pending-link:hover .badge-warning,
+.kb-pending-link.active .badge-warning {
+    background: #f59e0b !important;
+    color: #fff !important;
+}
+
+/* Add Category Button */
+.kb-add-category-btn {
+    margin-top: var(--spacing-md);
+    width: 100%;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    font-size: 0.8rem;
+}
+
 /* KB Content */
 .kb-content {
     display: flex;
     flex-direction: column;
+}
+
+/* Loading & Empty States */
+.kb-loading,
+.kb-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xxl) var(--spacing-lg);
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.kb-loading .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--primary-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: var(--spacing-md);
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.kb-empty h3 {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
+}
+
+.kb-empty p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
 }
 
 /* Articles Grid */
@@ -107,6 +214,7 @@
     padding: var(--spacing-lg);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
+    position: relative;
 }
 
 .article-card:hover {
@@ -115,6 +223,9 @@
 }
 
 .article-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin-bottom: var(--spacing-md);
 }
 
@@ -127,29 +238,41 @@
     text-transform: uppercase;
 }
 
-.article-category.getting-started {
-    background: var(--info-light);
-    color: var(--info);
-}
-
-.article-category.projects {
+/* Category color classes */
+.article-category.cat-default {
     background: var(--blue-lightest);
     color: var(--primary-blue);
 }
 
-.article-category.developer {
-    background: #E9D5FF;
-    color: #7C3AED;
+/* Status Badge on Card */
+.article-status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
-.article-category.analytics {
-    background: var(--success-light);
-    color: var(--success);
+.article-status-badge.status-approved {
+    background: var(--success-light, #dcfce7);
+    color: var(--success, #16a34a);
 }
 
-.article-category.security {
-    background: #FEE2E2;
-    color: #DC2626;
+.article-status-badge.status-pending {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.article-status-badge.status-draft {
+    background: var(--background);
+    color: var(--text-muted);
+}
+
+.article-status-badge.status-rejected {
+    background: #fee2e2;
+    color: #dc2626;
 }
 
 .article-icon {
@@ -195,30 +318,191 @@
 }
 
 .meta-author,
-.meta-date {
+.meta-date,
+.meta-comments {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
 }
 
-.article-footer {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
+/*  View Article : Comments Section  */
+.kb-comments-section {
     margin-top: var(--spacing-md);
-    padding-top: var(--spacing-md);
-    border-top: 1px solid var(--border-light);
 }
 
-.footer-stat {
+.kb-comments-section .detail-section-title {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
-    font-size: 0.75rem;
-    color: var(--text-muted);
+    gap: var(--spacing-sm);
 }
 
-/* Responsive */
+.comment-count-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: var(--primary-blue);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+}
+
+.kb-comments-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: var(--spacing-md);
+}
+
+.kb-comment-item {
+    display: flex;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.kb-comment-item:last-child {
+    border-bottom: none;
+}
+
+.kb-comment-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--blue-lightest);
+    color: var(--primary-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.kb-comment-body {
+    flex: 1;
+}
+
+.kb-comment-author {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.kb-comment-date {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-left: var(--spacing-sm);
+}
+
+.kb-comment-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    line-height: 1.4;
+}
+
+.kb-comment-form {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: flex-end;
+}
+
+.kb-comment-form .form-textarea {
+    flex: 1;
+    resize: none;
+}
+
+.kb-comment-form .btn {
+    white-space: nowrap;
+}
+
+.kb-no-comments {
+    text-align: center;
+    padding: var(--spacing-md);
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/*  Pagination  */
+.kb-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+}
+
+.pagination-info {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/*  Article Content Preview  */
+.article-content-preview {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+}
+
+.article-content-preview h5 {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+}
+
+.article-content-preview p {
+    margin-bottom: var(--spacing-sm);
+}
+
+/*  Tags  */
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+}
+
+.tag {
+    display: inline-block;
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    background: var(--background);
+    color: var(--text-secondary);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border);
+}
+
+/*  Approval action buttons group  */
+#view-admin-actions {
+    display: inline-flex;
+    gap: var(--spacing-sm);
+}
+
+.btn-warning {
+    background: #f59e0b;
+    color: #fff;
+    border: none;
+}
+
+.btn-warning:hover {
+    background: #d97706;
+}
+
+.btn-success {
+    background: var(--success, #16a34a);
+    color: #fff;
+    border: none;
+}
+
+.btn-success:hover {
+    background: #15803d;
+}
+
+/*  Required field indicator  */
+.required {
+    color: #dc2626;
+}
+
+/*  Responsive  */
 @media (max-width: 992px) {
     .kb-layout {
         grid-template-columns: 1fr;
@@ -232,10 +516,27 @@
         flex-direction: row;
         flex-wrap: wrap;
     }
+
+    .kb-stats-bar {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
     .articles-grid {
         grid-template-columns: 1fr;
+    }
+
+    .kb-stats-bar {
+        grid-template-columns: 1fr;
+    }
+
+    .kb-comment-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #view-admin-actions {
+        flex-direction: column;
     }
 }

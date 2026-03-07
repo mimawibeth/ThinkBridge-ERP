@@ -1,0 +1,609 @@
+@{
+    ViewData["Title"] = "Sign Up - ThinkBridge ERP";
+    ViewData["HideLayout"] = true;
+    ViewData["BodyClass"] = "signup-page";
+    var plans = ViewData["Plans"] as List<ThinkBridge_ERP.Models.Entities.SubscriptionPlan>;
+    var selectedPlanId = ViewData["SelectedPlanId"] as int?;
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/login.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/landing.css" asp-append-version="true" />
+}
+
+<a href="/" class="back-to-home-btn">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+    </svg>
+    Back to Home
+</a>
+
+<div class="login-container signup-layout">
+    <!-- Left Side - Branding -->
+    <div class="login-branding signup-branding">
+        <div class="branding-content">
+            <div class="logo">
+                <img src="~/images/thinkBridge.png" alt="ThinkBridge" class="logo-icon" />
+                <span class="logo-text"><span class="logo-think">Think</span><span
+                    class="logo-bridge">Bridge</span></span>
+                </div>
+                <h1 class="branding-title">Start Your Journey with ThinkBridge</h1>
+                <p class="branding-description">
+                    Create your company workspace in minutes. Get access to powerful project management, team collaboration,
+                    and business tools.
+                </p>
+                <div class="signup-benefits">
+                    <div class="signup-benefit-item">
+                        <div class="signup-benefit-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3>Quick Setup</h3>
+                            <p>Get your workspace ready in under 3 minutes</p>
+                        </div>
+                    </div>
+                    <div class="signup-benefit-item">
+                        <div class="signup-benefit-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3>Invite Your Team</h3>
+                            <p>Add members and assign roles instantly</p>
+                        </div>
+                    </div>
+                    <div class="signup-benefit-item">
+                        <div class="signup-benefit-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3>All Modules Included</h3>
+                            <p>Projects, tasks, calendar, reports &amp; more</p>
+                        </div>
+                    </div>
+                    <div class="signup-benefit-item">
+                        <div class="signup-benefit-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3>Free Trial Available</h3>
+                            <p>Try ThinkBridge risk-free, no credit card needed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Signup Form -->
+        <div class="login-form-container signup-form-side">
+            <div class="login-logo-mobile">
+                <img src="~/images/thinkBridge.png" alt="ThinkBridge" class="logo-icon" />
+                <span class="logo-text"><span class="logo-think">Think</span><span class="logo-bridge">Bridge</span></span>
+            </div>
+
+            <!-- Stepper -->
+            <div class="signup-stepper">
+                <div class="stepper-step active" id="step-indicator-1">
+                    <div class="stepper-number">1</div>
+                    <span>Details</span>
+                </div>
+                <div class="stepper-line"></div>
+                <div class="stepper-step" id="step-indicator-2">
+                    <div class="stepper-number">2</div>
+                    <span>Plan</span>
+                </div>
+                <div class="stepper-line"></div>
+                <div class="stepper-step" id="step-indicator-3">
+                    <div class="stepper-number">3</div>
+                    <span>Done</span>
+                </div>
+            </div>
+
+            <div class="signup-form-wrapper">
+                <!-- Step 1: Company Details -->
+                <div class="signup-step" id="step-1">
+                    <div class="login-header">
+                        <h2>Register Your Company</h2>
+                        <p>Fill in your company and admin details to get started.</p>
+                    </div>
+                    <form class="login-form" id="signupForm">
+                        <div class="signup-form-row">
+                            <div class="form-group">
+                                <label for="companyName">Company Name <span class="required">*</span></label>
+                                <input type="text" id="companyName" class="form-input" placeholder="e.g. Acme Corporation"
+                                       required />
+                            </div>
+                            <div class="form-group">
+                                <label for="industry">Industry</label>
+                                <select id="industry" class="form-input form-select">
+                                    <option value="">Select industry</option>
+                                    <option value="Technology">Technology</option>
+                                    <option value="Manufacturing">Manufacturing</option>
+                                    <option value="Healthcare">Healthcare</option>
+                                    <option value="Finance">Finance</option>
+                                    <option value="Education">Education</option>
+                                    <option value="Retail">Retail</option>
+                                    <option value="Construction">Construction</option>
+                                    <option value="Consulting">Consulting</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="signup-form-row">
+                            <div class="form-group">
+                                <label for="adminFirstName">First Name <span class="required">*</span></label>
+                                <input type="text" id="adminFirstName" class="form-input" placeholder="First name"
+                                       required />
+                            </div>
+                            <div class="form-group">
+                                <label for="adminLastName">Last Name <span class="required">*</span></label>
+                                <input type="text" id="adminLastName" class="form-input" placeholder="Last name" required />
+                            </div>
+                        </div>
+                        <div class="signup-form-row">
+                            <div class="form-group">
+                                <label for="adminEmail">Email <span class="required">*</span></label>
+                                <input type="email" id="adminEmail" class="form-input" placeholder="you@example.com"
+                                       required />
+                                <small
+                                    style="color: var(--text-muted, #888); font-size: 0.78rem; margin-top: 2px; display: block;">This
+                                    will be your login email for the system.</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="adminPhone">Phone Number</label>
+                                    <input type="tel" id="adminPhone" class="form-input" placeholder="09XX XXX XXXX"
+                                           maxlength="13" />
+                                </div>
+                            </div>
+                            <div class="signup-form-row">
+                                <div class="form-group">
+                                    <label for="adminPassword">Password <span class="required">*</span></label>
+                                    <div class="password-input-wrapper">
+                                        <input type="password" id="adminPassword" class="form-input"
+                                               placeholder="Min 12 characters" minlength="12" required />
+                                        <button type="button" class="password-toggle"
+                                                onclick="togglePasswordVisibility('adminPassword', this)">
+                                            <svg class="eye-open" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                 stroke="currentColor" stroke-width="2">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                            </svg>
+                                            <svg class="eye-closed" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                 stroke="currentColor" stroke-width="2" style="display:none;">
+                                                <path
+                                                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                                                </path>
+                                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <small class="form-hint" style="display:none;">Min 12 characters. Must include uppercase,
+                                        lowercase, numeric &
+                                        special characters.</small>
+                                        <ul class="password-checklist" id="passwordChecklist">
+                                            <li id="check-length"><span class="check-icon-pw"></span> Min. 12 characters</li>
+                                            <li id="check-lowercase"><span class="check-icon-pw"></span> Min. one lowercase
+                                                character</li>
+                                                <li id="check-uppercase"><span class="check-icon-pw"></span> Min. one uppercase
+                                                    character</li>
+                                                    <li id="check-number"><span class="check-icon-pw"></span> Min. one number</li>
+                                                    <li id="check-special"><span class="check-icon-pw"></span> Min. one special character
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="adminPasswordConfirm">Confirm Password <span class="required">*</span></label>
+                                                <div class="password-input-wrapper">
+                                                    <input type="password" id="adminPasswordConfirm" class="form-input"
+                                                           placeholder="Re-enter password" minlength="12" required />
+                                                    <button type="button" class="password-toggle"
+                                                            onclick="togglePasswordVisibility('adminPasswordConfirm', this)">
+                                                        <svg class="eye-open" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                             stroke="currentColor" stroke-width="2">
+                                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                            <circle cx="12" cy="12" r="3"></circle>
+                                                        </svg>
+                                                        <svg class="eye-closed" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                             stroke="currentColor" stroke-width="2" style="display:none;">
+                                                            <path
+                                                                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                                                            </path>
+                                                            <line x1="1" y1="1" x2="23" y2="23"></line>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-primary btn-login" id="nextToStep2" onclick="goToStep(2)">
+                                            Next: Choose Plan
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="2">
+                                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                                <polyline points="12 5 19 12 12 19"></polyline>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                    <div class="login-footer">
+                                        <p>Already have an account? <a href="/Auth/Login">Sign in here</a></p>
+                                    </div>
+                                </div>
+
+                                <!-- Step 2: Choose Plan -->
+                                <div class="signup-step" id="step-2" style="display:none;">
+                                    <div class="login-header">
+                                        <h2>Choose Your Plan</h2>
+                                        <p>Select a plan that fits your team. All plans include all modules.</p>
+                                    </div>
+                                    <div class="plan-cards">
+                                        @if (plans != null)
+                                        {
+                                            @foreach (var plan in plans)
+                                            {
+                                                var isSelected = selectedPlanId.HasValue && selectedPlanId.Value == plan.PlanID;
+                                                var isTrial = plan.Price == 0;
+                                                <div class="plan-card @(isSelected ? "selected" : "")" data-plan-id="@plan.PlanID"
+                                                     data-plan-price="@plan.Price" onclick="selectPlan(this, @plan.PlanID)">
+                                                    <div class="plan-card-header">
+                                                        <h4>@plan.PlanName</h4>
+                                                        <div class="plan-price">
+                                                            @if (isTrial)
+                                                            {
+                                                                <span class="plan-amount">Free</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="plan-currency">₱</span>
+                                                                <span class="plan-amount">@plan.Price.ToString("N0")</span>
+                                                                <span class="plan-period">/mo</span>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                    <div class="plan-card-body">
+                                                        <span class="plan-detail">@(plan.MaxUsers.HasValue ? $"{plan.MaxUsers} users" : "Unlimited                                users")</span>
+                                                        <span class="plan-detail">@(plan.MaxProjects.HasValue ? $"{plan.MaxProjects} projects" :
+                                                                                            "Unlimited projects")</span>
+                                                        </div>
+                                                        <div class="plan-check">
+                                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                                 stroke-width="3">
+                                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                                            </svg>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                        <div class="form-actions-signup">
+                                            <button type="button" class="btn btn-secondary" onclick="goToStep(1)">
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                     stroke-width="2">
+                                                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                                                    <polyline points="12 19 5 12 12 5"></polyline>
+                                                </svg>
+                                                Back
+                                            </button>
+                                            <button type="button" class="btn btn-primary" id="submitRegistration"
+                                                    onclick="submitRegistration()">
+                                                <span id="submitBtnText">Complete Registration</span>
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                     stroke-width="2" id="submitBtnArrow">
+                                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                                </svg>
+                                                <span id="submitBtnLoading" style="display:none;">Processing...</span>
+                                            </button>
+                                        </div>
+                                        <div class="form-group error-message" id="registrationError" style="display: none;">
+                                            <span class="error-text" id="registrationErrorText"></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 3: Success -->
+                                    <div class="signup-step" id="step-3" style="display:none;">
+                                        <div class="success-container">
+                                            <div class="success-icon">
+                                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                     stroke-width="2">
+                                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                                </svg>
+                                            </div>
+                                            <h2>Account Created!</h2>
+                                            <p class="success-subtitle">Your ThinkBridge ERP account is ready.</p>
+                                            <div class="credentials-card">
+                                                <div class="credential-row">
+                                                    <span class="credential-label">Email</span>
+                                                    <span class="credential-value" id="resultEmail">—</span>
+                                                </div>
+                                                <div class="credential-row">
+                                                    <span class="credential-label">Plan</span>
+                                                    <span class="credential-value" id="resultPlan">—</span>
+                                                </div>
+                                            </div>
+                                            <div class="credential-warning">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                     stroke-width="2">
+                                                    <circle cx="12" cy="12" r="10"></circle>
+                                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                                </svg>
+                                                <span>Use the password you set during registration to log in.</span>
+                                            </div>
+                                            <a href="/Auth/Login" class="btn btn-primary btn-login">
+                                                Go to Login
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                     stroke-width="2">
+                                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Signup Modal -->
+                        <div class="signup-modal-overlay" id="signupModal">
+                            <div class="signup-modal">
+                                <div class="signup-modal-icon" id="signupModalIcon">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                    </svg>
+                                </div>
+                                <h3 class="signup-modal-title" id="signupModalTitle">Notice</h3>
+                                <p class="signup-modal-message" id="signupModalMessage"></p>
+                                <button class="btn btn-primary btn-sm signup-modal-btn" id="signupModalBtn"
+                                        onclick="closeSignupModal()">OK</button>
+                            </div>
+                        </div>
+
+                        @section PageScripts {
+                            <script>
+                                let selectedPlanId = @(selectedPlanId.HasValue ? selectedPlanId.Value.ToString() : "0");
+
+                                function selectPlan(element, planId) {
+                                    document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+                                    element.classList.add('selected');
+                                    selectedPlanId = planId;
+
+                                    // Update button text based on price
+                                    const price = parseFloat(element.dataset.planPrice);
+                                    const btnText = document.getElementById('submitBtnText');
+                                    btnText.textContent = 'Proceed to Payment';
+                                }
+
+                                function togglePasswordVisibility(inputId, btn) {
+                                    const input = document.getElementById(inputId);
+                                    const eyeOpen = btn.querySelector('.eye-open');
+                                    const eyeClosed = btn.querySelector('.eye-closed');
+                                    if (input.type === 'password') {
+                                        input.type = 'text';
+                                        eyeOpen.style.display = 'none';
+                                        eyeClosed.style.display = 'block';
+                                    } else {
+                                        input.type = 'password';
+                                        eyeOpen.style.display = 'block';
+                                        eyeClosed.style.display = 'none';
+                                    }
+                                }
+
+                                function validatePassword(password) {
+                                    if (password.length === 0) return 'Password is required.';
+                                    if (password.length < 12) return 'Password must be minimum 12 characters.';
+                                    if (!/[A-Z]/.test(password)) return 'Password must include uppercase letters.';
+                                    if (!/[a-z]/.test(password)) return 'Password must include lowercase letters.';
+                                    if (!/[0-9]/.test(password)) return 'Password must include numeric characters.';
+                                    if (!/[^a-zA-Z0-9]/.test(password)) return 'Password must include special characters.';
+                                    return null;
+                                }
+
+                                // Real-time password checklist
+                                document.getElementById('adminPassword').addEventListener('input', function () {
+                                    const pw = this.value;
+                                    const checklist = document.getElementById('passwordChecklist');
+                                    checklist.style.display = pw.length > 0 ? 'block' : 'none';
+                                    const update = (id, pass) => {
+                                        const el = document.getElementById(id);
+                                        el.classList.toggle('valid', pass);
+                                        el.classList.toggle('invalid', !pass);
+                                    };
+                                    update('check-length', pw.length >= 12);
+                                    update('check-lowercase', /[a-z]/.test(pw));
+                                    update('check-uppercase', /[A-Z]/.test(pw));
+                                    update('check-number', /[0-9]/.test(pw));
+                                    update('check-special', /[^a-zA-Z0-9]/.test(pw));
+                                });
+
+                                // Format phone as 09XX XXX XXXX
+                                document.getElementById('adminPhone').addEventListener('input', function () {
+                                    let digits = this.value.replace(/\D/g, '').slice(0, 11);
+                                    let formatted = '';
+                                    if (digits.length > 7) {
+                                        formatted = digits.slice(0, 4) + ' ' + digits.slice(4, 7) + ' ' + digits.slice(7);
+                                    } else if (digits.length > 4) {
+                                        formatted = digits.slice(0, 4) + ' ' + digits.slice(4);
+                                    } else {
+                                        formatted = digits;
+                                    }
+                                    this.value = formatted;
+                                });
+
+                                function goToStep(step) {
+                                    if (step === 2) {
+                                        // Validate step 1
+                                        const companyName = document.getElementById('companyName').value.trim();
+                                        const firstName = document.getElementById('adminFirstName').value.trim();
+                                        const lastName = document.getElementById('adminLastName').value.trim();
+                                        const password = document.getElementById('adminPassword').value;
+                                        const confirmPassword = document.getElementById('adminPasswordConfirm').value;
+
+                                        const adminEmail = document.getElementById('adminEmail').value.trim();
+
+                                        if (!companyName) { showModal('Please enter your company name.'); return; }
+                                        if (!adminEmail) { showModal('Please enter your email address.'); return; }
+                                        if (!/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(adminEmail)) { showModal('Please enter a valid email address.'); return; }
+                                        if (!firstName) { showModal('Please enter admin first name.'); return; }
+                                        if (!lastName) { showModal('Please enter admin last name.'); return; }
+
+                                        const pwError = validatePassword(password);
+                                        if (pwError) { showModal(pwError); return; }
+                                        if (password !== confirmPassword) { showModal('Passwords do not match.'); return; }
+                                    }
+
+                                    document.querySelectorAll('.signup-step').forEach(s => s.style.display = 'none');
+                                    document.getElementById('step-' + step).style.display = 'block';
+
+                                    // Update step indicators
+                                    document.querySelectorAll('.stepper-step').forEach((s, i) => {
+                                        s.classList.toggle('active', i < step);
+                                        s.classList.toggle('completed', i < step - 1);
+                                    });
+                                    document.querySelectorAll('.stepper-line').forEach((l, i) => {
+                                        l.classList.toggle('active', i < step - 1);
+                                    });
+                                }
+
+                                async function submitRegistration() {
+                                    if (!selectedPlanId || selectedPlanId === 0) {
+                                        showError('Please select a subscription plan.');
+                                        return;
+                                    }
+
+                                    const btn = document.getElementById('submitRegistration');
+                                    const btnText = document.getElementById('submitBtnText');
+                                    const btnArrow = document.getElementById('submitBtnArrow');
+                                    const btnLoading = document.getElementById('submitBtnLoading');
+
+                                    btn.disabled = true;
+                                    btnText.style.display = 'none';
+                                    btnArrow.style.display = 'none';
+                                    btnLoading.style.display = 'inline';
+
+                                    hideError();
+
+                                    try {
+                                        const response = await fetch('/api/subscription/register', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                companyName: document.getElementById('companyName').value.trim(),
+                                                industry: document.getElementById('industry').value,
+                                                adminEmail: document.getElementById('adminEmail').value.trim(),
+                                                adminFirstName: document.getElementById('adminFirstName').value.trim(),
+                                                adminLastName: document.getElementById('adminLastName').value.trim(),
+                                                adminPhone: document.getElementById('adminPhone').value.replace(/\s/g, ''),
+                                                adminPassword: document.getElementById('adminPassword').value,
+                                                planId: selectedPlanId
+                                            })
+                                        });
+
+                                        const result = await response.json();
+
+                                        if (!result.success) {
+                                            showError(result.message);
+                                            resetButton();
+                                            return;
+                                        }
+
+                                        if (result.isTrial) {
+                                            // Free trial - show credentials
+                                            document.getElementById('resultEmail').textContent = result.email;
+                                            document.getElementById('resultPlan').textContent = result.planName;
+                                            goToStep(3);
+                                        } else {
+                                            // Paid plan - redirect to PayMongo
+                                            sessionStorage.setItem('tb_email', result.email);
+                                            sessionStorage.setItem('tb_plan', result.planName);
+
+                                            showModal(
+                                                `Your login email: ${result.email}\n\nYou'll be redirected to PayMongo for payment.`,
+                                                'Payment Redirect',
+                                                'success',
+                                                function () { window.location.href = result.checkoutUrl; }
+                                            );
+                                        }
+                                    } catch (error) {
+                                        console.error('Registration error:', error);
+                                        showError('An error occurred. Please try again.');
+                                        resetButton();
+                                    }
+                                }
+
+                                function showError(msg) {
+                                    const el = document.getElementById('registrationError');
+                                    document.getElementById('registrationErrorText').textContent = msg;
+                                    el.style.display = 'block';
+                                }
+
+                                function hideError() {
+                                    document.getElementById('registrationError').style.display = 'none';
+                                }
+
+                                function resetButton() {
+                                    const btn = document.getElementById('submitRegistration');
+                                    const btnText = document.getElementById('submitBtnText');
+                                    const btnArrow = document.getElementById('submitBtnArrow');
+                                    const btnLoading = document.getElementById('submitBtnLoading');
+                                    btn.disabled = false;
+                                    btnText.style.display = 'inline';
+                                    btnArrow.style.display = 'inline';
+                                    btnLoading.style.display = 'none';
+                                }
+
+                                // Auto-select plan if planId is in URL
+                                if (selectedPlanId > 0) {
+                                    const planCard = document.querySelector(`.plan-card[data-plan-id="${selectedPlanId}"]`);
+                                    if (planCard) planCard.classList.add('selected');
+                                }
+
+                                // Modal functions
+                                let modalCallback = null;
+                                function showModal(message, title, type, onClose) {
+                                    const overlay = document.getElementById('signupModal');
+                                    const iconEl = document.getElementById('signupModalIcon');
+                                    const titleEl = document.getElementById('signupModalTitle');
+                                    const msgEl = document.getElementById('signupModalMessage');
+                                    modalCallback = onClose || null;
+
+                                    titleEl.textContent = title || 'Notice';
+                                    msgEl.innerHTML = message.replace(/\n/g, '<br>');
+
+                                    // Icon based on type
+                                    iconEl.className = 'signup-modal-icon ' + (type === 'success' ? 'modal-success' : 'modal-warning');
+                                    if (type === 'success') {
+                                        iconEl.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                                    } else {
+                                        iconEl.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>';
+                                    }
+
+                                    overlay.classList.add('active');
+                                }
+
+                                function closeSignupModal() {
+                                    document.getElementById('signupModal').classList.remove('active');
+                                    if (modalCallback) { modalCallback(); modalCallback = null; }
+                                }
+                            </script>
+                        }

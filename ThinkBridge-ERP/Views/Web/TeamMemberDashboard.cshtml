@@ -1,0 +1,176 @@
+@{
+    ViewData["Title"] = "My Dashboard";
+    var userRole = ViewData["UserRole"]?.ToString() ?? "teammember";
+    var userName = ViewData["UserName"]?.ToString() ?? "Team Member";
+}
+
+@section PageStyles {
+    <link rel="stylesheet" href="~/css/pages/dashboard.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/teammember.css" asp-append-version="true" />
+}
+
+<div class="page-dashboard tm-dashboard">
+    <!-- Welcome Section -->
+    <section class="welcome-section">
+        <h1 class="welcome-title">Welcome back, <span id="dash-username">@userName</span>!</h1>
+        <p class="welcome-subtitle">Here's what you have on your plate today.</p>
+    </section>
+
+    <!-- KPI Cards Section -->
+    <section class="kpi-section">
+        <div class="kpi-card">
+            <div class="kpi-left">
+                <div class="kpi-icon green">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+                <div class="kpi-label-group">
+                    <span class="kpi-label">Active</span>
+                    <span class="kpi-change positive" id="kpi-active-sub">Loading...</span>
+                </div>
+            </div>
+            <span class="kpi-value" id="kpi-active">—</span>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-left">
+                <div class="kpi-icon purple">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+                <div class="kpi-label-group">
+                    <span class="kpi-label">Completed</span>
+                    <span class="kpi-change positive" id="kpi-completed-sub">Loading...</span>
+                </div>
+            </div>
+            <span class="kpi-value" id="kpi-completed">—</span>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-left">
+                <div class="kpi-icon blue">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                </div>
+                <div class="kpi-label-group">
+                    <span class="kpi-label">My Projects</span>
+                    <span class="kpi-change neutral" id="kpi-projects-sub">Loading...</span>
+                </div>
+            </div>
+            <span class="kpi-value" id="kpi-projects">—</span>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-left">
+                <div class="kpi-icon orange">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                </div>
+                <div class="kpi-label-group">
+                    <span class="kpi-label">Planning</span>
+                    <span class="kpi-change neutral" id="kpi-planning-sub">Loading...</span>
+                </div>
+            </div>
+            <span class="kpi-value" id="kpi-planning">—</span>
+        </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <div class="dashboard-grid">
+        <!-- My Projects -->
+        <section class="dashboard-section my-projects" style="grid-column: 1 / -1;">
+            <div class="section-header">
+                <h2 class="section-title">My Assigned Projects</h2>
+                <a href="@Url.Action("Projects", "Web")" class="view-all-link">
+                    View all
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+            </div>
+            <div class="projects-compact-list" id="my-projects-list">
+                <div style="text-align:center;padding:32px;color:var(--text-secondary);">Loading your projects...</div>
+            </div>
+        </section>
+    </div>
+</div>
+
+@section PageScripts {
+<script>
+(function() {
+    'use strict';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadTMStats();
+        loadMyProjects();
+    });
+
+    async function loadTMStats() {
+        try {
+            const res = await fetch('/api/projects/stats', { credentials: 'same-origin' });
+            const result = await res.json();
+            if (result.success) {
+                const d = result.data;
+                document.getElementById('kpi-projects').textContent = d.totalProjects;
+                document.getElementById('kpi-projects-sub').textContent = 'Assigned to you';
+                document.getElementById('kpi-active').textContent = d.activeProjects;
+                document.getElementById('kpi-active-sub').textContent = 'In progress';
+                document.getElementById('kpi-completed').textContent = d.completedProjects;
+                document.getElementById('kpi-completed-sub').textContent = 'Done';
+                document.getElementById('kpi-planning').textContent = d.planningProjects;
+                document.getElementById('kpi-planning-sub').textContent = 'Upcoming';
+            }
+        } catch (e) { console.error('Error loading stats:', e); }
+    }
+
+    async function loadMyProjects() {
+        try {
+            const res = await fetch('/api/projects?page=1&pageSize=10', { credentials: 'same-origin' });
+            const result = await res.json();
+            if (result.success && result.data.length > 0) {
+                document.getElementById('my-projects-list').innerHTML = result.data.map(p => `
+                    <div class="project-compact-card" style="cursor:pointer;" onclick="window.location.href='@Url.Action("Projects", "Web")'">
+                        <div class="project-info">
+                            <h3 class="project-name">${esc(p.projectName)}</h3>
+                        </div>
+                        <div class="project-stats">
+                            <div class="stat">
+                                <span class="stat-value"><span class="badge badge-${getStatusClass(p.status)}" style="font-size:0.7rem;">${esc(p.status)}</span></span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">${p.progress || 0}%</span>
+                                <span class="stat-label">Progress</span>
+                            </div>
+                        </div>
+                        <div class="project-progress-mini">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${p.progress || 0}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                document.getElementById('my-projects-list').innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-secondary);">No projects assigned to you yet.</div>';
+            }
+        } catch (e) { console.error('Error loading projects:', e); }
+    }
+
+    function getStatusClass(status) {
+        const map = { 'Planning': 'planning', 'In Progress': 'in-progress', 'Review': 'review', 'Completed': 'completed', 'Delayed': 'delayed', 'Archived': 'archived' };
+        return map[status] || 'planning';
+    }
+
+    function esc(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+})();
+</script>
+}

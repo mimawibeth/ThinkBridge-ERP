@@ -16,6 +16,8 @@
         initModals();
         initTabs();
         initSettingsNav();
+        initTopbarDate();
+        initSessionManager();
     });
 
     // ===========================================
@@ -97,22 +99,9 @@
     // Dropdowns (Notifications & User)
     // ===========================================
     function initDropdowns() {
-        // Notification dropdown
+        // Notification dropdown — toggle handled by toggleNotifications() called from onclick
         const notificationBtn = document.querySelector('.notification-btn');
         const notificationDropdown = document.querySelector('.notification-dropdown');
-
-        if (notificationBtn && notificationDropdown) {
-            notificationBtn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                notificationDropdown.classList.toggle('active');
-
-                // Close user dropdown if open
-                const userDropdown = document.querySelector('.user-dropdown');
-                if (userDropdown) {
-                    userDropdown.classList.remove('active');
-                }
-            });
-        }
 
         // User dropdown
         const userDropdownBtn = document.querySelector('.user-dropdown-btn');
@@ -151,7 +140,178 @@
                 e.stopPropagation();
             });
         });
+
+        // Load initial unread count
+        loadUnreadCount();
+        // Poll every 30 seconds
+        setInterval(loadUnreadCount, 30000);
     }
+
+    // ---- Notification Functions (Global) ----
+    let notificationsLoaded = false;
+
+    function getNotifLink(notifType) {
+        const role = (document.getElementById('topbar-user-role')?.value || '').toLowerCase();
+        const taskPage = (role === 'teammember') ? '/Web/MyTasks' : '/Web/Tasks';
+        const map = {
+            'task': taskPage,
+            'task_assigned': taskPage,
+            'task_status': taskPage,
+            'mention': taskPage,
+            'lifecycle': '/Web/ProductLifecycle',
+            'ArticleApproved': '/Web/KnowledgeBase',
+            'ArticleRejected': '/Web/KnowledgeBase',
+            'ArticleRevision': '/Web/KnowledgeBase',
+            'ArticleComment': '/Web/KnowledgeBase',
+            'ArticlePending': '/Web/KnowledgeBase',
+            'post': '/Web/Activity',
+            'comment': '/Web/Activity',
+            'Calendar': '/Web/Calendar'
+        };
+        return map[notifType] || null;
+    }
+
+    window.toggleNotifications = function (e) {
+        if (e) e.stopPropagation();
+        const dropdown = document.getElementById('notification-dropdown');
+        const isOpen = dropdown.classList.contains('active');
+
+        // Close user dropdown
+        const userDropdown = document.querySelector('.user-dropdown');
+        if (userDropdown) userDropdown.classList.remove('active');
+
+        if (isOpen) {
+            dropdown.classList.remove('active');
+        } else {
+            dropdown.classList.add('active');
+            loadNotifications();
+        }
+    };
+
+    async function loadUnreadCount() {
+        try {
+            const res = await fetch('/api/notifications/unread-count');
+            const json = await res.json();
+            if (json.success) {
+                const dot = document.getElementById('notification-dot');
+                if (dot) {
+                    dot.style.display = json.data > 0 ? '' : 'none';
+                }
+            }
+        } catch (e) { /* silent */ }
+    }
+
+    async function loadNotifications() {
+        try {
+            const res = await fetch('/api/notifications?pageSize=15');
+            const json = await res.json();
+            if (!json.success) return;
+
+            const list = document.getElementById('notification-list');
+            const notifications = json.data || [];
+
+            if (notifications.length === 0) {
+                list.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:0.82rem;">No notifications yet.</div>';
+                return;
+            }
+
+            list.innerHTML = notifications.map(n => {
+                const iconType = getNotifIconType(n.notifType);
+                const timeAgo = formatNotifTime(n.createdAt);
+                return `
+                    <div class="notification-item ${n.isRead ? '' : 'unread'}" data-notif-id="${n.notificationID}" data-notif-type="${n.notifType}" onclick="handleNotificationClick(${n.notificationID}, this)">
+                        <div class="notification-icon ${iconType.cssClass}">
+                            ${iconType.svg}
+                        </div>
+                        <div class="notification-content">
+                            <p>${n.message}</p>
+                            <span class="notification-time">${timeAgo}</span>
+                        </div>
+                        <button class="notif-delete-btn" onclick="event.stopPropagation(); deleteNotification(${n.notificationID}, this)" title="Delete">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>`;
+            }).join('');
+
+            notificationsLoaded = true;
+        } catch (e) { console.error('Failed to load notifications', e); }
+    }
+
+    function getNotifIconType(type) {
+        const types = {
+            'mention': { cssClass: 'mention', svg: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"></circle><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"></path></svg>' },
+            'task_assigned': { cssClass: 'task', svg: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>' },
+            'task_status': { cssClass: 'task', svg: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path></svg>' },
+            'product': { cssClass: 'lifecycle', svg: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>' },
+        };
+        return types[type] || { cssClass: 'task', svg: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path></svg>' };
+    }
+
+    function formatNotifTime(dateStr) {
+        const seconds = Math.floor((new Date() - new Date(dateStr)) / 1000);
+        if (seconds < 60) return 'Just now';
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes} min ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        const days = Math.floor(hours / 24);
+        if (days < 7) return `${days}d ago`;
+        return new Date(dateStr).toLocaleDateString();
+    }
+
+    window.handleNotificationClick = async function (notifId, el) {
+        // Mark as read
+        if (el.classList.contains('unread')) {
+            try {
+                await fetch(`/api/notifications/${notifId}/read`, { method: 'PATCH' });
+                el.classList.remove('unread');
+                loadUnreadCount();
+            } catch (e) { /* silent */ }
+        }
+        // Navigate to the source page
+        const notifType = el.dataset.notifType || '';
+        const link = getNotifLink(notifType);
+        if (link) {
+            window.location.href = link;
+        }
+    };
+
+    window.markAllNotificationsRead = async function (e) {
+        if (e) e.preventDefault();
+        try {
+            const res = await fetch('/api/notifications/read-all', { method: 'PATCH' });
+            const json = await res.json();
+            if (json.success) {
+                document.querySelectorAll('.notification-item.unread').forEach(el => el.classList.remove('unread'));
+                loadUnreadCount();
+            }
+        } catch (e) { console.error('Failed to mark all as read', e); }
+    };
+
+    window.deleteNotification = async function (notifId, btn) {
+        try {
+            const res = await fetch(`/api/notifications/${notifId}`, { method: 'DELETE' });
+            const json = await res.json();
+            if (json.success) {
+                const item = btn.closest('.notification-item');
+                if (item) {
+                    item.style.opacity = '0';
+                    item.style.height = '0';
+                    item.style.overflow = 'hidden';
+                    item.style.transition = 'all 0.2s ease';
+                    setTimeout(() => {
+                        item.remove();
+                        loadUnreadCount();
+                        // Check if list is empty
+                        const list = document.getElementById('notification-list');
+                        if (!list.querySelector('.notification-item')) {
+                            list.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:0.82rem;">No notifications yet.</div>';
+                        }
+                    }, 200);
+                }
+            }
+        } catch (e) { console.error('Failed to delete notification', e); }
+    };
 
     // ===========================================
     // Modal Management
@@ -315,6 +475,29 @@
     };
 
     // ===========================================
+    // Topbar Date
+    // ===========================================
+    function initTopbarDate() {
+        var dateEl = document.getElementById('topbar-date');
+        if (!dateEl) return;
+
+        function updateDate() {
+            var now = new Date();
+            var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            dateEl.textContent = now.toLocaleDateString(undefined, options);
+        }
+
+        updateDate();
+        // Update at midnight
+        var now = new Date();
+        var msUntilMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now;
+        setTimeout(function () {
+            updateDate();
+            setInterval(updateDate, 86400000);
+        }, msUntilMidnight);
+    }
+
+    // ===========================================
     // Toast Notifications
     // ===========================================
     window.showToast = function (message, type) {
@@ -354,6 +537,148 @@
         if (input) {
             input.type = input.type === 'password' ? 'text' : 'password';
         }
+    };
+
+    // ===========================================
+    // Session Management & Security
+    // ===========================================
+    function initSessionManager() {
+        // Only run on authenticated pages (pages with sidebar = logged in)
+        const isAuthPage = !!document.querySelector('.sidebar');
+        if (!isAuthPage) return;
+
+        const INACTIVITY_LIMIT = 20 * 60 * 1000; // 20 minutes in ms
+        const WARNING_BEFORE = 2 * 60 * 1000;     // Show warning 2 min before expiry
+        let inactivityTimer = null;
+        let warningTimer = null;
+        let warningToast = null;
+
+        function resetTimers() {
+            clearTimeout(inactivityTimer);
+            clearTimeout(warningTimer);
+            dismissWarning();
+
+            // Warning toast at 18 minutes
+            warningTimer = setTimeout(function () {
+                showSessionWarning();
+            }, INACTIVITY_LIMIT - WARNING_BEFORE);
+
+            // Auto-logout at 20 minutes of inactivity
+            inactivityTimer = setTimeout(function () {
+                performLogout('Your session has expired due to inactivity.');
+            }, INACTIVITY_LIMIT);
+        }
+
+        function showSessionWarning() {
+            if (warningToast) return;
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container';
+                toastContainer.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999;';
+                document.body.appendChild(toastContainer);
+            }
+            warningToast = document.createElement('div');
+            warningToast.className = 'toast toast-warning';
+            warningToast.style.cssText = 'background: var(--surface); padding: 16px 24px; border-radius: 8px; box-shadow: var(--shadow-lg); margin-bottom: 10px; border-left: 4px solid var(--warning);';
+            warningToast.textContent = 'Your session will expire in 2 minutes due to inactivity.';
+            toastContainer.appendChild(warningToast);
+        }
+
+        function dismissWarning() {
+            if (warningToast) {
+                warningToast.remove();
+                warningToast = null;
+            }
+        }
+
+        function performLogout(message) {
+            // Clear all client-side storage
+            sessionStorage.clear();
+            localStorage.removeItem('sidebarCollapsed');
+
+            // Server-side sign out via GET
+            window.location.href = '/Auth/Logout';
+        }
+
+        // Track user activity (mouse, keyboard, scroll, touch)
+        var activityEvents = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'];
+        var throttled = false;
+        activityEvents.forEach(function (evt) {
+            document.addEventListener(evt, function () {
+                if (!throttled) {
+                    throttled = true;
+                    resetTimers();
+                    setTimeout(function () { throttled = false; }, 5000); // Throttle to every 5s
+                }
+            }, { passive: true });
+        });
+
+        // Start timers
+        resetTimers();
+
+        // Handle tab/browser close: clear session storage
+        window.addEventListener('beforeunload', function () {
+            // Mark that we are navigating away (page transitions should not clear)
+            sessionStorage.setItem('_tb_navigating', '1');
+        });
+
+        // On page load, check if this is a fresh tab open (not a navigation)
+        // If _tb_navigating flag was NOT set, it means fresh tab → session likely expired
+        if (!sessionStorage.getItem('_tb_navigating')) {
+            // Fresh tab/browser open - server cookie will handle auth
+            // Just ensure sessionStorage is clean for security
+        }
+        // Always remove the navigation flag on load so next close is treated properly
+        sessionStorage.removeItem('_tb_navigating');
+
+        // Intercept fetch to inject CSRF token and handle 401 redirects
+        var originalFetch = window.fetch;
+        window.fetch = function (url, options) {
+            options = options || {};
+            var method = (options.method || 'GET').toUpperCase();
+            if (method !== 'GET' && method !== 'HEAD') {
+                var token = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (token) {
+                    options.headers = options.headers || {};
+                    if (!options.headers['RequestVerificationToken']) {
+                        options.headers['RequestVerificationToken'] = token.value;
+                    }
+                }
+            }
+            return originalFetch.call(this, url, options).then(function (response) {
+                if (response.status === 401) {
+                    sessionStorage.clear();
+                    window.location.href = '/Auth/Login';
+                }
+                return response;
+            });
+        };
+    }
+
+    // Global logout function (used by logout buttons/links)
+    window.performSecureLogout = async function () {
+        try {
+            // Clear all client-side storage
+            sessionStorage.clear();
+            localStorage.removeItem('sidebarCollapsed');
+
+            // Call server logout
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            if (token) {
+                await fetch('/Auth/Logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    credentials: 'same-origin'
+                });
+            }
+        } catch (e) {
+            // Ignore errors
+        }
+        window.location.href = '/Auth/Login';
     };
 
 })();

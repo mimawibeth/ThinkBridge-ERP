@@ -2,6 +2,42 @@
    ThinkBridge ERP - Login Page Styles
    ========================================== */
 
+.back-to-home-btn {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 1000;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    background: rgba(255, 255, 255, 0.6);
+    color: rgba(100, 116, 139, 0.7);
+    border: 1px solid rgba(229, 232, 235, 0.4);
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-decoration: none;
+    backdrop-filter: blur(8px);
+    box-shadow: none;
+    transition: all 0.2s ease;
+    opacity: 0.7;
+}
+
+.back-to-home-btn:hover {
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--text-primary, #1a1a2e);
+    opacity: 1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transform: translateX(-2px);
+}
+
+.back-to-home-btn svg {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+}
+
 .login-page {
     margin: 0;
     padding: 0;
@@ -16,9 +52,9 @@
 
 /* Left Side - Branding */
 .login-branding {
-    flex: 1;
+    flex: 1.6;
     background: linear-gradient(135deg, #0B3D4C 0%, #0B3D4C 50%, #1A6B8A 100%);
-    padding: 60px;
+    padding: 60px 80px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -126,14 +162,15 @@
 
 /* Right Side - Form Container */
 .login-form-container {
-    width: 50%;
-    min-width: 480px;
+    width: 800px;
+    min-width: 800px;
+    max-width: 420px;
     background: var(--surface);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 60px;
+    padding: 40px;
 }
 
 .login-form-wrapper {
@@ -141,14 +178,14 @@
     max-width: 500px;
     background: var(--surface);
     border-radius: 16px;
-    padding: 40px;
+    padding: 32px;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
     border: 1px solid var(--border);
 }
 
 .login-header {
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
 }
 
 .login-header h2 {
@@ -226,6 +263,58 @@
     color: var(--text-primary);
 }
 
+/* Password Strength Checklist */
+.password-checklist {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0 0;
+    font-size: 0.82rem;
+}
+
+.password-checklist li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 0;
+    color: var(--text-muted);
+    transition: color 0.2s ease;
+}
+
+.password-checklist li .check-icon-pw {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--border, #E5E8EB);
+    position: relative;
+    transition: background 0.2s ease;
+}
+
+.password-checklist li.valid {
+    color: var(--success, #10B981);
+}
+
+.password-checklist li.valid .check-icon-pw {
+    background: var(--success, #10B981);
+}
+
+.password-checklist li.valid .check-icon-pw::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 5.5px;
+    width: 4px;
+    height: 7px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.password-checklist li.invalid {
+    color: var(--text-muted);
+}
+
 /* Form Options Row */
 .form-options {
     display: flex;
@@ -297,7 +386,7 @@
 }
 
 .login-footer p {
-    font-size: 0.875rem;
+    font-size: 0.775rem;
     color: var(--text-secondary);
 }
 
@@ -380,6 +469,8 @@
     .login-form-container {
         width: 100%;
         min-width: unset;
+        max-width: unset;
+        padding: 40px;
     }
 }
 
