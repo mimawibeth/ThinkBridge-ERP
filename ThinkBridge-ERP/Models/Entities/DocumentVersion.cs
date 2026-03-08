@@ -17,7 +17,6 @@ public class DocumentVersion
     public string VersionLabel { get; set; } = string.Empty;
 
     [Required]
-    [StringLength(500)]
     public string FilePath { get; set; } = string.Empty;
 
     public long? FileSize { get; set; }

@@ -36,7 +36,41 @@
                         <div class="action-filter-item" data-value="Create">Created</div>
                         <div class="action-filter-item" data-value="Update">Updated</div>
                         <div class="action-filter-item" data-value="Delete">Deleted</div>
-                        <div class="action-filter-item" data-value="Login">Login</div>
+                        <div class="action-filter-item" data-value="Archive">Archived</div>
+                        <div class="action-filter-item" data-value="Restore">Restored</div>
+                        <div class="action-filter-item" data-value="Advance">Advanced Stage</div>
+                        <div class="action-filter-item" data-value="Approve">Approved</div>
+                        <div class="action-filter-item" data-value="Reject">Rejected</div>
+                        <div class="action-filter-item" data-value="Reset">Reset Password</div>
+                        <div class="action-filter-item" data-value="Activate">Activated</div>
+                        <div class="action-filter-item" data-value="Deactivate">Deactivated</div>
+                    </div>
+                </div>
+                <div class="filter-dropdown" id="entity-filter">
+                    <button class="filter-btn" id="entity-filter-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        <span class="filter-text">All Resources</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div class="filter-dropdown-menu">
+                        <div class="entity-filter-item" data-value="All">All Resources</div>
+                        <div class="entity-filter-item" data-value="Project">Projects</div>
+                        <div class="entity-filter-item" data-value="Task">Tasks</div>
+                        <div class="entity-filter-item" data-value="Product">Products</div>
+                        <div class="entity-filter-item" data-value="User">Users</div>
+                        <div class="entity-filter-item" data-value="Document">Documents</div>
+                        <div class="entity-filter-item" data-value="CalendarEvent">Calendar</div>
+                        <div class="entity-filter-item" data-value="Post">Discussions</div>
+                        <div class="entity-filter-item" data-value="TaskComment">Task Comments</div>
                     </div>
                 </div>
                 <div class="filter-dropdown" id="date-filter">
@@ -48,7 +82,7 @@
                             <line x1="8" y1="2" x2="8" y2="6"></line>
                             <line x1="3" y1="10" x2="21" y2="10"></line>
                         </svg>
-                        <span class="filter-text">All Time</span>
+                        <span class="filter-text">Today</span>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                              stroke-width="2">
                             <polyline points="6 9 12 15 18 9"></polyline>
@@ -62,6 +96,13 @@
                         <div class="date-filter-item" data-value="90days">Last 90 Days</div>
                     </div>
                 </div>
+                <button class="filter-btn" id="refresh-btn" title="Refresh">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <polyline points="1 20 1 14 7 14"></polyline>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
@@ -74,28 +115,28 @@
                     <th>Timestamp</th>
                     <th>User</th>
                     <th>Action</th>
-                    <th>Resource</th>
                     <th>Details</th>
                     <th>IP Address</th>
                 </tr>
             </thead>
             <tbody id="audit-log-body">
                 <tr>
-                    <td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">Loading audit logs...</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Pagination -->
-    <div class="pagination">
-        <div class="pagination-info" id="pagination-info">
-            Showing <strong>0</strong> entries
+                    <td colspan="5" style="text-align:center; padding:2rem; color:var(--text-muted);">Loading audit
+                        logs...</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        <div class="pagination-controls" id="pagination-controls"></div>
-    </div>
-</div>
 
-@section PageScripts {
-    <script src="~/js/pages/audit-log.js" asp-append-version="true"></script>
-}
+        <!-- Pagination -->
+        <div class="pagination">
+            <div class="pagination-info" id="pagination-info">
+                Showing <strong>0</strong> entries
+            </div>
+            <div class="pagination-controls" id="pagination-controls"></div>
+        </div>
+    </div>
+
+    @section PageScripts {
+        <script src="~/js/pages/audit-log.js" asp-append-version="true"></script>
+    }

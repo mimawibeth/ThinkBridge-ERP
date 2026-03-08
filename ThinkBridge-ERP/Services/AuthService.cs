@@ -39,6 +39,25 @@ public class AuthService : IAuthService
             // Check if user is active
             if (user.Status != "Active")
             {
+                // Check if user's company subscription expired past grace period
+                if (user.CompanyID.HasValue)
+                {
+                    var subscription = await _context.Subscriptions
+                        .Where(s => s.CompanyID == user.CompanyID.Value)
+                        .OrderByDescending(s => s.StartDate)
+                        .FirstOrDefaultAsync();
+
+                    if (subscription != null && subscription.Status == "Expired")
+                    {
+                        _logger.LogWarning("Login blocked: User {Email} - subscription expired past grace period", email);
+                        return new AuthResult
+                        {
+                            Success = false,
+                            ErrorMessage = "Your subscription has expired and the grace period has ended. Please contact your administrator to renew."
+                        };
+                    }
+                }
+
                 _logger.LogWarning("Login attempt failed: User {Email} is not active (Status: {Status})", email, user.Status);
                 return new AuthResult
                 {
@@ -47,15 +66,50 @@ public class AuthService : IAuthService
                 };
             }
 
-            // Verify password using BCrypt
-            if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
+            // Check if account is locked out
+            if (user.LockoutEnd.HasValue && user.LockoutEnd.Value > DateTime.UtcNow)
             {
-                _logger.LogWarning("Login attempt failed: Invalid password for user {Email}", email);
+                var remaining = (int)Math.Ceiling((user.LockoutEnd.Value - DateTime.UtcNow).TotalSeconds);
+                _logger.LogWarning("Login attempt failed: User {Email} is locked out for {Seconds}s", email, remaining);
                 return new AuthResult
                 {
                     Success = false,
-                    ErrorMessage = "Invalid email or password."
+                    ErrorMessage = "Account is temporarily locked.",
+                    LockoutSeconds = remaining
                 };
+            }
+
+            // Verify password using BCrypt
+            if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
+            {
+                user.FailedLoginAttempts++;
+                if (user.FailedLoginAttempts >= 3)
+                {
+                    user.LockoutEnd = DateTime.UtcNow.AddMinutes(1);
+                    _logger.LogWarning("User {Email} locked out after {Attempts} failed attempts", email, user.FailedLoginAttempts);
+                }
+                await _context.SaveChangesAsync();
+
+                _logger.LogWarning("Login attempt failed: Invalid password for user {Email} (attempt {Attempts})", email, user.FailedLoginAttempts);
+                var lockoutSecs = user.FailedLoginAttempts >= 3 && user.LockoutEnd.HasValue
+                    ? (int)Math.Ceiling((user.LockoutEnd.Value - DateTime.UtcNow).TotalSeconds)
+                    : 0;
+                return new AuthResult
+                {
+                    Success = false,
+                    ErrorMessage = user.FailedLoginAttempts >= 3
+                        ? "Account is temporarily locked due to multiple failed attempts."
+                        : "Invalid email or password.",
+                    LockoutSeconds = lockoutSecs
+                };
+            }
+
+            // Reset failed attempts on successful login
+            if (user.FailedLoginAttempts > 0)
+            {
+                user.FailedLoginAttempts = 0;
+                user.LockoutEnd = null;
+                await _context.SaveChangesAsync();
             }
 
             // Get user roles

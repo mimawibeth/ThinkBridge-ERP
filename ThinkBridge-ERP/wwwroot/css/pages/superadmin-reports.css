@@ -32,6 +32,12 @@
     flex-wrap: wrap;
 }
 
+.filter-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
 .date-filter {
     display: flex;
     align-items: center;

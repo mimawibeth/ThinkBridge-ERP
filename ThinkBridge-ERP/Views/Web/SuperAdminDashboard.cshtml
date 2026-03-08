@@ -54,16 +54,18 @@
             <div class="kpi-left">
                 <div class="kpi-icon orange">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                     </svg>
                 </div>
                 <div class="kpi-label-group">
-                    <span class="kpi-label">Pending Payments</span>
-                    <span class="kpi-change warning" id="kpi-payments-sub">Loading...</span>
+                    <span class="kpi-label">Total Users</span>
+                    <span class="kpi-change positive" id="kpi-users-sub">Loading...</span>
                 </div>
             </div>
-            <span class="kpi-value" id="kpi-payments">&mdash;</span>
+            <span class="kpi-value" id="kpi-users">&mdash;</span>
         </div>
         <div class="kpi-card">
             <div class="kpi-left">
@@ -155,7 +157,9 @@
 
         document.getElementById('kpi-subs').textContent = data.activeSubscriptions;
 
-        document.getElementById('kpi-payments').textContent = data.pendingPayments;
+        document.getElementById('kpi-users').textContent = data.totalUsers;
+        document.getElementById('kpi-users-sub').textContent = `Platform-wide`;
+        document.getElementById('kpi-users-sub').className = 'kpi-change positive';
 
         document.getElementById('kpi-revenue').textContent = formatCurrency(data.monthlyRevenue);
         }

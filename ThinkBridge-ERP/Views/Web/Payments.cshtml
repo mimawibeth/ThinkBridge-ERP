@@ -16,13 +16,7 @@
                 <span class="stat-label">Total Revenue (This Month)</span>
                 <span class="stat-value" id="stat-revenue">₱0</span>
             </div>
-            <div class="stat-trend positive" id="stat-trend">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                    <polyline points="17 6 23 6 23 12"></polyline>
-                </svg>
-                <span id="stat-trend-text">--</span>
-            </div>
+            <span class="stat-count" id="stat-completed-count">0 payments</span>
         </div>
         <div class="stat-card">
             <div class="stat-content">
@@ -43,7 +37,7 @@
                 <span class="stat-label">Collected (This Month)</span>
                 <span class="stat-value success" id="stat-collected">₱0</span>
             </div>
-            <span class="stat-count" id="stat-collected-count">0 payments</span>
+            <span class="stat-count" id="stat-collected-total">0 payments</span>
         </div>
     </section>
 
@@ -68,12 +62,12 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Invoice</th>
+                        <th>Invoice #</th>
                         <th>Company</th>
                         <th>Amount</th>
-                        <th>Provider</th>
+                        <th>Method</th>
                         <th>Status</th>
-                        <th>Date</th>
+                        <th>Date (PHT)</th>
                     </tr>
                 </thead>
                 <tbody id="payments-tbody">
@@ -110,215 +104,221 @@
 
 @section PageScripts {
     <script>
-                                document.addEventListener('DOMContentLoaded', function () {
-                                    let currentPage = 1;
-                                    let currentStatus = '';
-                                    let currentSearch = '';
-                                    let filterYear = null;
-                                    let filterMonth = null;
+            document.addEventListener('DOMContentLoaded', function () {
+                let currentPage = 1;
+                let currentStatus = '';
+                let currentSearch = '';
+                let filterYear = null;
+                let filterMonth = null;
 
-                                    // Set default date filter to current month
-                                    const dateFilter = document.getElementById('date-filter');
-                                    const now = new Date();
-                                    dateFilter.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                // Set default date filter to current month
+                const dateFilter = document.getElementById('date-filter');
+                const now = new Date();
+                dateFilter.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-                                    loadPaymentStats();
-                                    loadPayments();
+                loadPaymentStats();
+                loadPayments();
 
-                                    // Filter tab clicks
-                                    document.querySelectorAll('.filter-tab').forEach(tab => {
-                                        tab.addEventListener('click', function () {
-                                            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-                                            this.classList.add('active');
-                                            currentStatus = this.dataset.status || '';
-                                            currentPage = 1;
-                                            loadPayments();
-                                        });
-                                    });
+                // Filter tab clicks
+                document.querySelectorAll('.filter-tab').forEach(tab => {
+                    tab.addEventListener('click', function () {
+                        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                        this.classList.add('active');
+                        currentStatus = this.dataset.status || '';
+                        currentPage = 1;
+                        loadPayments();
+                    });
+                });
 
-                                    // Search input
-                                    const searchInput = document.getElementById('payment-search');
-                                    if (searchInput) {
-                                        let timeout;
-                                        searchInput.addEventListener('input', function () {
-                                            clearTimeout(timeout);
-                                            timeout = setTimeout(() => {
-                                                currentSearch = this.value;
-                                                currentPage = 1;
-                                                loadPayments();
-                                            }, 300);
-                                        });
-                                    }
+                // Search input
+                const searchInput = document.getElementById('payment-search');
+                if (searchInput) {
+                    let timeout;
+                    searchInput.addEventListener('input', function () {
+                        clearTimeout(timeout);
+                        timeout = setTimeout(() => {
+                            currentSearch = this.value;
+                            currentPage = 1;
+                            loadPayments();
+                        }, 300);
+                    });
+                }
 
-                                    // Date filter
-                                    dateFilter.addEventListener('change', function () {
-                                        if (this.value) {
-                                            const parts = this.value.split('-');
-                                            filterYear = parseInt(parts[0]);
-                                            filterMonth = parseInt(parts[1]);
-                                        } else {
-                                            filterYear = null;
-                                            filterMonth = null;
-                                        }
-                                        currentPage = 1;
-                                        loadPayments();
-                                        loadPaymentStats();
-                                    });
+                // Date filter
+                dateFilter.addEventListener('change', function () {
+                    if (this.value) {
+                        const parts = this.value.split('-');
+                        filterYear = parseInt(parts[0]);
+                        filterMonth = parseInt(parts[1]);
+                    } else {
+                        filterYear = null;
+                        filterMonth = null;
+                    }
+                    currentPage = 1;
+                    loadPayments();
+                    loadPaymentStats();
+                });
 
-                                    async function loadPaymentStats() {
-                                        const params = new URLSearchParams();
-                                        if (filterYear) params.append('year', filterYear);
-                                        if (filterMonth) params.append('month', filterMonth);
+                async function loadPaymentStats() {
+                    const params = new URLSearchParams();
+                    if (filterYear) params.append('year', filterYear);
+                    if (filterMonth) params.append('month', filterMonth);
 
-                                        try {
-                                            const res = await fetch(`/api/superadmin/payments/stats?${params}`, { credentials: 'same-origin' });
-                                            const result = await res.json();
-                                            if (result.success) {
-                                                const d = result.data;
-                                                document.getElementById('stat-revenue').textContent = '₱' + formatNum(d.totalRevenue);
-                                                document.getElementById('stat-pending').textContent = '₱' + formatNum(d.pendingAmount);
-                                                document.getElementById('stat-overdue').textContent = '₱' + formatNum(d.overdueAmount);
-                                                document.getElementById('stat-collected').textContent = '₱' + formatNum(d.collectedAmount);
-                                                document.getElementById('stat-pending-count').textContent = d.pendingCount + ' invoices';
-                                                document.getElementById('stat-overdue-count').textContent = d.overdueCount + ' invoices';
-                                                document.getElementById('stat-collected-count').textContent = d.completedCount + ' payments';
-                                            }
-                                        } catch (e) { console.error('Error loading payment stats:', e); }
-                                    }
+                    try {
+                        const res = await fetch(`/api/superadmin/payments/stats?${params}`, { credentials: 'same-origin' });
+                        const result = await res.json();
+                        if (result.success) {
+                            const d = result.data;
+                            document.getElementById('stat-revenue').textContent = '₱' + formatNum(d.totalRevenue);
+                            document.getElementById('stat-pending').textContent = '₱' + formatNum(d.pendingAmount);
+                            document.getElementById('stat-overdue').textContent = '₱' + formatNum(d.overdueAmount);
+                            document.getElementById('stat-collected').textContent = '₱' + formatNum(d.collectedAmount);
+                            document.getElementById('stat-completed-count').textContent = d.completedCount + ' payments';
+                            document.getElementById('stat-pending-count').textContent = d.pendingCount + ' invoices';
+                            document.getElementById('stat-overdue-count').textContent = d.overdueCount + ' invoices';
+                            document.getElementById('stat-collected-total').textContent = d.completedCount + ' payments';
+                        }
+                    } catch (e) { console.error('Error loading payment stats:', e); }
+                }
 
-                                    async function loadPayments() {
-                                        const params = new URLSearchParams({ page: currentPage, pageSize: 10 });
-                                        if (currentSearch) params.append('search', currentSearch);
-                                        if (currentStatus) params.append('status', currentStatus);
-                                        if (filterYear) params.append('year', filterYear);
-                                        if (filterMonth) params.append('month', filterMonth);
+                async function loadPayments() {
+                    const params = new URLSearchParams({ page: currentPage, pageSize: 10 });
+                    if (currentSearch) params.append('search', currentSearch);
+                    if (currentStatus) params.append('status', currentStatus);
+                    if (filterYear) params.append('year', filterYear);
+                    if (filterMonth) params.append('month', filterMonth);
 
-                                        try {
-                                            const res = await fetch(`/api/superadmin/payments?${params}`, { credentials: 'same-origin' });
-                                            const result = await res.json();
-                                            if (result.success) {
-                                                renderPayments(result.data);
-                                                renderPagination(result.pagination);
-                                            }
-                                        } catch (e) { console.error('Error loading payments:', e); }
-                                    }
+                    try {
+                        const res = await fetch(`/api/superadmin/payments?${params}`, { credentials: 'same-origin' });
+                        const result = await res.json();
+                        if (result.success) {
+                            renderPayments(result.data);
+                            renderPagination(result.pagination);
+                        }
+                    } catch (e) { console.error('Error loading payments:', e); }
+                }
 
-                                    function renderPayments(payments) {
-                                        const tbody = document.getElementById('payments-tbody');
-                                        if (!payments || payments.length === 0) {
-                                            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--text-secondary);">No payments found</td></tr>';
-                                            return;
-                                        }
+                function renderPayments(payments) {
+                    const tbody = document.getElementById('payments-tbody');
+                    if (!payments || payments.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:40px; color:var(--text-secondary);">No payments found</td></tr>';
+                        return;
+                    }
 
-                                        tbody.innerHTML = payments.map(p => {
-                                            const statusClass = p.status.toLowerCase();
-                                            const isOverdue = statusClass === 'pending' && p.paidAt === null;
-                                            const initials = getInitials(p.companyName);
+                    tbody.innerHTML = payments.map(p => {
+                        const statusClass = p.status.toLowerCase();
+                        const rowClass = statusClass === 'failed' ? 'failed-row' : (statusClass === 'pending' ? 'overdue-row' : '');
 
-                                            return `
-                                                <tr class="clickable-row ${isOverdue ? 'overdue-row' : ''}" onclick="viewPayment(${p.paymentID})">
-                                                    <td><span class="invoice-id">${esc(p.invoiceNumber || 'N/A')}</span></td>
-                                                    <td>
-                                                        <span class="company-name">${esc(p.companyName)}</span>
-                                                    </td>
-                                                    <td class="amount">₱${formatNum(p.amount)}</td>
-                                                    <td>${esc(p.provider)}${p.paymentMethod ? ' / ' + esc(p.paymentMethod) : ''}</td>
-                                                    <td><span class="status-indicator ${statusClass}">${esc(p.status)}</span></td>
-                                                    <td>${p.paidAt ? formatDate(p.paidAt) : formatDate(p.createdAt)}</td>
-                                                </tr>`;
-                                        }).join('');
-                                    }
+                        return `
+                            <tr class="clickable-row ${rowClass}" onclick="viewPayment(${p.paymentID})">
+                                <td><span class="invoice-id">${esc(p.invoiceNumber || 'N/A')}</span></td>
+                                <td><span class="company-name">${esc(p.companyName)}</span></td>
+                                <td class="amount">₱${formatNum(p.amount)}</td>
+                                <td>${esc(p.paymentMethod || p.provider || 'N/A')}</td>
+                                <td><span class="status-indicator ${statusClass}">${esc(p.status)}</span></td>
+                                <td>${esc(p.paidAt || p.createdAt || '-')}</td>
+                            </tr>`;
+                    }).join('');
+                }
 
-                                    function renderPagination(pagination) {
-                                        const footer = document.getElementById('payments-pagination');
-                                        if (!footer) return;
+                function renderPagination(pagination) {
+                    const footer = document.getElementById('payments-pagination');
+                    if (!footer) return;
 
-                                        if (!pagination || pagination.totalPages <= 1) {
-                                            footer.innerHTML = pagination
-                                                ? `<span class="table-info">Showing ${pagination.totalCount} payment${pagination.totalCount !== 1 ? 's' : ''}</span>`
-                                                : '';
-                                            return;
-                                        }
+                    if (!pagination || pagination.totalPages <= 1) {
+                        footer.innerHTML = pagination
+                            ? `<span class="table-info">Showing ${pagination.totalCount} payment${pagination.totalCount !== 1 ? 's' : ''}</span>`
+                            : '';
+                        return;
+                    }
 
-                                        let pagesHtml = '';
-                                        for (let i = 1; i <= pagination.totalPages; i++) {
-                                            pagesHtml += `<button class="page-btn ${i === pagination.page ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
-                                        }
+                    let pagesHtml = '';
+                    const tp = pagination.totalPages;
+                    const cp = pagination.page;
 
-                                        const start = (pagination.page - 1) * pagination.pageSize + 1;
-                                        const end = Math.min(pagination.page * pagination.pageSize, pagination.totalCount);
-                                        footer.innerHTML = `
-                                            <span class="table-info">Showing ${start}\u2013${end} of ${pagination.totalCount} payments</span>
-                                            <div class="pagination">${pagesHtml}</div>
-                                        `;
-                                    }
+                    if (tp <= 7) {
+                        for (let i = 1; i <= tp; i++) {
+                            pagesHtml += `<button class="page-btn ${i === cp ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+                        }
+                    } else {
+                        pagesHtml += `<button class="page-btn ${1 === cp ? 'active' : ''}" onclick="goToPage(1)">1</button>`;
+                        let startPage = Math.max(2, cp - 1);
+                        let endPage = Math.min(tp - 1, cp + 1);
+                        if (cp <= 3) { startPage = 2; endPage = 4; }
+                        if (cp >= tp - 2) { startPage = tp - 3; endPage = tp - 1; }
+                        if (startPage > 2) pagesHtml += `<span class="page-ellipsis">…</span>`;
+                        for (let i = startPage; i <= endPage; i++) {
+                            pagesHtml += `<button class="page-btn ${i === cp ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+                        }
+                        if (endPage < tp - 1) pagesHtml += `<span class="page-ellipsis">…</span>`;
+                        pagesHtml += `<button class="page-btn ${tp === cp ? 'active' : ''}" onclick="goToPage(${tp})">${tp}</button>`;
+                    }
 
-                                    window.goToPage = function (page) {
-                                        currentPage = page;
-                                        loadPayments();
-                                    };
+                    const start = (cp - 1) * pagination.pageSize + 1;
+                    const end = Math.min(cp * pagination.pageSize, pagination.totalCount);
+                    footer.innerHTML = `
+                        <span class="table-info">Showing ${start}\u2013${end} of ${pagination.totalCount} payments</span>
+                        <div class="pagination">${pagesHtml}</div>
+                    `;
+                }
 
-                                    window.viewPayment = async function (paymentId) {
-                                        const modal = document.getElementById('payment-detail-modal');
-                                        const body = document.getElementById('payment-detail-body');
-                                        body.innerHTML = '<p>Loading...</p>';
-                                        modal.classList.add('active');
+                window.goToPage = function (page) {
+                    currentPage = page;
+                    loadPayments();
+                };
 
-                                        try {
-                                            const res = await fetch(`/api/superadmin/payments/${paymentId}`, { credentials: 'same-origin' });
-                                            const result = await res.json();
-                                            if (result.success) {
-                                                const p = result.data.payment;
-                                                body.innerHTML = `
-                                                    <div style="display:grid; gap:12px;">
-                                                        <div><strong>Company:</strong> ${esc(result.data.companyName)}</div>
-                                                        <div><strong>Plan:</strong> ${esc(result.data.planName)}</div>
-                                                        <div><strong>Invoice:</strong> ${esc(result.data.invoiceNumber || 'N/A')}</div>
-                                                        <hr style="border:none; border-top:1px solid var(--border);">
-                                                        <div><strong>Amount:</strong> ${p.currency} ${formatNum(p.amount)}</div>
-                                                        <div><strong>Provider:</strong> ${esc(p.provider)}</div>
-                                                        <div><strong>Payment Method:</strong> ${esc(p.paymentMethod || 'N/A')}</div>
-                                                        <div><strong>Status:</strong> ${esc(p.status)}</div>
-                                                        <div><strong>Transaction ID:</strong> ${esc(p.externalTransactionID || 'N/A')}</div>
-                                                        <div><strong>Created:</strong> ${p.createdAt}</div>
-                                                        <div><strong>Paid At:</strong> ${p.paidAt || 'N/A'}</div>
-                                                    </div>`;
-                                            } else {
-                                                body.innerHTML = '<p>Error loading payment details.</p>';
-                                            }
-                                        } catch (e) {
-                                            body.innerHTML = '<p>Error loading payment details.</p>';
-                                        }
-                                    };
+                window.viewPayment = async function (paymentId) {
+                    const modal = document.getElementById('payment-detail-modal');
+                    const body = document.getElementById('payment-detail-body');
+                    body.innerHTML = '<p>Loading...</p>';
+                    modal.classList.add('active');
 
-                                    // Close modal on overlay click
-                                    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-                                        overlay.addEventListener('click', function (e) {
-                                            if (e.target === overlay) overlay.classList.remove('active');
-                                        });
-                                    });
+                    try {
+                        const res = await fetch(`/api/superadmin/payments/${paymentId}`, { credentials: 'same-origin' });
+                        const result = await res.json();
+                        if (result.success) {
+                            const p = result.data.payment;
+                            const statusClass = p.status ? p.status.toLowerCase() : '';
+                            body.innerHTML = `
+                                <div style="display:grid; gap:12px;">
+                                    <div><strong>Company:</strong> ${esc(result.data.companyName)}</div>
+                                    <div><strong>Plan:</strong> ${esc(result.data.planName)}</div>
+                                    <div><strong>Invoice:</strong> ${esc(result.data.invoiceNumber || 'N/A')}</div>
+                                    <hr style="border:none; border-top:1px solid var(--border);">
+                                    <div><strong>Amount:</strong> ${esc(p.currency)} ${formatNum(p.amount)}</div>
+                                    <div><strong>Provider:</strong> ${esc(p.provider)}</div>
+                                    <div><strong>Payment Method:</strong> ${esc(p.paymentMethod || 'N/A')}</div>
+                                    <div><strong>Status:</strong> <span class="status-indicator ${statusClass}" style="font-size:0.85rem;">${esc(p.status)}</span></div>
+                                    <div><strong>Transaction ID:</strong> ${esc(p.externalTransactionID || 'N/A')}</div>
+                                    <div><strong>Created (PHT):</strong> ${esc(p.createdAt)}</div>
+                                    <div><strong>Paid At (PHT):</strong> ${esc(p.paidAt || 'N/A')}</div>
+                                </div>`;
+                        } else {
+                            body.innerHTML = '<p>Error loading payment details.</p>';
+                        }
+                    } catch (e) {
+                        body.innerHTML = '<p>Error loading payment details.</p>';
+                    }
+                };
 
-                                    function getInitials(name) {
-                                        if (!name) return '??';
-                                        return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
-                                    }
+                // Close modal on overlay click
+                document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                    overlay.addEventListener('click', function (e) {
+                        if (e.target === overlay) overlay.classList.remove('active');
+                    });
+                });
 
-                                    function esc(text) {
-                                        if (!text) return '';
-                                        const d = document.createElement('div');
-                                        d.textContent = text;
-                                        return d.innerHTML;
-                                    }
+                function esc(text) {
+                    if (!text) return '';
+                    const d = document.createElement('div');
+                    d.textContent = text;
+                    return d.innerHTML;
+                }
 
-                                    function formatNum(n) {
-                                        if (n == null) return '0';
-                                        return Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                                    }
-
-                                    function formatDate(dateStr) {
-                                        if (!dateStr) return '-';
-                                        return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                                    }
-                                });
+                function formatNum(n) {
+                    if (n == null) return '0';
+                    return Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+            });
     </script>
 }

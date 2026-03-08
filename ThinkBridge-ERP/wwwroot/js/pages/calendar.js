@@ -367,8 +367,6 @@
             evts.forEach(evt => {
                 const color = evt.color || '#0B4F6C';
                 const timeStr = `${formatTime(new Date(evt.startDate))} – ${formatTime(new Date(evt.endDate))}`;
-                const priorityClass = `priority-${evt.priority.toLowerCase()}`;
-
                 html += `<div class="list-event-item" onclick="calViewEvent(${evt.eventId})">`;
                 html += `<div class="list-event-color" style="background:${escapeHtml(color)};"></div>`;
                 html += `<div class="list-event-time">${timeStr}</div>`;
@@ -379,11 +377,10 @@
                     html += `<span class="list-event-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>${escapeHtml(evt.projectName)}</span>`;
                 }
                 if (evt.location) {
-                    html += `<span class="list-event-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>${escapeHtml(evt.location)}</span>`;
+                    html += `<span class="list-event-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>${escapeHtml(evt.location)}</span>`;
                 }
                 html += `<span class="list-event-meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>${escapeHtml(evt.creatorName)}</span>`;
                 html += `</div></div>`;
-                html += `<span class="list-event-priority ${priorityClass}">${escapeHtml(evt.priority)}</span>`;
                 html += `</div>`;
             });
             html += `</div>`;
@@ -448,10 +445,10 @@
                 <div class="detail-content"><div class="detail-label">Date & Time</div><div class="detail-value">${timeStr}</div></div>
             </div>`;
 
-            // Priority & Color
+            // Color
             html += `<div class="event-detail-row">
-                <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                <div class="detail-content"><div class="detail-label">Priority</div><div class="detail-value"><span class="list-event-priority ${priorityClass}">${escapeHtml(evt.priority)}</span> <span class="event-color-badge" style="background:${escapeHtml(color)};"></span></div></div>
+                <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle></svg>
+                <div class="detail-content"><div class="detail-label">Color</div><div class="detail-value"><span class="event-color-badge" style="background:${escapeHtml(color)};"></span></div></div>
             </div>`;
 
             // Project
@@ -462,11 +459,12 @@
                 </div>`;
             }
 
-            // Location
+            // Meeting Link
             if (evt.location) {
+                const linkHtml = evt.location.startsWith('http') ? `<a href="${escapeHtml(evt.location)}" target="_blank" rel="noopener noreferrer" style="color:var(--primary); text-decoration:underline;">${escapeHtml(evt.location)}</a>` : escapeHtml(evt.location);
                 html += `<div class="event-detail-row">
-                    <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                    <div class="detail-content"><div class="detail-label">Location</div><div class="detail-value">${escapeHtml(evt.location)}</div></div>
+                    <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                    <div class="detail-content"><div class="detail-label">Meeting Link</div><div class="detail-value">${linkHtml}</div></div>
                 </div>`;
             }
 
@@ -531,7 +529,6 @@
                 document.getElementById('event-title').value = evt.title;
                 document.getElementById('event-description').value = evt.description || '';
                 document.getElementById('event-location').value = evt.location || '';
-                document.getElementById('event-priority').value = evt.priority;
                 document.getElementById('event-project').value = evt.projectId || '';
                 document.getElementById('event-color').value = evt.color || '#0B4F6C';
 
@@ -585,7 +582,7 @@
             endDate: endDate.toISOString(),
             allDay: false,
             location: document.getElementById('event-location').value.trim() || null,
-            priority: document.getElementById('event-priority').value,
+            priority: 'Medium',
             color: document.getElementById('event-color').value || null,
             projectId: document.getElementById('event-project').value ? parseInt(document.getElementById('event-project').value, 10) : null
         };
@@ -654,14 +651,19 @@
         return div.innerHTML;
     }
 
+    function toUtcDate(dateStr) {
+        if (!dateStr) return new Date();
+        const s = String(dateStr);
+        return new Date(s.endsWith('Z') || s.includes('+') ? s : s + 'Z');
+    }
+
     function formatTime(date) {
-        return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true });
+        return date.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour: 'numeric', minute: '2-digit', hour12: true });
     }
 
     function formatDateRelative(dateStr) {
-        const d = new Date(dateStr);
-        const now = new Date();
-        const diffMs = now - d;
+        const d = toUtcDate(dateStr);
+        const diffMs = Date.now() - d.getTime();
         const diffMins = Math.floor(diffMs / 60000);
         if (diffMins < 1) return 'just now';
         if (diffMins < 60) return `${diffMins}m ago`;
@@ -669,7 +671,7 @@
         if (diffHrs < 24) return `${diffHrs}h ago`;
         const diffDays = Math.floor(diffHrs / 24);
         if (diffDays < 7) return `${diffDays}d ago`;
-        return d.toLocaleDateString();
+        return d.toLocaleDateString('en-US', { timeZone: 'Asia/Manila' });
     }
 
     function toLocalDatetimeString(date) {

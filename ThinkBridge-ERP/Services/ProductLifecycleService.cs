@@ -176,6 +176,18 @@ public class ProductLifecycleService : IProductLifecycleService
                 await _context.SaveChangesAsync();
             }
 
+            // Audit log
+            _context.AuditLogs.Add(new AuditLog
+            {
+                CompanyID = companyId,
+                UserID = userId,
+                Action = $"Created product '{request.ProductName}'",
+                EntityName = "Product",
+                EntityID = product.ProductID,
+                CreatedAt = DateTime.UtcNow
+            });
+            await _context.SaveChangesAsync();
+
             _logger.LogInformation("Product '{ProductName}' created by user {UserId}", request.ProductName, userId);
             return new CreateProductResult { Success = true, ProductId = product.ProductID };
         }
@@ -200,6 +212,17 @@ public class ProductLifecycleService : IProductLifecycleService
             if (request.ProductCode != null) product.ProductCode = request.ProductCode;
             if (request.Description != null) product.Description = request.Description;
             if (request.ProjectID.HasValue) product.ProjectID = request.ProjectID.Value == 0 ? null : request.ProjectID.Value;
+
+            // Audit log
+            _context.AuditLogs.Add(new AuditLog
+            {
+                CompanyID = companyId,
+                UserID = userId,
+                Action = $"Updated product '{product.ProductName}'",
+                EntityName = "Product",
+                EntityID = productId,
+                CreatedAt = DateTime.UtcNow
+            });
 
             await _context.SaveChangesAsync();
             return new ServiceResult { Success = true };
@@ -236,6 +259,17 @@ public class ProductLifecycleService : IProductLifecycleService
                 ChangedBy = userId,
                 ChangedAt = DateTime.UtcNow,
                 Remarks = remarks ?? $"Advanced to {stage.StageName}"
+            });
+
+            // Audit log
+            _context.AuditLogs.Add(new AuditLog
+            {
+                CompanyID = companyId,
+                UserID = userId,
+                Action = $"Advanced product '{product.ProductName}' to '{stage.StageName}'",
+                EntityName = "Product",
+                EntityID = productId,
+                CreatedAt = DateTime.UtcNow
             });
 
             await _context.SaveChangesAsync();
@@ -292,6 +326,18 @@ public class ProductLifecycleService : IProductLifecycleService
                 return new ServiceResult { Success = false, ErrorMessage = "Product is already archived." };
 
             product.Status = "Archived";
+
+            // Audit log
+            _context.AuditLogs.Add(new AuditLog
+            {
+                CompanyID = companyId,
+                UserID = userId,
+                Action = $"Archived product '{product.ProductName}'",
+                EntityName = "Product",
+                EntityID = productId,
+                CreatedAt = DateTime.UtcNow
+            });
+
             await _context.SaveChangesAsync();
 
             return new ServiceResult { Success = true };
@@ -317,6 +363,18 @@ public class ProductLifecycleService : IProductLifecycleService
                 return new ServiceResult { Success = false, ErrorMessage = "Product is not archived." };
 
             product.Status = "Concept";
+
+            // Audit log
+            _context.AuditLogs.Add(new AuditLog
+            {
+                CompanyID = companyId,
+                UserID = userId,
+                Action = $"Restored product '{product.ProductName}'",
+                EntityName = "Product",
+                EntityID = productId,
+                CreatedAt = DateTime.UtcNow
+            });
+
             await _context.SaveChangesAsync();
 
             return new ServiceResult { Success = true };

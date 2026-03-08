@@ -43,7 +43,7 @@ public class ReportController : ControllerBase
     /// Get report dashboard KPI cards
     /// </summary>
     [HttpGet("dashboard")]
-    public async Task<IActionResult> GetDashboard([FromQuery] string period = "month")
+    public async Task<IActionResult> GetDashboard([FromQuery] DateTime? dateFrom = null, [FromQuery] DateTime? dateTo = null)
     {
         var companyId = GetCurrentCompanyId();
         var userId = GetCurrentUserId();
@@ -51,7 +51,7 @@ public class ReportController : ControllerBase
 
         if (companyId == 0) return BadRequest(new { success = false, message = "Invalid company context." });
 
-        var result = await _reportService.GetReportDashboardAsync(companyId, userId, role, period);
+        var result = await _reportService.GetReportDashboardAsync(companyId, userId, role, dateFrom, dateTo);
         return result.Success
             ? Ok(new { success = true, data = result })
             : BadRequest(new { success = false, message = result.ErrorMessage });
@@ -61,7 +61,7 @@ public class ReportController : ControllerBase
     /// Get project progress data
     /// </summary>
     [HttpGet("project-progress")]
-    public async Task<IActionResult> GetProjectProgress()
+    public async Task<IActionResult> GetProjectProgress([FromQuery] DateTime? dateFrom = null, [FromQuery] DateTime? dateTo = null)
     {
         var companyId = GetCurrentCompanyId();
         var userId = GetCurrentUserId();
@@ -69,7 +69,7 @@ public class ReportController : ControllerBase
 
         if (companyId == 0) return BadRequest(new { success = false, message = "Invalid company context." });
 
-        var result = await _reportService.GetProjectProgressAsync(companyId, userId, role);
+        var result = await _reportService.GetProjectProgressAsync(companyId, userId, role, dateFrom, dateTo);
         return result.Success
             ? Ok(new { success = true, data = result.Projects })
             : BadRequest(new { success = false, message = result.ErrorMessage });
@@ -79,7 +79,7 @@ public class ReportController : ControllerBase
     /// Get task distribution data
     /// </summary>
     [HttpGet("task-distribution")]
-    public async Task<IActionResult> GetTaskDistribution()
+    public async Task<IActionResult> GetTaskDistribution([FromQuery] DateTime? dateFrom = null, [FromQuery] DateTime? dateTo = null)
     {
         var companyId = GetCurrentCompanyId();
         var userId = GetCurrentUserId();
@@ -87,7 +87,7 @@ public class ReportController : ControllerBase
 
         if (companyId == 0) return BadRequest(new { success = false, message = "Invalid company context." });
 
-        var result = await _reportService.GetTaskDistributionAsync(companyId, userId, role);
+        var result = await _reportService.GetTaskDistributionAsync(companyId, userId, role, dateFrom, dateTo);
         return result.Success
             ? Ok(new { success = true, data = result })
             : BadRequest(new { success = false, message = result.ErrorMessage });
@@ -97,7 +97,7 @@ public class ReportController : ControllerBase
     /// Get team performance table data
     /// </summary>
     [HttpGet("team-performance")]
-    public async Task<IActionResult> GetTeamPerformance()
+    public async Task<IActionResult> GetTeamPerformance([FromQuery] DateTime? dateFrom = null, [FromQuery] DateTime? dateTo = null)
     {
         var companyId = GetCurrentCompanyId();
         var userId = GetCurrentUserId();
@@ -105,7 +105,7 @@ public class ReportController : ControllerBase
 
         if (companyId == 0) return BadRequest(new { success = false, message = "Invalid company context." });
 
-        var result = await _reportService.GetTeamPerformanceAsync(companyId, userId, role);
+        var result = await _reportService.GetTeamPerformanceAsync(companyId, userId, role, dateFrom, dateTo);
         return result.Success
             ? Ok(new { success = true, data = result.Members })
             : BadRequest(new { success = false, message = result.ErrorMessage });
@@ -189,7 +189,7 @@ public class ReportController : ControllerBase
     /// Download Project Manager PDF report (role-scoped)
     /// </summary>
     [HttpGet("download-pdf")]
-    public async Task<IActionResult> DownloadPmPdf([FromQuery] string period = "month")
+    public async Task<IActionResult> DownloadPmPdf([FromQuery] DateTime? dateFrom = null, [FromQuery] DateTime? dateTo = null)
     {
         var companyId = GetCurrentCompanyId();
         var userId = GetCurrentUserId();
@@ -201,6 +201,12 @@ public class ReportController : ControllerBase
 
         try
         {
+            var period = "month";
+            if (dateFrom.HasValue && dateTo.HasValue)
+            {
+                var days = (dateTo.Value - dateFrom.Value).TotalDays;
+                period = days <= 7 ? "week" : days <= 31 ? "month" : days <= 93 ? "quarter" : "year";
+            }
             var pdfBytes = await _pdfReportService.GenerateProjectManagerPdfAsync(companyId, userId, role, fullName, companyName, period);
             var fileName = $"PM-Report-{DateTime.UtcNow:yyyy-MM-dd}.pdf";
             return File(pdfBytes, "application/pdf", fileName);

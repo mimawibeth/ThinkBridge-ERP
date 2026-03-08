@@ -31,6 +31,7 @@ public class ApplicationDbContext : DbContext
     // Project Management
     public DbSet<Project> Projects { get; set; }
     public DbSet<ProjectMember> ProjectMembers { get; set; }
+    public DbSet<ProjectCategory> ProjectCategories { get; set; }
     public DbSet<Task> Tasks { get; set; }
     public DbSet<TaskAssignment> TaskAssignments { get; set; }
     public DbSet<TaskUpdate> TaskUpdates { get; set; }
@@ -93,6 +94,10 @@ public class ApplicationDbContext : DbContext
             .WithMany(c => c.Subscriptions)
             .HasForeignKey(s => s.CompanyID)
             .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<Subscription>()
+            .Property(s => s.GracePeriodDays)
+            .HasDefaultValue(7);
 
         // Configure AuditLog - Company relationship (NoAction to avoid cascade cycle)
         modelBuilder.Entity<AuditLog>()

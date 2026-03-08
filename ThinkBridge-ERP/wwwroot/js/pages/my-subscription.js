@@ -8,6 +8,7 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         loadSubscription();
+        loadSubscriptionAlert();
 
         // Load payment history when modal opens
         const historyModal = document.getElementById('paymentHistoryModal');
@@ -53,9 +54,11 @@
         content.style.flexDirection = 'column';
         content.style.gap = 'var(--spacing-lg)';
 
+        currentSubscriptionId = sub.subscriptionId;
+
         // Status badge
         const statusEl = document.getElementById('plan-status');
-        statusEl.textContent = sub.status;
+        statusEl.textContent = sub.status === 'GracePeriod' ? 'Grace Period' : sub.status;
         statusEl.className = 'plan-badge ' + sub.status.toLowerCase();
 
         // Plan info
@@ -113,6 +116,11 @@
 
         // Features
         renderFeatures(sub);
+
+        // Auto-renew toggle (only for paid plans)
+        if (sub.price > 0) {
+            initAutoRenewToggle(sub.autoRenew);
+        }
     }
 
     function renderFeatures(sub) {
@@ -140,6 +148,90 @@
         container.innerHTML = features.map(f => `<div class="feature-item">${checkSvg}<span>${escapeHtml(f)}</span></div>`).join('');
     }
 
+    // ─── Subscription Alert & Auto-Renew ─────────
+
+    let currentSubscriptionId = 0;
+
+    async function loadSubscriptionAlert() {
+        var banner = document.getElementById('subAlertBanner');
+        if (!banner) return;
+
+        var result = await apiGet('/api/companyadmin/subscription/alert');
+        if (!result || !result.success || !result.data) {
+            banner.style.display = 'none';
+            return;
+        }
+
+        var a = result.data;
+        document.getElementById('subAlertMessage').textContent = a.message;
+        if (a.alertType === 'grace-period' || a.alertType === 'auto-renew-failed') {
+            banner.classList.add('alert-danger');
+        }
+        banner.style.display = 'flex';
+
+        // Show renew button if in grace period or expiring soon
+        var renewBtn = document.getElementById('btnRenewNow');
+        if (renewBtn && (a.alertType === 'grace-period' || a.alertType === 'expiring-soon' || a.alertType === 'auto-renew-failed')) {
+            renewBtn.style.display = 'inline-flex';
+        }
+    }
+
+    function initAutoRenewToggle(autoRenew) {
+        var actionsSection = document.getElementById('planRenewalActions');
+        var toggle = document.getElementById('autoRenewToggle');
+        if (!actionsSection || !toggle) return;
+
+        actionsSection.style.display = 'flex';
+        toggle.checked = autoRenew;
+
+        toggle.addEventListener('change', async function () {
+            var enabled = toggle.checked;
+            try {
+                var resp = await fetch('/api/companyadmin/subscription/auto-renew', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ enabled: enabled })
+                });
+                var result = await resp.json();
+                if (result.success) {
+                    if (typeof showToast === 'function') showToast(result.message, 'success');
+                } else {
+                    toggle.checked = !enabled;
+                    if (typeof showToast === 'function') showToast(result.message || 'Failed to update.', 'error');
+                }
+            } catch (e) {
+                toggle.checked = !enabled;
+                if (typeof showToast === 'function') showToast('Network error.', 'error');
+            }
+        });
+    }
+
+    window.renewSubscription = async function () {
+        if (!currentSubscriptionId) return;
+        var btn = document.getElementById('btnRenewNow');
+        if (btn) { btn.disabled = true; btn.textContent = 'Processing...'; }
+
+        try {
+            var resp = await fetch('/api/subscription/renew', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({ subscriptionId: currentSubscriptionId })
+            });
+            var result = await resp.json();
+            if (result.success && result.checkoutUrl) {
+                window.location.href = result.checkoutUrl;
+            } else {
+                if (typeof showToast === 'function') showToast(result.message || 'Renewal failed.', 'error');
+                if (btn) { btn.disabled = false; btn.textContent = 'Renew Now'; }
+            }
+        } catch (e) {
+            if (typeof showToast === 'function') showToast('Network error.', 'error');
+            if (btn) { btn.disabled = false; btn.textContent = 'Renew Now'; }
+        }
+    };
+
     // ─── Payment History ─────────────────────────
 
     async function loadPaymentHistory() {
@@ -164,11 +256,17 @@
         content.style.display = 'block';
 
         const tbody = document.getElementById('payment-history-body');
-        const dateOpts = { year: 'numeric', month: 'short', day: 'numeric' };
+        const dateOpts = { timeZone: 'Asia/Manila', year: 'numeric', month: 'short', day: 'numeric' };
+
+        function toUtc(ds) {
+            if (!ds) return null;
+            const s = String(ds);
+            return new Date(s.endsWith('Z') || s.includes('+') ? s : s + 'Z');
+        }
 
         tbody.innerHTML = result.data.map(p => {
-            const date = p.paidAt ? new Date(p.paidAt).toLocaleDateString(undefined, dateOpts)
-                : new Date(p.createdAt).toLocaleDateString(undefined, dateOpts);
+            const d = p.paidAt ? toUtc(p.paidAt) : toUtc(p.createdAt);
+            const date = d ? d.toLocaleDateString('en-US', dateOpts) : '—';
             const invoice = p.invoiceNumber || '—';
             const statusClass = getStatusClass(p.status);
             return `<tr>

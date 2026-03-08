@@ -9,29 +9,30 @@
 }
 
 <div class="page-reports">
-    <!-- Header -->
-    <div class="report-header">
-        <h1>Platform Reports</h1>
+    <!-- Header actions -->
+    <div class="report-header" style="justify-content:flex-end;">
         <div class="report-header-actions">
-            <div class="date-filter">
-                <label for="date-from">From</label>
-                <input type="date" id="date-from" />
-                <label for="date-to">To</label>
-                <input type="date" id="date-to" />
+            <div class="filter-row">
+                <div class="date-filter">
+                    <label for="dateFrom">From</label>
+                    <input type="date" id="dateFrom" class="filter-select" />
+                    <label for="dateTo">To</label>
+                    <input type="date" id="dateTo" class="filter-select" />
+                </div>
+                <button class="btn-generate" onclick="applyFilter()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                    Filter
+                </button>
             </div>
-            <button class="btn-generate" id="btn-generate" onclick="generateReport()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                </svg>
-                Generate
-            </button>
             <button class="btn-print" onclick="printReport()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="6 9 6 2 18 2 18 9"></polyline>
                     <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
                     <rect x="6" y="14" width="12" height="8"></rect>
                 </svg>
-                Print Report
+                Print
             </button>
             <button class="btn-print" onclick="downloadPDF()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -39,22 +40,13 @@
                     <polyline points="7 10 12 15 17 10"></polyline>
                     <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
-                Download PDF
+                PDF
             </button>
         </div>
     </div>
 
-    <!-- Report Meta -->
-    <div class="report-meta" id="report-meta">
-        <span><strong>Report:</strong> Platform Overview</span>
-        <span><strong>Period:</strong> <span id="meta-period">Last 12 months</span></span>
-        <span><strong>Generated:</strong> <span id="meta-generated">—</span></span>
-    </div>
-
     <!-- Loading -->
-    <div class="report-loading" id="report-loading">
-        Loading report data...
-    </div>
+    <div class="report-loading" id="report-loading">Loading report data...</div>
 
     <!-- Report Content (hidden until data loads) -->
     <div id="report-content" style="display:none;">
@@ -63,38 +55,38 @@
         <div class="report-kpi-grid" id="kpi-grid"></div>
 
         <!-- Revenue Chart + Subscription Distribution -->
-        <div class="report-chart-grid">
-            <div class="report-chart-card">
-                <h3>Monthly Revenue Trend</h3>
-                <div class="report-chart-container">
-                    <canvas id="revenue-chart"></canvas>
+        <div class="report-section">
+            <div class="report-chart-grid">
+                <div class="report-chart-card">
+                    <h3 class="report-section-title">Monthly Revenue Trend</h3>
+                    <div class="report-chart-container">
+                        <canvas id="revenue-chart"></canvas>
+                    </div>
                 </div>
-            </div>
-            <div class="report-chart-card">
-                <h3>Subscription Distribution</h3>
-                <div class="report-chart-container">
-                    <canvas id="plan-chart"></canvas>
+                <div class="report-chart-card">
+                    <h3 class="report-section-title">Subscription Distribution</h3>
+                    <div class="report-chart-container">
+                        <canvas id="plan-chart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Subscription Breakdown -->
-        <section class="report-section">
-            <div class="report-section-header">
-                <h2>Subscription Breakdown</h2>
+        <div class="report-section">
+            <div class="report-chart-card">
+                <h3 class="report-section-title">Subscription Breakdown</h3>
+                <div id="subscription-breakdown" style="margin-top:var(--spacing-md);"></div>
             </div>
-            <div class="report-section-body" id="subscription-breakdown"></div>
-        </section>
+        </div>
 
 
 
         <!-- Top Companies Tables -->
         <div class="report-tables-grid">
-            <section class="report-section">
-                <div class="report-section-header">
-                    <h2>Top Companies by Users</h2>
-                </div>
-                <div class="report-section-body" style="padding:0;">
+            <div class="report-section">
+                <div class="report-chart-card">
+                    <h3 class="report-section-title">Top Companies by Users</h3>
                     <table class="report-table" id="top-users-table">
                         <thead>
                             <tr>
@@ -108,12 +100,10 @@
                         <tbody></tbody>
                     </table>
                 </div>
-            </section>
-            <section class="report-section">
-                <div class="report-section-header">
-                    <h2>Top Companies by Revenue</h2>
-                </div>
-                <div class="report-section-body" style="padding:0;">
+            </div>
+            <div class="report-section">
+                <div class="report-chart-card">
+                    <h3 class="report-section-title">Top Companies by Revenue</h3>
                     <table class="report-table" id="top-revenue-table">
                         <thead>
                             <tr>
@@ -126,16 +116,16 @@
                         <tbody></tbody>
                     </table>
                 </div>
-            </section>
+            </div>
         </div>
 
         <!-- Payment Summary -->
-        <section class="report-section">
-            <div class="report-section-header">
-                <h2>Payment Summary</h2>
+        <div class="report-section">
+            <div class="report-chart-card">
+                <h3 class="report-section-title">Payment Summary</h3>
+                <div id="payment-summary" style="margin-top:var(--spacing-md);"></div>
             </div>
-            <div class="report-section-body" id="payment-summary"></div>
-        </section>
+        </div>
 
     </div>
 </div>
@@ -147,11 +137,13 @@
         // Set default date range (last 12 months)
         const now = new Date();
         const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-        document.getElementById('date-from').value = yearAgo.toISOString().split('T')[0];
-        document.getElementById('date-to').value = now.toISOString().split('T')[0];
+        document.getElementById('dateFrom').value = yearAgo.toISOString().split('T')[0];
+        document.getElementById('dateTo').value = now.toISOString().split('T')[0];
 
         generateReport();
         });
+
+        function applyFilter() { generateReport(); }
 
         let revenueChart = null;
         let planChart = null;
@@ -162,8 +154,8 @@
         loading.style.display = 'flex';
         content.style.display = 'none';
 
-        const dateFrom = document.getElementById('date-from').value;
-        const dateTo = document.getElementById('date-to').value;
+        const dateFrom = document.getElementById('dateFrom').value;
+        const dateTo = document.getElementById('dateTo').value;
 
         const params = new URLSearchParams();
         if (dateFrom) params.append('dateFrom', dateFrom);
@@ -187,12 +179,6 @@
         }
 
         function renderReport(data) {
-        // Meta
-        document.getElementById('meta-period').textContent =
-        formatDate(data.periodStart) + ' — ' + formatDate(data.periodEnd);
-        document.getElementById('meta-generated').textContent =
-        new Date(data.generatedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
-
         // KPIs
         renderKPIs(data);
 
@@ -225,21 +211,10 @@
         <div class="kpi-sub"><span class="text-success">${data.activeSubscriptions} active</span> · ${data.trialSubscriptions} trial</div>
         </div>
         <div class="report-kpi-card">
-        <div class="kpi-label">Monthly Recurring Revenue</div>
-        <div class="kpi-value">₱${formatNumber(data.monthlyRecurringRevenue)}</div>
-        <div class="kpi-sub">${data.newCompaniesThisPeriod} new companies this period</div>
-        </div>
-        <div class="report-kpi-card">
         <div class="kpi-label">Total Revenue</div>
         <div class="kpi-value">₱${formatNumber(data.totalRevenue)}</div>
         <div class="kpi-sub">${data.completedPayments} completed payments</div>
         </div>
-        <div class="report-kpi-card">
-        <div class="kpi-label">Pending Payments</div>
-        <div class="kpi-value">${data.pendingPayments}</div>
-        <div class="kpi-sub"><span class="text-warning">₱${formatNumber(data.pendingAmount)} pending</span></div>
-        </div>
-
         `;
         }
 
@@ -446,8 +421,8 @@
         btn.disabled = true;
 
         try {
-        const dateFrom = document.getElementById('date-from').value;
-        const dateTo = document.getElementById('date-to').value;
+        const dateFrom = document.getElementById('dateFrom').value;
+        const dateTo = document.getElementById('dateTo').value;
         let url = '/api/superadmin/reports/download-pdf';
         const params = [];
         if (dateFrom) params.push(`dateFrom=${dateFrom}`);
@@ -493,7 +468,7 @@
         }
 
         // Make functions globally available
-        window.generateReport = generateReport;
+        window.applyFilter = applyFilter;
         window.printReport = printReport;
         window.downloadPDF = downloadPDF;
     </script>

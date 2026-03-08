@@ -21,19 +21,14 @@ public class ReportService : IReportService
     // Dashboard KPI cards
     // ──────────────────────────────────────────────
     public async System.Threading.Tasks.Task<ReportDashboardResult> GetReportDashboardAsync(
-        int companyId, int userId, string userRole, string period = "month")
+        int companyId, int userId, string userRole, DateTime? dateFrom = null, DateTime? dateTo = null)
     {
         try
         {
-            // Determine date range
+            // Determine date range — default to last month if not provided
             var now = DateTime.UtcNow;
-            DateTime from = period switch
-            {
-                "week" => now.AddDays(-7),
-                "quarter" => now.AddMonths(-3),
-                "year" => now.AddYears(-1),
-                _ => now.AddMonths(-1) // month
-            };
+            DateTime from = dateFrom?.ToUniversalTime() ?? now.AddMonths(-1);
+            DateTime to = dateTo?.ToUniversalTime().Date.AddDays(1) ?? now;
 
             // All tasks for company in range, scoped by role
             IQueryable<Task> taskQuery = _context.Tasks
@@ -44,14 +39,14 @@ public class ReportService : IReportService
             taskQuery = ApplyRoleScope(taskQuery, userId, userRole);
 
             var allTasks = await taskQuery.ToListAsync();
-            var periodTasks = allTasks.Where(t => t.CreatedAt >= from).ToList();
+            var periodTasks = allTasks.Where(t => t.CreatedAt >= from && t.CreatedAt <= to).ToList();
 
-            // Tasks completed
-            var completedTasks = allTasks.Count(t => t.Status == "Completed");
-            var totalTasks = allTasks.Count;
+            // Tasks completed in period
+            var completedTasks = periodTasks.Count(t => t.Status == "Completed");
+            var totalTasks = periodTasks.Count;
 
-            // On-time delivery: completed tasks that were completed by their DueDate (or have no DueDate)
-            var completedWithDue = allTasks.Where(t => t.Status == "Completed" && t.DueDate.HasValue).ToList();
+            // On-time delivery: completed tasks that were completed by their DueDate
+            var completedWithDue = periodTasks.Where(t => t.Status == "Completed" && t.DueDate.HasValue).ToList();
             var onTimeCount = completedWithDue.Count(t => t.DueDate!.Value >= t.CreatedAt.Date);
             decimal onTimePercent = completedWithDue.Count > 0
                 ? Math.Round((decimal)onTimeCount / completedWithDue.Count * 100, 0)
@@ -59,7 +54,7 @@ public class ReportService : IReportService
 
             // Team utilization: users with at least one active task / total team members
             var teamUserIds = await GetTeamUserIdsAsync(companyId, userId, userRole);
-            var usersWithActiveTasks = allTasks
+            var usersWithActiveTasks = periodTasks
                 .Where(t => t.Status == "In Progress" || t.Status == "In Review")
                 .SelectMany(t => t.TaskAssignments.Select(ta => ta.UserID))
                 .Distinct()
@@ -69,7 +64,7 @@ public class ReportService : IReportService
                 : 0;
 
             // Blockers: tasks marked as High priority that are overdue
-            var blockerTasks = allTasks.Where(t => t.Priority == "High" && t.DueDate.HasValue && t.DueDate.Value < now).ToList();
+            var blockerTasks = periodTasks.Where(t => t.Priority == "High" && t.DueDate.HasValue && t.DueDate.Value < now).ToList();
             var blockersResolved = blockerTasks.Count(t => t.Status == "Completed");
 
             return new ReportDashboardResult
@@ -94,12 +89,17 @@ public class ReportService : IReportService
     // Project progress bars
     // ──────────────────────────────────────────────
     public async System.Threading.Tasks.Task<ProjectProgressResult> GetProjectProgressAsync(
-        int companyId, int userId, string userRole)
+        int companyId, int userId, string userRole, DateTime? dateFrom = null, DateTime? dateTo = null)
     {
         try
         {
             IQueryable<Project> query = _context.Projects
                 .Where(p => p.CompanyID == companyId && p.Status != "Archived");
+
+            if (dateFrom.HasValue)
+                query = query.Where(p => p.CreatedAt >= dateFrom.Value.ToUniversalTime());
+            if (dateTo.HasValue)
+                query = query.Where(p => p.CreatedAt <= dateTo.Value.ToUniversalTime().Date.AddDays(1));
 
             if (userRole.Equals("ProjectManager", StringComparison.OrdinalIgnoreCase))
             {
@@ -136,7 +136,7 @@ public class ReportService : IReportService
     // Task distribution (status breakdown)
     // ──────────────────────────────────────────────
     public async System.Threading.Tasks.Task<TaskDistributionResult> GetTaskDistributionAsync(
-        int companyId, int userId, string userRole)
+        int companyId, int userId, string userRole, DateTime? dateFrom = null, DateTime? dateTo = null)
     {
         try
         {
@@ -144,6 +144,11 @@ public class ReportService : IReportService
                 .Include(t => t.Project)
                 .Include(t => t.TaskAssignments)
                 .Where(t => t.Project.CompanyID == companyId && t.Status != "Archived");
+
+            if (dateFrom.HasValue)
+                query = query.Where(t => t.CreatedAt >= dateFrom.Value.ToUniversalTime());
+            if (dateTo.HasValue)
+                query = query.Where(t => t.CreatedAt <= dateTo.Value.ToUniversalTime().Date.AddDays(1));
 
             query = ApplyRoleScope(query, userId, userRole);
 
@@ -171,7 +176,7 @@ public class ReportService : IReportService
     // Team performance table
     // ──────────────────────────────────────────────
     public async System.Threading.Tasks.Task<TeamPerformanceResult> GetTeamPerformanceAsync(
-        int companyId, int userId, string userRole)
+        int companyId, int userId, string userRole, DateTime? dateFrom = null, DateTime? dateTo = null)
     {
         try
         {
@@ -180,6 +185,11 @@ public class ReportService : IReportService
                 .Include(t => t.Project)
                 .Include(t => t.TaskAssignments).ThenInclude(ta => ta.User)
                 .Where(t => t.Project.CompanyID == companyId && t.Status != "Archived");
+
+            if (dateFrom.HasValue)
+                taskQuery = taskQuery.Where(t => t.CreatedAt >= dateFrom.Value.ToUniversalTime());
+            if (dateTo.HasValue)
+                taskQuery = taskQuery.Where(t => t.CreatedAt <= dateTo.Value.ToUniversalTime().Date.AddDays(1));
 
             if (userRole.Equals("ProjectManager", StringComparison.OrdinalIgnoreCase))
             {

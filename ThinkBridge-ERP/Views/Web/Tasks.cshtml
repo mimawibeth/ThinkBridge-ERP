@@ -506,16 +506,13 @@
 
                 .task-menu-dropdown {
                     display: none;
-                    position: absolute;
-                    right: 0;
-                    top: 100%;
-                    margin-top: 4px;
+                    position: fixed;
                     background: var(--surface);
                     border: 1px solid var(--border);
                     border-radius: var(--radius-md);
                     box-shadow: var(--shadow-lg);
                     min-width: 160px;
-                    z-index: 100;
+                    z-index: 9999;
                     overflow: hidden;
                 }
 
@@ -888,11 +885,27 @@
                     const menu = document.getElementById(`menu-${taskId}`);
                     const isOpen = menu && menu.classList.contains('show');
                     closeAllMenus();
-                    if (!isOpen && menu) menu.classList.add('show');
+                    if (!isOpen && menu) {
+                        const btn = e.currentTarget;
+                        const rect = btn.getBoundingClientRect();
+                        menu.classList.add('show');
+                        const menuH = menu.offsetHeight;
+                        const spaceBelow = window.innerHeight - rect.bottom;
+                        if (spaceBelow < menuH + 8) {
+                            menu.style.top = (rect.top - menuH - 4) + 'px';
+                        } else {
+                            menu.style.top = (rect.bottom + 4) + 'px';
+                        }
+                        menu.style.left = (rect.right - menu.offsetWidth) + 'px';
+                    }
                 }
 
                 function closeAllMenus() {
-                    document.querySelectorAll('.task-menu-dropdown.show').forEach(m => m.classList.remove('show'));
+                    document.querySelectorAll('.task-menu-dropdown.show').forEach(m => {
+                        m.classList.remove('show');
+                        m.style.top = '';
+                        m.style.left = '';
+                    });
                 }
 
                 async function loadProjects() {
@@ -929,10 +942,10 @@
                     container.innerHTML = teamMembers.map(m => {
                         const initials = m.initials || (m.fullName || '').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
                         return `<label style="display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:var(--radius-md);background:var(--surface);border:1px solid var(--border);cursor:pointer;font-size:0.85rem;white-space:nowrap;">
-                                                    <input type="checkbox" value="${m.userID}" style="accent-color:var(--primary);" />
-                                                    <span class="team-avatar" style="width:22px;height:22px;font-size:0.6rem;margin-left:0;background:${m.avatarColor || '#0B4F6C'}">${escapeHtml(initials)}</span>
-                                                    ${escapeHtml(m.fullName)} <span style="color:var(--text-secondary);font-size:0.75rem;">(${escapeHtml(m.role || 'TeamMember')})</span>
-                                                </label>`;
+                                                                    <input type="checkbox" value="${m.userID}" style="accent-color:var(--primary);" />
+                                                                    <span class="team-avatar" style="width:22px;height:22px;font-size:0.6rem;margin-left:0;background:${m.avatarColor || '#0B4F6C'}">${escapeHtml(initials)}</span>
+                                                                    ${escapeHtml(m.fullName)} <span style="color:var(--text-secondary);font-size:0.75rem;">(${escapeHtml(m.role || 'TeamMember')})</span>
+                                                                </label>`;
                     }).join('');
                 }
 
@@ -986,12 +999,12 @@
                             }
                         } else {
                             document.getElementById('tasks-tbody').innerHTML = `<tr><td colspan="7" class="tasks-empty-cell">
-                                                                                <div class="tasks-empty"><span class="tasks-empty-title">Failed to load tasks</span></div></td></tr>`;
+                                                                                                <div class="tasks-empty"><span class="tasks-empty-title">Failed to load tasks</span></div></td></tr>`;
                         }
                     } catch (e) {
                         console.error('Failed to load tasks', e);
                         document.getElementById('tasks-tbody').innerHTML = `<tr><td colspan="7" class="tasks-empty-cell">
-                                                                            <div class="tasks-empty"><span class="tasks-empty-title">Error loading tasks</span></div></td></tr>`;
+                                                                                            <div class="tasks-empty"><span class="tasks-empty-title">Error loading tasks</span></div></td></tr>`;
                     }
                 }
 
@@ -999,14 +1012,14 @@
                     const tbody = document.getElementById('tasks-tbody');
                     if (!tasks || tasks.length === 0) {
                         tbody.innerHTML = `<tr><td colspan="7" class="tasks-empty-cell">
-                                                                            <div class="tasks-empty">
-                                                                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                                                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                                                                    <line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line>
-                                                                                </svg>
-                                                                                <span class="tasks-empty-title">No tasks found</span>
-                                                                                <span class="tasks-empty-sub">Try adjusting your filters or create a new task</span>
-                                                                            </div></td></tr>`;
+                                                                                            <div class="tasks-empty">
+                                                                                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                                                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                                                                                    <line x1="9" y1="9" x2="15" y2="15"></line><line x1="15" y1="9" x2="9" y2="15"></line>
+                                                                                                </svg>
+                                                                                                <span class="tasks-empty-title">No tasks found</span>
+                                                                                                <span class="tasks-empty-sub">Try adjusting your filters or create a new task</span>
+                                                                                            </div></td></tr>`;
                         return;
                     }
 
@@ -1034,54 +1047,54 @@
 
                         // Action dropdown items
                         let menuItems = `<button class="task-menu-item" onclick="event.stopPropagation(); closeAllMenus(); viewTask(${t.taskID})">
-                                                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                                                            View Details
-                                                                        </button>`;
+                                                                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                                                                            View Details
+                                                                                        </button>`;
 
                         if (isTeamMember) {
                             menuItems += `<button class="task-menu-item" onclick="event.stopPropagation(); closeAllMenus(); showStatusSelect(${t.taskID})">
-                                                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-                                                                                Update Status
-                                                                            </button>`;
+                                                                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                                                                                                Update Status
+                                                                                            </button>`;
                         }
 
                         if (canEdit) {
                             menuItems += `<button class="task-menu-item" onclick="event.stopPropagation(); closeAllMenus(); openEditTaskModal(${t.taskID})">
-                                                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                                                                                Edit Task
-                                                                            </button>`;
+                                                                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                                                                                Edit Task
+                                                                                            </button>`;
                             menuItems += `<button class="task-menu-item warning" onclick="event.stopPropagation(); closeAllMenus(); openArchiveModal(${t.taskID}, '${escapeHtml(t.title).replace(/'/g, "\\'")}')">
-                                                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>
-                                                                                Archive
-                                                                            </button>`;
+                                                                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>
+                                                                                                Archive
+                                                                                            </button>`;
                         }
 
                         return `<tr onclick="viewTask(${t.taskID})">
-                                                                            <td class="th-check">
-                                                                                <input type="checkbox" class="task-check" ${isCompleted ? 'checked' : ''}
-                                                                                    onclick="event.stopPropagation(); toggleComplete(${t.taskID}, this.checked)" />
-                                                                            </td>
-                                                                            <td><span class="task-name ${isCompleted ? 'completed' : ''}">${escapeHtml(t.title)}</span></td>
-                                                                            <td><span class="task-project">${escapeHtml(t.projectName)}</span></td>
-                                                                            <td><span class="status-dot ${statusCls}">${statusLabel}</span></td>
-                                                                            <td>
-                                                                                <span class="task-due ${isOverdue ? 'overdue' : ''}">
-                                                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                                                                                    ${dueDateStr}
-                                                                                </span>
-                                                                            </td>
-                                                                            <td><div class="assignees-stack">${assigneeHtml}</div></td>
-                                                                            <td onclick="event.stopPropagation()">
-                                                                                <div class="task-menu-wrap">
-                                                                                    <button class="task-menu-btn" onclick="toggleMenu(${t.taskID}, event)" title="Actions">
-                                                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="12" cy="19" r="1.5"></circle></svg>
-                                                                                    </button>
-                                                                                    <div class="task-menu-dropdown" id="menu-${t.taskID}">
-                                                                                        ${menuItems}
-                                                                                    </div>
-                                                                                </div>
-                                                                            </td>
-                                                                        </tr>`;
+                                                                                            <td class="th-check">
+                                                                                                <input type="checkbox" class="task-check" ${isCompleted ? 'checked' : ''}
+                                                                                                    onclick="event.stopPropagation(); toggleComplete(${t.taskID}, this.checked)" />
+                                                                                            </td>
+                                                                                            <td><span class="task-name ${isCompleted ? 'completed' : ''}">${escapeHtml(t.title)}</span></td>
+                                                                                            <td><span class="task-project">${escapeHtml(t.projectName)}</span></td>
+                                                                                            <td><span class="status-dot ${statusCls}">${statusLabel}</span></td>
+                                                                                            <td>
+                                                                                                <span class="task-due ${isOverdue ? 'overdue' : ''}">
+                                                                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                                                                                    ${dueDateStr}
+                                                                                                </span>
+                                                                                            </td>
+                                                                                            <td><div class="assignees-stack">${assigneeHtml}</div></td>
+                                                                                            <td onclick="event.stopPropagation()">
+                                                                                                <div class="task-menu-wrap">
+                                                                                                    <button class="task-menu-btn" onclick="toggleMenu(${t.taskID}, event)" title="Actions">
+                                                                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"></circle><circle cx="12" cy="12" r="1.5"></circle><circle cx="12" cy="19" r="1.5"></circle></svg>
+                                                                                                    </button>
+                                                                                                    <div class="task-menu-dropdown" id="menu-${t.taskID}">
+                                                                                                        ${menuItems}
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </td>
+                                                                                        </tr>`;
                     }).join('');
                 }
 
@@ -1251,48 +1264,63 @@
                         currentViewTaskId = taskId;
 
                         let html = `
-                                                                            <div class="task-detail-row"><div class="task-detail-label">Project</div><div class="task-detail-value">${escapeHtml(t.projectName)}</div></div>
-                                                                            <div class="task-detail-row"><div class="task-detail-label">Status</div><div class="task-detail-value"><span class="badge ${getStatusClass(t.status)}">${t.status}</span></div></div>
-                                                                            <div class="task-detail-row"><div class="task-detail-label">Priority</div><div class="task-detail-value"><span class="badge ${getPriorityClass(t.priority)}">${t.priority}</span></div></div>
-                                                                            ${t.description ? `<div class="task-detail-row"><div class="task-detail-label">Description</div><div class="task-detail-value">${escapeHtml(t.description)}</div></div>` : ''}
-                                                                            <div class="task-detail-row"><div class="task-detail-label">Assignees</div><div class="task-detail-value">${t.assignees?.length ? t.assignees.map(a => escapeHtml(a.fullName)).join(', ') : 'Unassigned'}</div></div>
-                                                                            <div class="task-detail-row"><div class="task-detail-label">Due Date</div><div class="task-detail-value ${isOverdue ? 'overdue-text' : ''}">${t.dueDate ? new Date(t.dueDate).toLocaleDateString() : '\u2014'}${isOverdue ? ' (Overdue)' : ''}</div></div>
-                                                                            <div class="task-detail-row"><div class="task-detail-label">Estimated Hrs</div><div class="task-detail-value">${t.estimatedHours ?? '\u2014'}</div></div>
-                                                                            <div class="task-detail-row"><div class="task-detail-label">Actual Hrs</div><div class="task-detail-value">${t.actualHours ?? '\u2014'}</div></div>
-                                                                            <div class="task-detail-row"><div class="task-detail-label">Created By</div><div class="task-detail-value">${escapeHtml(t.createdByName)}</div></div>
-                                                                        `;
+                                                                                            <div class="task-detail-row"><div class="task-detail-label">Project</div><div class="task-detail-value">${escapeHtml(t.projectName)}</div></div>
+                                                                                            <div class="task-detail-row"><div class="task-detail-label">Status</div><div class="task-detail-value"><span class="badge ${getStatusClass(t.status)}">${t.status}</span></div></div>
+                                                                                            <div class="task-detail-row"><div class="task-detail-label">Priority</div><div class="task-detail-value"><span class="badge ${getPriorityClass(t.priority)}">${t.priority}</span></div></div>
+                                                                                            ${t.description ? `<div class="task-detail-row"><div class="task-detail-label">Description</div><div class="task-detail-value">${escapeHtml(t.description)}</div></div>` : ''}
+                                                                                            <div class="task-detail-row"><div class="task-detail-label">Assignees</div><div class="task-detail-value">${t.assignees?.length ? t.assignees.map(a => escapeHtml(a.fullName)).join(', ') : 'Unassigned'}</div></div>
+                                                                                            <div class="task-detail-row"><div class="task-detail-label">Due Date</div><div class="task-detail-value ${isOverdue ? 'overdue-text' : ''}">${t.dueDate ? new Date(t.dueDate).toLocaleDateString() : '\u2014'}${isOverdue ? ' (Overdue)' : ''}</div></div>
+                                                                                            <div class="task-detail-row"><div class="task-detail-label">Estimated Hrs</div><div class="task-detail-value">${t.estimatedHours ?? '\u2014'}</div></div>
+                                                                                            <div class="task-detail-row"><div class="task-detail-label">Actual Hrs</div><div class="task-detail-value">${t.actualHours ?? '\u2014'}</div></div>
+                                                                                            <div class="task-detail-row"><div class="task-detail-label">Created By</div><div class="task-detail-value">${escapeHtml(t.createdByName)}</div></div>
+                                                                                        `;
 
                         if (updates.length > 0) {
+                            const visibleUpdates = updates.slice(0, 5);
                             html += `<h4 style="margin-top:20px;margin-bottom:8px;font-size:0.9rem;">Activity Log</h4>`;
-                            html += `<ul class="task-updates-list">` + updates.map(u => `
-                                                                                <li class="task-update-item">
-                                                                                    <div class="task-update-avatar">${u.initials}</div>
-                                                                                    <div class="task-update-content">
-                                                                                        <div class="task-update-user">${escapeHtml(u.userName)}</div>
-                                                                                        <div class="task-update-text">${escapeHtml(u.updateText)}</div>
-                                                                                        <div class="task-update-time">${new Date(u.createdAt).toLocaleString()}</div>
-                                                                                    </div>
-                                                                                </li>
-                                                                            `).join('') + `</ul>`;
+                            html += `<ul class="task-updates-list">` + visibleUpdates.map(u => `
+                                                                                                <li class="task-update-item">
+                                                                                                    <div class="task-update-avatar">${u.initials}</div>
+                                                                                                    <div class="task-update-content">
+                                                                                                        <div class="task-update-user">${escapeHtml(u.userName)}</div>
+                                                                                                        <div class="task-update-text">${escapeHtml(u.updateText)}</div>
+                                                                                                        <div class="task-update-time">${new Date(u.createdAt).toLocaleString()}</div>
+                                                                                                    </div>
+                                                                                                </li>
+                                                                                            `).join('') + `</ul>`;
+                            if (updates.length > 5) {
+                                html += `<button class="btn btn-secondary btn-sm" style="width:100%;margin-top:4px;" onclick="this.style.display='none';this.previousElementSibling.querySelectorAll('.task-update-item.hidden-update').forEach(el=>el.style.display='');">View All (${updates.length})</button>`;
+                                // Re-render with all but hide extras
+                                html = html.replace('</ul>', updates.slice(5).map(u => `
+                                                                                                <li class="task-update-item hidden-update" style="display:none;">
+                                                                                                    <div class="task-update-avatar">${u.initials}</div>
+                                                                                                    <div class="task-update-content">
+                                                                                                        <div class="task-update-user">${escapeHtml(u.userName)}</div>
+                                                                                                        <div class="task-update-text">${escapeHtml(u.updateText)}</div>
+                                                                                                        <div class="task-update-time">${new Date(u.createdAt).toLocaleString()}</div>
+                                                                                                    </div>
+                                                                                                </li>
+                                                                                            `).join('') + `</ul>`);
+                            }
                         }
 
                         // Comments section
                         html += `
-                                                                            <div class="task-comments-section">
-                                                                                <h4 style="margin-top:20px;margin-bottom:12px;font-size:0.9rem;display:flex;align-items:center;gap:6px;">
-                                                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                                                                                    Comments <span class="comment-count" id="comment-count"></span>
-                                                                                </h4>
-                                                                                <div id="comments-list" class="comments-list"><div style="text-align:center;color:var(--text-muted);font-size:0.82rem;padding:12px;">Loading comments...</div></div>
-                                                                                <div class="comment-input-area">
-                                                                                    <div class="comment-input-wrapper" style="position:relative;">
-                                                                                        <textarea id="comment-input" class="comment-textarea" placeholder="Write a comment... Use @@ to mention someone" rows="2"></textarea>
-                                                                                        <div id="mention-dropdown" class="mention-dropdown" style="display:none;"></div>
-                                                                                    </div>
-                                                                                    <button class="btn btn-primary btn-sm" id="post-comment-btn" onclick="postComment()" style="margin-top:6px;align-self:flex-end;">Post Comment</button>
-                                                                                </div>
-                                                                            </div>
-                                                                        `;
+                                                                                            <div class="task-comments-section">
+                                                                                                <h4 style="margin-top:20px;margin-bottom:12px;font-size:0.9rem;display:flex;align-items:center;gap:6px;">
+                                                                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                                                                                    Comments <span class="comment-count" id="comment-count"></span>
+                                                                                                </h4>
+                                                                                                <div id="comments-list" class="comments-list"><div style="text-align:center;color:var(--text-muted);font-size:0.82rem;padding:12px;">Loading comments...</div></div>
+                                                                                                <div class="comment-input-area">
+                                                                                                    <div class="comment-input-wrapper" style="position:relative;">
+                                                                                                        <textarea id="comment-input" class="comment-textarea" placeholder="Write a comment... Use @@ to mention someone" rows="2"></textarea>
+                                                                                                        <div id="mention-dropdown" class="mention-dropdown" style="display:none;"></div>
+                                                                                                    </div>
+                                                                                                    <button class="btn btn-primary btn-sm" id="post-comment-btn" onclick="postComment()" style="margin-top:6px;align-self:flex-end;">Post Comment</button>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        `;
 
                         document.getElementById('view-task-title').textContent = t.title;
                         document.getElementById('view-task-body').innerHTML = html;
@@ -1305,13 +1333,13 @@
                         let footerHtml = '';
                         if (isTeamMember) {
                             footerHtml = `
-                                                                                <select class="tm-status-select" id="view-task-status-select">
-                                                                                    <option value="To Do" ${t.status === 'To Do' ? 'selected' : ''}>To Do</option>
-                                                                                    <option value="In Progress" ${t.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
-                                                                                    <option value="In Review" ${t.status === 'In Review' ? 'selected' : ''}>In Review</option>
-                                                                                    <option value="Completed" ${t.status === 'Completed' ? 'selected' : ''}>Completed</option>
-                                                                                </select>
-                                                                                <button class="btn btn-primary" onclick="updateStatusFromView(${t.taskID})">Update Status</button>`;
+                                                                                                <select class="tm-status-select" id="view-task-status-select">
+                                                                                                    <option value="To Do" ${t.status === 'To Do' ? 'selected' : ''}>To Do</option>
+                                                                                                    <option value="In Progress" ${t.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                                                                                                    <option value="In Review" ${t.status === 'In Review' ? 'selected' : ''}>In Review</option>
+                                                                                                    <option value="Completed" ${t.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                                                                                                </select>
+                                                                                                <button class="btn btn-primary" onclick="updateStatusFromView(${t.taskID})">Update Status</button>`;
                         }
                         footerHtml += `<button class="btn btn-secondary" onclick="closeViewTaskModal()">Close</button>`;
                         document.getElementById('view-task-footer').innerHTML = footerHtml;
@@ -1362,26 +1390,26 @@
                     const timeAgo = getTimeAgo(new Date(c.createdAt));
                     const editedLabel = c.isEdited ? ' <span style="color:var(--text-muted);font-size:0.72rem;">(edited)</span>' : '';
                     const actionsHtml = (c.canEdit || c.canDelete) ? `
-                                                                        <div class="comment-actions">
-                                                                            ${c.canEdit ? `<button class="comment-action-btn" onclick="editComment(${c.taskCommentID})" title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>` : ''}
-                                                                            ${c.canDelete ? `<button class="comment-action-btn danger" onclick="deleteComment(${c.taskCommentID})" title="Delete"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>` : ''}
-                                                                        </div>` : '';
+                                                                                        <div class="comment-actions">
+                                                                                            ${c.canEdit ? `<button class="comment-action-btn" onclick="editComment(${c.taskCommentID})" title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>` : ''}
+                                                                                            ${c.canDelete ? `<button class="comment-action-btn danger" onclick="deleteComment(${c.taskCommentID})" title="Delete"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>` : ''}
+                                                                                        </div>` : '';
 
                     // Render mentions as highlighted
                     let content = escapeHtml(c.content).replace(/@@(\w+\s\w+)/g, '<span class="mention-highlight">@@$1</span>');
 
                     return `
-                                                                        <div class="comment-item" id="comment-${c.taskCommentID}" data-comment-id="${c.taskCommentID}" data-content="${escapeHtml(c.content)}">
-                                                                            <div class="comment-avatar" style="background:${getAvatarColor(c.userID, c.avatarColor)}">${c.initials}</div>
-                                                                            <div class="comment-body">
-                                                                                <div class="comment-header">
-                                                                                    <span class="comment-author">${escapeHtml(c.userName)}</span>
-                                                                                    <span class="comment-time">${timeAgo}${editedLabel}</span>
-                                                                                    ${actionsHtml}
-                                                                                </div>
-                                                                                <div class="comment-text" id="comment-text-${c.taskCommentID}">${content}</div>
-                                                                            </div>
-                                                                        </div>`;
+                                                                                        <div class="comment-item" id="comment-${c.taskCommentID}" data-comment-id="${c.taskCommentID}" data-content="${escapeHtml(c.content)}">
+                                                                                            <div class="comment-avatar" style="background:${getAvatarColor(c.userID, c.avatarColor)}">${c.initials}</div>
+                                                                                            <div class="comment-body">
+                                                                                                <div class="comment-header">
+                                                                                                    <span class="comment-author">${escapeHtml(c.userName)}</span>
+                                                                                                    <span class="comment-time">${timeAgo}${editedLabel}</span>
+                                                                                                    ${actionsHtml}
+                                                                                                </div>
+                                                                                                <div class="comment-text" id="comment-text-${c.taskCommentID}">${content}</div>
+                                                                                            </div>
+                                                                                        </div>`;
                 }
 
                 async function postComment() {
@@ -1422,11 +1450,11 @@
                     const originalContent = el.dataset.content;
 
                     textEl.innerHTML = `
-                                                                        <textarea class="comment-edit-textarea" id="edit-input-${commentId}" rows="2">${originalContent}</textarea>
-                                                                        <div style="display:flex;gap:6px;margin-top:4px;">
-                                                                            <button class="btn btn-primary btn-sm" onclick="saveEditComment(${commentId})">Save</button>
-                                                                            <button class="btn btn-secondary btn-sm" onclick="loadTaskComments(currentViewTaskId)">Cancel</button>
-                                                                        </div>`;
+                                                                                        <textarea class="comment-edit-textarea" id="edit-input-${commentId}" rows="2">${originalContent}</textarea>
+                                                                                        <div style="display:flex;gap:6px;margin-top:4px;">
+                                                                                            <button class="btn btn-primary btn-sm" onclick="saveEditComment(${commentId})">Save</button>
+                                                                                            <button class="btn btn-secondary btn-sm" onclick="loadTaskComments(currentViewTaskId)">Cancel</button>
+                                                                                        </div>`;
                 }
 
                 async function saveEditComment(commentId) {
@@ -1504,12 +1532,12 @@
                     if (!users.length) { hideMentionDropdown(); return; }
 
                     dropdown.innerHTML = users.slice(0, 8).map((u, i) => `
-                                                                        <div class="mention-item ${i === 0 ? 'active' : ''}" data-user-id="${u.userID}" data-name="${u.fullName}" data-start="${startIdx}" data-cursor="${cursorPos}"
-                                                                             onclick="insertMention(this)">
-                                                                            <div class="mention-avatar" style="background:${getAvatarColor(u.userID, u.avatarColor)}">${u.initials}</div>
-                                                                            <span>${escapeHtml(u.fullName)}</span>
-                                                                        </div>
-                                                                    `).join('');
+                                                                                        <div class="mention-item ${i === 0 ? 'active' : ''}" data-user-id="${u.userID}" data-name="${u.fullName}" data-start="${startIdx}" data-cursor="${cursorPos}"
+                                                                                             onclick="insertMention(this)">
+                                                                                            <div class="mention-avatar" style="background:${getAvatarColor(u.userID, u.avatarColor)}">${u.initials}</div>
+                                                                                            <span>${escapeHtml(u.fullName)}</span>
+                                                                                        </div>
+                                                                                    `).join('');
                     dropdown.style.display = 'block';
                     mentionDropdownVisible = true;
                 }

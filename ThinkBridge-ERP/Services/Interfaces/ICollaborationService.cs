@@ -8,9 +8,9 @@ public interface ICollaborationService
     Task<ServiceResult> DeletePostAsync(int companyId, int userId, int postId);
 
     // Comments
-    Task<CommentListResult> GetCommentsAsync(int postId, string userRole);
+    Task<CommentListResult> GetCommentsAsync(int companyId, int postId, string userRole);
     Task<CreateCommentResult> AddCommentAsync(int companyId, int userId, int postId, string content);
-    Task<ServiceResult> DeleteCommentAsync(int userId, int commentId);
+    Task<ServiceResult> DeleteCommentAsync(int companyId, int userId, int commentId);
 
     // Activity Feed (aggregates tasks, products, posts, comments)
     Task<ActivityFeedResult> GetActivityFeedAsync(int companyId, int userId, string userRole, ActivityFeedRequest filter);
@@ -36,6 +36,8 @@ public class ActivityFeedRequest
 {
     public string? ActivityType { get; set; } // task, product, post, comment
     public string? SearchTerm { get; set; }
+    public DateTime? DateFrom { get; set; }
+    public DateTime? DateTo { get; set; }
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 30;
 }
@@ -101,6 +103,7 @@ public class ActivityFeedResult : ServiceResult
 public class ActivityItem
 {
     public string ActivityType { get; set; } = string.Empty; // task, product, post, comment
+    public int UserId { get; set; }
     public string UserName { get; set; } = string.Empty;
     public string UserInitials { get; set; } = string.Empty;
     public string UserAvatarColor { get; set; } = "#0B4F6C";

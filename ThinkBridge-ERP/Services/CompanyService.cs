@@ -27,11 +27,9 @@ public class CompanyService : ICompanyService
             var activeSubscriptions = await _context.Subscriptions
                 .Where(s => s.Status == "Active")
                 .CountAsync();
-            var pendingPayments = await _context.Invoices
-                .Where(i => i.Status == "Pending")
-                .CountAsync();
+            var totalUsers = await _context.Users.CountAsync();
             var monthlyRevenue = await _context.PaymentTransactions
-                .Where(p => p.Status == "Completed" && p.CreatedAt >= startOfMonth)
+                .Where(p => (p.Status == "Completed" || p.Status == "Paid") && p.CreatedAt >= startOfMonth)
                 .SumAsync(p => (decimal?)p.Amount) ?? 0;
             var newCompaniesThisMonth = await _context.Companies
                 .Where(c => c.CreatedAt >= startOfMonth)
@@ -49,7 +47,7 @@ public class CompanyService : ICompanyService
                     CreatedAt = c.CreatedAt,
                     UserCount = c.Users.Count(),
                     PlanName = c.Subscriptions
-                        .Where(s => s.Status == "Active" || s.Status == "Trial")
+                        .Where(s => s.Status == "Active" || s.Status == "Trial" || s.Status == "GracePeriod")
                         .OrderByDescending(s => s.StartDate)
                         .Select(s => s.Plan.PlanName)
                         .FirstOrDefault(),
@@ -82,7 +80,7 @@ public class CompanyService : ICompanyService
                 Success = true,
                 TotalCompanies = totalCompanies,
                 ActiveSubscriptions = activeSubscriptions,
-                PendingPayments = pendingPayments,
+                TotalUsers = totalUsers,
                 MonthlyRevenue = monthlyRevenue,
                 NewCompaniesThisMonth = newCompaniesThisMonth,
                 RecentCompanies = recentCompanies,
@@ -122,7 +120,7 @@ public class CompanyService : ICompanyService
             if (!string.IsNullOrWhiteSpace(filter.PlanName))
             {
                 query = query.Where(c => c.Subscriptions.Any(s =>
-                    (s.Status == "Active" || s.Status == "Trial") &&
+                    (s.Status == "Active" || s.Status == "Trial" || s.Status == "GracePeriod") &&
                     s.Plan.PlanName.ToLower() == filter.PlanName.ToLower()));
             }
 
@@ -141,7 +139,7 @@ public class CompanyService : ICompanyService
                     CreatedAt = c.CreatedAt,
                     UserCount = c.Users.Count(),
                     PlanName = c.Subscriptions
-                        .Where(s => s.Status == "Active" || s.Status == "Trial")
+                        .Where(s => s.Status == "Active" || s.Status == "Trial" || s.Status == "GracePeriod")
                         .OrderByDescending(s => s.StartDate)
                         .Select(s => s.Plan.PlanName)
                         .FirstOrDefault(),
@@ -197,7 +195,7 @@ public class CompanyService : ICompanyService
             }
 
             var activeSubscription = company.Subscriptions
-                .Where(s => s.Status == "Active" || s.Status == "Trial")
+                .Where(s => s.Status == "Active" || s.Status == "Trial" || s.Status == "GracePeriod")
                 .OrderByDescending(s => s.StartDate)
                 .FirstOrDefault();
 

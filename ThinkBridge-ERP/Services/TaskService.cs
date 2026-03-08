@@ -82,7 +82,7 @@ public class TaskService : ITaskService
             var totalCount = await query.CountAsync();
 
             var tasks = await query
-                .OrderByDescending(t => t.CreatedAt)
+                .OrderByDescending(t => t.UpdatedAt)
                 .Skip((filter.Page - 1) * filter.PageSize)
                 .Take(filter.PageSize)
                 .Select(t => new TaskListItem
@@ -198,7 +198,8 @@ public class TaskService : ITaskService
                 DueDate = request.DueDate,
                 EstimatedHours = request.EstimatedHours,
                 CreatedBy = userId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
             _context.Tasks.Add(task);
@@ -235,6 +236,18 @@ public class TaskService : ITaskService
             // Recalculate project progress
             await RecalculateProjectProgressAsync(request.ProjectID);
 
+            // Audit log
+            _context.AuditLogs.Add(new AuditLog
+            {
+                CompanyID = companyId,
+                UserID = userId,
+                Action = $"Created task '{request.Title}'",
+                EntityName = "Task",
+                EntityID = task.TaskID,
+                CreatedAt = DateTime.UtcNow
+            });
+            await _context.SaveChangesAsync();
+
             _logger.LogInformation("Task '{Title}' created for project {ProjectId} by user {UserId}", request.Title, request.ProjectID, userId);
             return new CreateTaskResult { Success = true, TaskId = task.TaskID };
         }
@@ -269,6 +282,7 @@ public class TaskService : ITaskService
             if (request.DueDate.HasValue) task.DueDate = request.DueDate.Value;
             if (request.EstimatedHours.HasValue) task.EstimatedHours = request.EstimatedHours.Value;
             if (request.ActualHours.HasValue) task.ActualHours = request.ActualHours.Value;
+            task.UpdatedAt = DateTime.UtcNow;
 
             if (!string.IsNullOrWhiteSpace(request.Status) && request.Status != task.Status)
             {
@@ -307,6 +321,17 @@ public class TaskService : ITaskService
                 }
             }
 
+            // Audit log
+            _context.AuditLogs.Add(new AuditLog
+            {
+                CompanyID = companyId,
+                UserID = userId,
+                Action = $"Updated task '{task.Title}'",
+                EntityName = "Task",
+                EntityID = taskId,
+                CreatedAt = DateTime.UtcNow
+            });
+
             await _context.SaveChangesAsync();
 
             // Recalculate project progress if status changed
@@ -343,6 +368,7 @@ public class TaskService : ITaskService
 
             var oldStatus = task.Status;
             task.Status = newStatus;
+            task.UpdatedAt = DateTime.UtcNow;
 
             // Log status change
             _context.TaskUpdates.Add(new TaskUpdate
@@ -351,6 +377,17 @@ public class TaskService : ITaskService
                 UserID = userId,
                 UpdateText = $"Status changed from '{oldStatus}' to '{newStatus}'",
                 NewStatus = newStatus,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            // Audit log
+            _context.AuditLogs.Add(new AuditLog
+            {
+                CompanyID = companyId,
+                UserID = userId,
+                Action = $"Changed task '{task.Title}' status to '{newStatus}'",
+                EntityName = "Task",
+                EntityID = taskId,
                 CreatedAt = DateTime.UtcNow
             });
 
@@ -397,11 +434,24 @@ public class TaskService : ITaskService
             if (task == null)
                 return new ServiceResult { Success = false, ErrorMessage = "Task not found." };
 
+            var taskTitle = task.Title;
             var projectId = task.ProjectID;
 
             _context.TaskUpdates.RemoveRange(task.TaskUpdates);
             _context.TaskAssignments.RemoveRange(task.TaskAssignments);
             _context.Tasks.Remove(task);
+
+            // Audit log
+            _context.AuditLogs.Add(new AuditLog
+            {
+                CompanyID = companyId,
+                UserID = userId,
+                Action = $"Deleted task '{taskTitle}'",
+                EntityName = "Task",
+                EntityID = taskId,
+                CreatedAt = DateTime.UtcNow
+            });
+
             await _context.SaveChangesAsync();
 
             // Recalculate project progress
@@ -478,7 +528,7 @@ public class TaskService : ITaskService
             }
 
             return await query
-                .OrderByDescending(t => t.CreatedAt)
+                .OrderByDescending(t => t.UpdatedAt)
                 .Select(t => new TaskListItem
                 {
                     TaskID = t.TaskID,

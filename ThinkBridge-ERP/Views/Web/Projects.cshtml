@@ -134,25 +134,15 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="project-status">Status</label>
-                        <select id="project-status" class="form-select">
-                            <option value="Planning">Planning</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Review">Review</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
                         <label for="project-category">Category</label>
-                        <select id="project-category" class="form-select">
-                            <option value="">Select Category</option>
-                            <option value="Development">Development</option>
-                            <option value="Infrastructure">Infrastructure</option>
-                            <option value="Analytics">Analytics</option>
-                            <option value="Security">Security</option>
-                            <option value="Documentation">Documentation</option>
-                            <option value="Design">Design</option>
-                            <option value="Marketing">Marketing</option>
-                        </select>
+                        <div style="display:flex;gap:6px;">
+                            <select id="project-category" class="form-select" style="flex:1;">
+                                <option value="">Select Category</option>
+                            </select>
+                            <button type="button" class="btn btn-secondary" onclick="window.openAddCategoryModal('project-category')" style="white-space:nowrap;padding:8px 12px;font-size:0.82rem;" title="Add new category">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -225,22 +215,14 @@
                     </div>
                     <div class="form-group">
                         <label for="edit-project-category">Category</label>
-                        <select id="edit-project-category" class="form-select">
-                            <option value="">Select Category</option>
-                            <option value="Development">Development</option>
-                            <option value="Infrastructure">Infrastructure</option>
-                            <option value="Analytics">Analytics</option>
-                            <option value="Security">Security</option>
-                            <option value="Documentation">Documentation</option>
-                            <option value="Design">Design</option>
-                            <option value="Marketing">Marketing</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="edit-project-progress">Progress (%)</label>
-                        <input type="number" id="edit-project-progress" class="form-input" min="0" max="100" />
+                        <div style="display:flex;gap:6px;">
+                            <select id="edit-project-category" class="form-select" style="flex:1;">
+                                <option value="">Select Category</option>
+                            </select>
+                            <button type="button" class="btn btn-secondary" onclick="window.openAddCategoryModal('edit-project-category')" style="white-space:nowrap;padding:8px 12px;font-size:0.82rem;" title="Add new category">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -334,6 +316,31 @@
     </div>
 </div>
 
+<!-- Add Category Modal -->
+<div class="modal-overlay" id="add-category-modal">
+    <div class="modal modal-sm">
+        <div class="modal-header">
+            <h2>Add Category</h2>
+            <button class="modal-close" onclick="window.closeAddCategoryModal()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="new-category-name">Category Name <span style="color: var(--danger);">*</span></label>
+                <input type="text" id="new-category-name" class="form-input" placeholder="Enter category name" maxlength="50" required />
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="window.closeAddCategoryModal()">Cancel</button>
+            <button class="btn btn-primary" id="save-category-btn">Create Category</button>
+        </div>
+    </div>
+</div>
+
 @section PageScripts {
 <script>
 (function() {
@@ -351,7 +358,8 @@
     document.addEventListener('DOMContentLoaded', function() {
         if (IS_ADMIN) loadStats();
         loadProjects();
-        if (CAN_CREATE) loadTeamMembers();
+        if (CAN_CREATE) { loadTeamMembers(); }
+        loadCategories();
         initEventListeners();
     });
 
@@ -450,13 +458,7 @@
             const res = await fetch(`/api/projects?${params}`, { credentials: 'same-origin' });
             const result = await res.json();
             if (result.success) {
-                const recentProjects = JSON.parse(localStorage.getItem('recentProjects') || '{}');
-                const sorted = result.data.slice().sort((a, b) => {
-                    const ta = recentProjects[a.projectID] || 0;
-                    const tb = recentProjects[b.projectID] || 0;
-                    return tb - ta;
-                });
-                renderProjects(sorted);
+                renderProjects(result.data);
                 renderPagination(result.pagination);
             }
         } catch (e) { console.error('Error loading projects:', e); }
@@ -472,6 +474,81 @@
             }
         } catch (e) { console.error('Error loading team members:', e); }
     }
+
+    async function loadCategories() {
+        try {
+            const res = await fetch('/api/projects/categories', { credentials: 'same-origin' });
+            const result = await res.json();
+            if (result.success) {
+                const selects = ['project-category', 'edit-project-category'];
+                selects.forEach(id => {
+                    const sel = document.getElementById(id);
+                    if (!sel) return;
+                    const current = sel.value;
+                    sel.innerHTML = '<option value="">Select Category</option>';
+                    result.data.forEach(c => {
+                        sel.innerHTML += `<option value="${esc(c.categoryName)}">${esc(c.categoryName)}</option>`;
+                    });
+                    if (current) sel.value = current;
+                });
+            }
+        } catch (e) { console.error('Error loading categories:', e); }
+    }
+
+    let _addCategoryTargetSelect = null;
+
+    async function promptAddCategory(selectId) {
+        const nameInput = document.getElementById('new-category-name');
+        const name = nameInput.value.trim();
+        if (!name) { nameInput.focus(); return; }
+        const btn = document.getElementById('save-category-btn');
+        btn.disabled = true;
+        btn.textContent = 'Creating...';
+        try {
+            const res = await fetch('/api/projects/categories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({ categoryName: name })
+            });
+            const result = await res.json();
+            if (result.success) {
+                await loadCategories();
+                const sel = document.getElementById(selectId);
+                if (sel) sel.value = result.data.categoryName;
+                closeModal('add-category-modal');
+                nameInput.value = '';
+                showToast('Category added.', 'success');
+            } else {
+                showToast(result.message || 'Failed to add category.', 'error');
+            }
+        } catch (e) {
+            console.error('Error adding category:', e);
+            showToast('An error occurred.', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Create Category';
+        }
+    }
+
+    window.openAddCategoryModal = function(selectId) {
+        _addCategoryTargetSelect = selectId;
+        document.getElementById('new-category-name').value = '';
+        openModal('add-category-modal');
+        setTimeout(() => document.getElementById('new-category-name').focus(), 100);
+    };
+
+    window.closeAddCategoryModal = function() {
+        closeModal('add-category-modal');
+    };
+
+    document.getElementById('save-category-btn')?.addEventListener('click', function() {
+        promptAddCategory(_addCategoryTargetSelect);
+    });
+
+    document.getElementById('new-category-name')?.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); promptAddCategory(_addCategoryTargetSelect); }
+    });
 
     async function createProject() {
         const name = document.getElementById('project-name').value.trim();
@@ -499,7 +576,7 @@
             description: projDesc,
             startDate: startVal || null,
             dueDate: dueVal || null,
-            status: document.getElementById('project-status').value,
+            status: 'Planning',
             category: document.getElementById('project-category').value || null,
             teamMemberIds: selectedMembers
         };
@@ -537,6 +614,7 @@
 
     async function openEditModal(projectId) {
         try {
+            await loadCategories();
             const res = await fetch(`/api/projects/${projectId}`, { credentials: 'same-origin' });
             const result = await res.json();
             if (!result.success) { alert(result.message); return; }
@@ -548,8 +626,11 @@
             document.getElementById('edit-start-date').value = p.startDate ? p.startDate.split('T')[0] : '';
             document.getElementById('edit-due-date').value = p.dueDate ? p.dueDate.split('T')[0] : '';
             document.getElementById('edit-project-status').value = p.status;
-            document.getElementById('edit-project-category').value = p.category || '';
-            document.getElementById('edit-project-progress').value = p.progress || 0;
+            const catSelect = document.getElementById('edit-project-category');
+            if (p.category && !Array.from(catSelect.options).some(o => o.value === p.category)) {
+                catSelect.innerHTML += `<option value="${esc(p.category)}">${esc(p.category)}</option>`;
+            }
+            catSelect.value = p.category || '';
 
             const memberIds = p.members.map(m => m.userID);
             renderTeamMemberCheckboxes('edit-team-members-list', memberIds);
@@ -584,7 +665,6 @@
             dueDate: editDueVal || null,
             status: document.getElementById('edit-project-status').value,
             category: document.getElementById('edit-project-category').value || null,
-            progress: parseFloat(document.getElementById('edit-project-progress').value) || 0,
             teamMemberIds: selectedMembers
         };
 
@@ -664,11 +744,6 @@
     }
 
     async function viewProject(projectId) {
-        // Track recently accessed
-        const recentProjects = JSON.parse(localStorage.getItem('recentProjects') || '{}');
-        recentProjects[projectId] = Date.now();
-        localStorage.setItem('recentProjects', JSON.stringify(recentProjects));
-
         try {
             const [projRes, tasksRes, productsRes] = await Promise.all([
                 fetch(`/api/projects/${projectId}`, { credentials: 'same-origin' }),
@@ -1003,6 +1078,8 @@
     window._archiveProject = CAN_ARCHIVE ? archiveProject : function() {};
     window._restoreProject = CAN_ARCHIVE ? restoreProject : function() {};
     window._goToPage = function(page) { currentPage = page; loadProjects(); };
+    window.promptAddCategory = promptAddCategory;
+    window.openAddCategoryModal = window.openAddCategoryModal;
 })();
 </script>
 }

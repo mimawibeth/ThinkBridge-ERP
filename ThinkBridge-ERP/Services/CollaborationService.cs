@@ -39,10 +39,8 @@ public class CollaborationService : ICollaborationService
             if (userRole.Equals("TeamMember", StringComparison.OrdinalIgnoreCase))
             {
                 // Team members see posts for projects they belong to, plus general posts
-                // Only see posts from other Team Members, not PMs or Admins
-                query = query.Where(p => (p.ProjectID == null ||
-                    p.Project!.ProjectMembers.Any(pm => pm.UserID == userId)) &&
-                    p.Creator.UserRoles.Any(ur => ur.Role.RoleName == "TeamMember"));
+                query = query.Where(p => p.ProjectID == null ||
+                    p.Project!.ProjectMembers.Any(pm => pm.UserID == userId));
             }
             else if (userRole.Equals("ProjectManager", StringComparison.OrdinalIgnoreCase))
             {
@@ -116,6 +114,18 @@ public class CollaborationService : ICollaborationService
             _context.Posts.Add(post);
             await _context.SaveChangesAsync();
 
+            // Audit log
+            _context.AuditLogs.Add(new AuditLog
+            {
+                CompanyID = companyId,
+                UserID = userId,
+                Action = "Created discussion post",
+                EntityName = "Post",
+                EntityID = post.PostID,
+                CreatedAt = DateTime.UtcNow
+            });
+            await _context.SaveChangesAsync();
+
             // Notify project members about the new post
             if (request.ProjectID.HasValue)
             {
@@ -168,6 +178,18 @@ public class CollaborationService : ICollaborationService
 
             _context.Comments.RemoveRange(post.Comments);
             _context.Posts.Remove(post);
+
+            // Audit log
+            _context.AuditLogs.Add(new AuditLog
+            {
+                CompanyID = companyId,
+                UserID = userId,
+                Action = "Deleted discussion post",
+                EntityName = "Post",
+                EntityID = postId,
+                CreatedAt = DateTime.UtcNow
+            });
+
             await _context.SaveChangesAsync();
 
             return new ServiceResult { Success = true };
@@ -182,19 +204,22 @@ public class CollaborationService : ICollaborationService
     // ──────────────────────────────────────────────
     // Comments
     // ──────────────────────────────────────────────
-    public async Task<CommentListResult> GetCommentsAsync(int postId, string userRole)
+    public async Task<CommentListResult> GetCommentsAsync(int companyId, int postId, string userRole)
     {
         try
         {
+            // Verify post belongs to caller's company
+            var postCompanyId = await _context.Posts
+                .Where(p => p.PostID == postId)
+                .Select(p => p.CompanyID)
+                .FirstOrDefaultAsync();
+
+            if (postCompanyId == 0 || postCompanyId != companyId)
+                return new CommentListResult { Success = false, ErrorMessage = "Post not found." };
+
             var query = _context.Comments
                 .Include(c => c.User)
                 .Where(c => c.PostID == postId);
-
-            // Team Members only see comments from other Team Members
-            if (userRole.Equals("TeamMember", StringComparison.OrdinalIgnoreCase))
-            {
-                query = query.Where(c => c.User.UserRoles.Any(ur => ur.Role.RoleName == "TeamMember"));
-            }
 
             var comments = await query
                 .OrderBy(c => c.CreatedAt)
@@ -237,6 +262,18 @@ public class CollaborationService : ICollaborationService
             _context.Comments.Add(comment);
             await _context.SaveChangesAsync();
 
+            // Audit log
+            _context.AuditLogs.Add(new AuditLog
+            {
+                CompanyID = companyId,
+                UserID = userId,
+                Action = "Added comment on discussion",
+                EntityName = "Comment",
+                EntityID = comment.CommentID,
+                CreatedAt = DateTime.UtcNow
+            });
+            await _context.SaveChangesAsync();
+
             // Notify the post author
             if (post.CreatedBy != userId)
             {
@@ -258,7 +295,7 @@ public class CollaborationService : ICollaborationService
         }
     }
 
-    public async Task<ServiceResult> DeleteCommentAsync(int userId, int commentId)
+    public async Task<ServiceResult> DeleteCommentAsync(int companyId, int userId, int commentId)
     {
         try
         {
@@ -266,10 +303,31 @@ public class CollaborationService : ICollaborationService
             if (comment == null)
                 return new ServiceResult { Success = false, ErrorMessage = "Comment not found." };
 
+            // Verify comment belongs to caller's company
+            var commentCompanyId = await _context.Posts
+                .Where(p => p.PostID == comment.PostID)
+                .Select(p => p.CompanyID)
+                .FirstOrDefaultAsync();
+
+            if (commentCompanyId != companyId)
+                return new ServiceResult { Success = false, ErrorMessage = "Comment not found." };
+
             if (comment.UserID != userId)
                 return new ServiceResult { Success = false, ErrorMessage = "You can only delete your own comments." };
 
             _context.Comments.Remove(comment);
+
+            // Audit log
+            _context.AuditLogs.Add(new AuditLog
+            {
+                CompanyID = commentCompanyId,
+                UserID = userId,
+                Action = "Deleted comment on discussion",
+                EntityName = "Comment",
+                EntityID = commentId,
+                CreatedAt = DateTime.UtcNow
+            });
+
             await _context.SaveChangesAsync();
             return new ServiceResult { Success = true };
         }
@@ -292,8 +350,7 @@ public class CollaborationService : ICollaborationService
             // Get project IDs the user can see
             var visibleProjectIds = await GetVisibleProjectIdsAsync(companyId, userId, userRole);
 
-            // For Team Members, only show activities from other Team Members
-            bool isTeamMember = userRole.Equals("TeamMember", StringComparison.OrdinalIgnoreCase);
+            // For Team Members, scope to visible projects only (already handled by visibleProjectIds)
 
             bool includeAll = string.IsNullOrWhiteSpace(filter.ActivityType) ||
                               filter.ActivityType.Equals("all", StringComparison.OrdinalIgnoreCase);
@@ -306,9 +363,6 @@ public class CollaborationService : ICollaborationService
                     .Include(tu => tu.Task).ThenInclude(t => t.Project)
                     .Where(tu => visibleProjectIds.Contains(tu.Task.ProjectID));
 
-                if (isTeamMember)
-                    taskQuery = taskQuery.Where(tu => tu.User.UserRoles.Any(ur => ur.Role.RoleName == "TeamMember"));
-
                 var taskUpdates = await taskQuery
                     .OrderByDescending(tu => tu.CreatedAt)
                     .Take(50)
@@ -317,6 +371,7 @@ public class CollaborationService : ICollaborationService
                 activities.AddRange(taskUpdates.Select(tu => new ActivityItem
                 {
                     ActivityType = "task",
+                    UserId = tu.User.UserID,
                     UserName = tu.User.FullName,
                     UserInitials = GetInitials(tu.User.Fname, tu.User.Lname),
                     UserAvatarColor = tu.User.AvatarColor,
@@ -337,9 +392,6 @@ public class CollaborationService : ICollaborationService
                     .Where(ph => ph.Product.CompanyID == companyId &&
                         (ph.Product.ProjectID == null || visibleProjectIds.Contains(ph.Product.ProjectID.Value)));
 
-                if (isTeamMember)
-                    productQuery = productQuery.Where(ph => ph.User.UserRoles.Any(ur => ur.Role.RoleName == "TeamMember"));
-
                 var productHistory = await productQuery
                     .OrderByDescending(ph => ph.ChangedAt)
                     .Take(50)
@@ -348,6 +400,7 @@ public class CollaborationService : ICollaborationService
                 activities.AddRange(productHistory.Select(ph => new ActivityItem
                 {
                     ActivityType = "product",
+                    UserId = ph.User.UserID,
                     UserName = ph.User.FullName,
                     UserInitials = GetInitials(ph.User.Fname, ph.User.Lname),
                     UserAvatarColor = ph.User.AvatarColor,
@@ -367,9 +420,6 @@ public class CollaborationService : ICollaborationService
                     .Where(p => p.CompanyID == companyId &&
                         (p.ProjectID == null || visibleProjectIds.Contains(p.ProjectID.Value)));
 
-                if (isTeamMember)
-                    postQuery = postQuery.Where(p => p.Creator.UserRoles.Any(ur => ur.Role.RoleName == "TeamMember"));
-
                 var posts = await postQuery
                     .OrderByDescending(p => p.CreatedAt)
                     .Take(50)
@@ -378,6 +428,7 @@ public class CollaborationService : ICollaborationService
                 activities.AddRange(posts.Select(p => new ActivityItem
                 {
                     ActivityType = "post",
+                    UserId = p.Creator.UserID,
                     UserName = p.Creator.FullName,
                     UserInitials = GetInitials(p.Creator.Fname, p.Creator.Lname),
                     UserAvatarColor = p.Creator.AvatarColor,
@@ -397,9 +448,6 @@ public class CollaborationService : ICollaborationService
                     .Where(c => c.Post.CompanyID == companyId &&
                         (c.Post.ProjectID == null || visibleProjectIds.Contains(c.Post.ProjectID.Value)));
 
-                if (isTeamMember)
-                    commentQuery = commentQuery.Where(c => c.User.UserRoles.Any(ur => ur.Role.RoleName == "TeamMember"));
-
                 var comments = await commentQuery
                     .OrderByDescending(c => c.CreatedAt)
                     .Take(50)
@@ -408,6 +456,7 @@ public class CollaborationService : ICollaborationService
                 activities.AddRange(comments.Select(c => new ActivityItem
                 {
                     ActivityType = "comment",
+                    UserId = c.User.UserID,
                     UserName = c.User.FullName,
                     UserInitials = GetInitials(c.User.Fname, c.User.Lname),
                     UserAvatarColor = c.User.AvatarColor,
@@ -428,6 +477,12 @@ public class CollaborationService : ICollaborationService
                         a.UserName.ToLower().Contains(search))
                     .ToList();
             }
+
+            // Date range filter
+            if (filter.DateFrom.HasValue)
+                activities = activities.Where(a => a.CreatedAt >= filter.DateFrom.Value).ToList();
+            if (filter.DateTo.HasValue)
+                activities = activities.Where(a => a.CreatedAt < filter.DateTo.Value.AddDays(1)).ToList();
 
             // Sort by date, paginate
             var sorted = activities.OrderByDescending(a => a.CreatedAt).ToList();

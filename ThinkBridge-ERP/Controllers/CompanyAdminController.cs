@@ -16,23 +16,32 @@ public class CompanyAdminController : ControllerBase
     private readonly ILogger<CompanyAdminController> _logger;
     private readonly ApplicationDbContext _context;
     private readonly ISubscriptionService _subscriptionService;
+    private readonly IEmailService _emailService;
 
     public CompanyAdminController(
         IUserManagementService userService,
         ILogger<CompanyAdminController> logger,
         ApplicationDbContext context,
-        ISubscriptionService subscriptionService)
+        ISubscriptionService subscriptionService,
+        IEmailService emailService)
     {
         _userService = userService;
         _logger = logger;
         _context = context;
         _subscriptionService = subscriptionService;
+        _emailService = emailService;
     }
 
     private int GetCurrentCompanyId()
     {
         var companyIdClaim = User.Claims.FirstOrDefault(c => c.Type == "CompanyID")?.Value;
         return int.TryParse(companyIdClaim, out var companyId) ? companyId : 0;
+    }
+
+    private int GetCurrentUserId()
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        return int.TryParse(userIdClaim, out var userId) ? userId : 0;
     }
 
     /// <summary>
@@ -158,6 +167,18 @@ public class CompanyAdminController : ControllerBase
             return BadRequest(new { success = false, message = result.ErrorMessage });
         }
 
+        // Audit log
+        _context.AuditLogs.Add(new Models.Entities.AuditLog
+        {
+            CompanyID = companyId,
+            UserID = GetCurrentUserId(),
+            Action = $"Created user '{request.FirstName} {request.LastName}' as {request.Role}",
+            EntityName = "User",
+            EntityID = result.UserId ?? 0,
+            CreatedAt = DateTime.UtcNow
+        });
+        await _context.SaveChangesAsync();
+
         return Ok(new
         {
             success = true,
@@ -177,6 +198,7 @@ public class CompanyAdminController : ControllerBase
     public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserRequest request)
     {
         var companyId = GetCurrentCompanyId();
+        var adminUserId = GetCurrentUserId();
         if (companyId == 0)
         {
             return BadRequest(new { success = false, message = "Invalid company context." });
@@ -187,6 +209,18 @@ public class CompanyAdminController : ControllerBase
         {
             return BadRequest(new { success = false, message = result.ErrorMessage });
         }
+
+        // Audit log
+        _context.AuditLogs.Add(new Models.Entities.AuditLog
+        {
+            CompanyID = companyId,
+            UserID = adminUserId,
+            Action = $"Updated user '{request.FirstName} {request.LastName}'",
+            EntityName = "User",
+            EntityID = id,
+            CreatedAt = DateTime.UtcNow
+        });
+        await _context.SaveChangesAsync();
 
         return Ok(new { success = true, data = result.User });
     }
@@ -214,6 +248,18 @@ public class CompanyAdminController : ControllerBase
             return BadRequest(new { success = false, message = result.ErrorMessage });
         }
 
+        // Audit log
+        _context.AuditLogs.Add(new Models.Entities.AuditLog
+        {
+            CompanyID = companyId,
+            UserID = GetCurrentUserId(),
+            Action = $"{(request.Status == "Active" ? "Activated" : "Deactivated")} user account",
+            EntityName = "User",
+            EntityID = id,
+            CreatedAt = DateTime.UtcNow
+        });
+        await _context.SaveChangesAsync();
+
         return Ok(new { success = true, message = $"User status updated to {request.Status}." });
     }
 
@@ -235,8 +281,35 @@ public class CompanyAdminController : ControllerBase
             return BadRequest(new { success = false, message = result.ErrorMessage });
         }
 
+        // Audit log
+        _context.AuditLogs.Add(new Models.Entities.AuditLog
+        {
+            CompanyID = companyId,
+            UserID = GetCurrentUserId(),
+            Action = "Reset user password",
+            EntityName = "User",
+            EntityID = id,
+            CreatedAt = DateTime.UtcNow
+        });
+        await _context.SaveChangesAsync();
+
         // Cast to get temporary password
         var resetResult = result as ResetPasswordResult;
+
+        // Send password reset email (fire-and-forget — don't block the response)
+        try
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.UserID == id && u.CompanyID == companyId);
+            if (user != null && resetResult?.TemporaryPassword != null)
+            {
+                _ = _emailService.SendPasswordResetEmailAsync(user.Email, user.Fname, resetResult.TemporaryPassword);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send password reset email for user {UserId}", id);
+        }
+
         return Ok(new
         {
             success = true,
@@ -257,6 +330,7 @@ public class CompanyAdminController : ControllerBase
     public async Task<IActionResult> GetAuditLogs(
         [FromQuery] string? search = null,
         [FromQuery] string? action = null,
+        [FromQuery] string? entity = null,
         [FromQuery] string? dateRange = null,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 15)
@@ -291,6 +365,12 @@ public class CompanyAdminController : ControllerBase
             if (!string.IsNullOrWhiteSpace(action) && action != "All")
             {
                 query = query.Where(a => a.Action.ToLower().Contains(action.ToLower()));
+            }
+
+            // Entity filter
+            if (!string.IsNullOrWhiteSpace(entity) && entity != "All")
+            {
+                query = query.Where(a => a.EntityName.ToLower().Contains(entity.ToLower()));
             }
 
             // Date range filter
@@ -388,7 +468,9 @@ public class CompanyAdminController : ControllerBase
                     maxUsers = subscription.Plan.MaxUsers,
                     maxProjects = subscription.Plan.MaxProjects,
                     currentUsers = userCount,
-                    currentProjects = projectCount
+                    currentProjects = projectCount,
+                    autoRenew = subscription.AutoRenew,
+                    gracePeriodEndDate = subscription.GracePeriodEndDate
                 }
             });
         }
@@ -505,4 +587,58 @@ public class CompanyAdminController : ControllerBase
             return StatusCode(500, new { success = false, message = "Failed to fetch receipt." });
         }
     }
+
+    // ─── Subscription Alert ──────────────────────
+
+    /// <summary>
+    /// Get subscription alert for red dot indicator
+    /// </summary>
+    [HttpGet("subscription/alert")]
+    public async Task<IActionResult> GetSubscriptionAlert()
+    {
+        var companyId = GetCurrentCompanyId();
+        if (companyId == 0)
+            return BadRequest(new { success = false, message = "Invalid company context." });
+
+        try
+        {
+            var alert = await _subscriptionService.GetSubscriptionAlertAsync(companyId);
+            return Ok(new { success = true, data = alert });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching subscription alert for company {CompanyId}", companyId);
+            return StatusCode(500, new { success = false, message = "Failed to fetch subscription alert." });
+        }
+    }
+
+    /// <summary>
+    /// Toggle auto-renew for the company subscription
+    /// </summary>
+    [HttpPost("subscription/auto-renew")]
+    public async Task<IActionResult> ToggleAutoRenew([FromBody] ToggleAutoRenewRequest request)
+    {
+        var companyId = GetCurrentCompanyId();
+        if (companyId == 0)
+            return BadRequest(new { success = false, message = "Invalid company context." });
+
+        try
+        {
+            var result = await _subscriptionService.ToggleAutoRenewAsync(companyId, request.Enabled);
+            if (!result)
+                return NotFound(new { success = false, message = "No active subscription found." });
+
+            return Ok(new { success = true, message = $"Auto-renew {(request.Enabled ? "enabled" : "disabled")}." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error toggling auto-renew for company {CompanyId}", companyId);
+            return StatusCode(500, new { success = false, message = "Failed to update auto-renew setting." });
+        }
+    }
+}
+
+public class ToggleAutoRenewRequest
+{
+    public bool Enabled { get; set; }
 }

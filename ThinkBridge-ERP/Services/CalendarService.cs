@@ -299,7 +299,7 @@ public class CalendarService : ICalendarService
     {
         try
         {
-            var query = _context.Projects.Where(p => p.CompanyID == companyId && p.Status == "Active");
+            var query = _context.Projects.Where(p => p.CompanyID == companyId && p.Status != "Archived");
 
             // TeamMember only sees projects they're a member of
             if (userRole == "TeamMember")

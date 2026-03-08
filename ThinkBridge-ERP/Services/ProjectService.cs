@@ -68,7 +68,7 @@ public class ProjectService : IProjectService
             var totalCount = await query.CountAsync();
 
             var projects = await query
-                .OrderByDescending(p => p.CreatedAt)
+                .OrderByDescending(p => p.UpdatedAt)
                 .Skip((filter.Page - 1) * filter.PageSize)
                 .Take(filter.PageSize)
                 .Select(p => new ProjectListItem
@@ -181,7 +181,8 @@ public class ProjectService : IProjectService
                 StartDate = request.StartDate,
                 DueDate = request.DueDate,
                 CreatedBy = userId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
             };
 
             _context.Projects.Add(project);
@@ -221,6 +222,18 @@ public class ProjectService : IProjectService
                 });
                 await _context.SaveChangesAsync();
             }
+
+            // Audit log
+            _context.AuditLogs.Add(new AuditLog
+            {
+                CompanyID = companyId,
+                UserID = userId,
+                Action = $"Created project '{request.ProjectName}'",
+                EntityName = "Project",
+                EntityID = project.ProjectID,
+                CreatedAt = DateTime.UtcNow
+            });
+            await _context.SaveChangesAsync();
 
             _logger.LogInformation("Project {ProjectCode} created by user {UserId}", projectCode, userId);
 
@@ -268,6 +281,7 @@ public class ProjectService : IProjectService
             if (request.Progress.HasValue) project.Progress = request.Progress.Value;
             if (request.StartDate.HasValue) project.StartDate = request.StartDate.Value;
             if (request.DueDate.HasValue) project.DueDate = request.DueDate.Value;
+            project.UpdatedAt = DateTime.UtcNow;
 
             // Update team members if provided
             if (request.TeamMemberIds != null)
@@ -292,6 +306,17 @@ public class ProjectService : IProjectService
                 }
             }
 
+            // Audit log
+            _context.AuditLogs.Add(new AuditLog
+            {
+                CompanyID = companyId,
+                UserID = userId,
+                Action = $"Updated project '{project.ProjectName}'",
+                EntityName = "Project",
+                EntityID = projectId,
+                CreatedAt = DateTime.UtcNow
+            });
+
             await _context.SaveChangesAsync();
             _logger.LogInformation("Project {ProjectId} updated by user {UserId}", projectId, userId);
 
@@ -304,7 +329,7 @@ public class ProjectService : IProjectService
         }
     }
 
-    public async Task<ServiceResult> ArchiveOrRestoreProjectAsync(int companyId, int projectId, string status)
+    public async Task<ServiceResult> ArchiveOrRestoreProjectAsync(int companyId, int userId, int projectId, string status)
     {
         try
         {
@@ -315,6 +340,19 @@ public class ProjectService : IProjectService
                 return new ServiceResult { Success = false, ErrorMessage = "Project not found." };
 
             project.Status = status;
+            project.UpdatedAt = DateTime.UtcNow;
+
+            // Audit log
+            _context.AuditLogs.Add(new AuditLog
+            {
+                CompanyID = companyId,
+                UserID = userId,
+                Action = $"{(status == "Archived" ? "Archived" : "Restored")} project '{project.ProjectName}'",
+                EntityName = "Project",
+                EntityID = projectId,
+                CreatedAt = DateTime.UtcNow
+            });
+
             await _context.SaveChangesAsync();
             _logger.LogInformation("Project {ProjectId} status changed to {Status} by CompanyAdmin", projectId, status);
 
@@ -345,9 +383,23 @@ public class ProjectService : IProjectService
                 return new ServiceResult { Success = false, ErrorMessage = "Only the project creator can delete this project." };
             }
 
+            var projectName = project.ProjectName;
+
             // Remove members first
             _context.ProjectMembers.RemoveRange(project.ProjectMembers);
             _context.Projects.Remove(project);
+
+            // Audit log
+            _context.AuditLogs.Add(new AuditLog
+            {
+                CompanyID = companyId,
+                UserID = userId,
+                Action = $"Deleted project '{projectName}'",
+                EntityName = "Project",
+                EntityID = projectId,
+                CreatedAt = DateTime.UtcNow
+            });
+
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Project {ProjectId} deleted by user {UserId}", projectId, userId);
@@ -383,7 +435,7 @@ public class ProjectService : IProjectService
             {
                 Success = true,
                 TotalProjects = projects.Count,
-                ActiveProjects = projects.Count(p => p.Status == "In Progress"),
+                ActiveProjects = projects.Count(p => p.Status != "Completed" && p.Status != "Archived"),
                 CompletedProjects = projects.Count(p => p.Status == "Completed"),
                 PlanningProjects = projects.Count(p => p.Status == "Planning"),
                 DelayedProjects = projects.Count(p => p.Status == "Delayed" || (p.DueDate.HasValue && p.DueDate.Value < DateTime.UtcNow && p.Status != "Completed"))

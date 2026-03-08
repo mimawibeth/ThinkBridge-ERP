@@ -249,12 +249,16 @@ public class SubscriptionService : ISubscriptionService
     }
 
     /// <summary>
-    /// Checks for subscriptions past their EndDate and marks them Expired.
-    /// Also suspends the corresponding companies.
+    /// Checks for subscriptions past their EndDate.
+    /// Active/Trial → GracePeriod (users stay active during grace).
+    /// GracePeriod past GracePeriodEndDate → Expired (users deactivated).
     /// </summary>
     public async Task<int> ExpireOverdueSubscriptionsAsync()
     {
         var now = DateTime.UtcNow;
+        var affected = 0;
+
+        // 1. Move Active/Trial subscriptions past EndDate into GracePeriod
         var overdueSubscriptions = await _context.Subscriptions
             .Include(s => s.Company)
             .Where(s => (s.Status == "Active" || s.Status == "Trial")
@@ -263,6 +267,26 @@ public class SubscriptionService : ISubscriptionService
             .ToListAsync();
 
         foreach (var sub in overdueSubscriptions)
+        {
+            sub.Status = "GracePeriod";
+            sub.GracePeriodEndDate = sub.EndDate!.Value.AddDays(sub.GracePeriodDays);
+
+            _logger.LogInformation(
+                "Subscription {SubId} entered grace period for company '{CompanyName}' (ends {GraceEnd})",
+                sub.SubscriptionID, sub.Company.CompanyName, sub.GracePeriodEndDate);
+
+            affected++;
+        }
+
+        // 2. Expire GracePeriod subscriptions past GracePeriodEndDate
+        var expiredGraceSubscriptions = await _context.Subscriptions
+            .Include(s => s.Company)
+            .Where(s => s.Status == "GracePeriod"
+                        && s.GracePeriodEndDate.HasValue
+                        && s.GracePeriodEndDate.Value < now)
+            .ToListAsync();
+
+        foreach (var sub in expiredGraceSubscriptions)
         {
             sub.Status = "Expired";
             sub.Company.Status = "Suspended";
@@ -277,23 +301,25 @@ public class SubscriptionService : ISubscriptionService
             }
 
             _logger.LogInformation(
-                "Subscription {SubId} expired for company '{CompanyName}'",
+                "Subscription {SubId} expired (grace ended) for company '{CompanyName}'",
                 sub.SubscriptionID, sub.Company.CompanyName);
+
+            affected++;
         }
 
-        if (overdueSubscriptions.Any())
+        if (affected > 0)
         {
             await _context.SaveChangesAsync();
         }
 
-        return overdueSubscriptions.Count;
+        return affected;
     }
 
     public async Task<Subscription?> GetActiveSubscriptionAsync(int companyId)
     {
         return await _context.Subscriptions
             .Include(s => s.Plan)
-            .Where(s => s.CompanyID == companyId && (s.Status == "Active" || s.Status == "Trial"))
+            .Where(s => s.CompanyID == companyId && (s.Status == "Active" || s.Status == "Trial" || s.Status == "GracePeriod"))
             .OrderByDescending(s => s.StartDate)
             .FirstOrDefaultAsync();
     }
@@ -305,5 +331,172 @@ public class SubscriptionService : ISubscriptionService
         var random = new Random();
         var password = new string(Enumerable.Range(0, 8).Select(_ => chars[random.Next(chars.Length)]).ToArray());
         return $"Tb@{password}1";
+    }
+
+    public async Task<SubscriptionAlertResult?> GetSubscriptionAlertAsync(int companyId)
+    {
+        var subscription = await _context.Subscriptions
+            .Include(s => s.Plan)
+            .Where(s => s.CompanyID == companyId)
+            .OrderByDescending(s => s.StartDate)
+            .FirstOrDefaultAsync();
+
+        if (subscription == null) return null;
+
+        var now = DateTime.UtcNow;
+        var pht = TimeZoneInfo.ConvertTimeFromUtc(now, TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila"));
+
+        // Auto-renew failed
+        if (subscription.AutoRenewFailedAt.HasValue)
+        {
+            return new SubscriptionAlertResult
+            {
+                AlertType = "auto-renew-failed",
+                Message = "Auto-renewal payment failed. Please renew manually to avoid service interruption.",
+                Status = subscription.Status,
+                EndDate = subscription.EndDate,
+                GracePeriodEndDate = subscription.GracePeriodEndDate,
+                AutoRenew = subscription.AutoRenew
+            };
+        }
+
+        // Grace period
+        if (subscription.Status == "GracePeriod" && subscription.GracePeriodEndDate.HasValue)
+        {
+            var graceRemaining = (int)Math.Ceiling((subscription.GracePeriodEndDate.Value - now).TotalDays);
+            return new SubscriptionAlertResult
+            {
+                AlertType = "grace-period",
+                Message = $"Your subscription has expired. You have {Math.Max(0, graceRemaining)} day(s) remaining in the grace period to renew.",
+                Status = subscription.Status,
+                EndDate = subscription.EndDate,
+                GracePeriodEndDate = subscription.GracePeriodEndDate,
+                DaysRemaining = Math.Max(0, graceRemaining),
+                AutoRenew = subscription.AutoRenew
+            };
+        }
+
+        // Expiring within 3 days
+        if ((subscription.Status == "Active" || subscription.Status == "Trial")
+            && subscription.EndDate.HasValue)
+        {
+            var daysLeft = (int)Math.Ceiling((subscription.EndDate.Value - now).TotalDays);
+            if (daysLeft <= 3 && daysLeft >= 0)
+            {
+                return new SubscriptionAlertResult
+                {
+                    AlertType = "expiring-soon",
+                    Message = $"Your subscription expires in {daysLeft} day(s). Renew now to avoid interruption.",
+                    Status = subscription.Status,
+                    EndDate = subscription.EndDate,
+                    DaysRemaining = daysLeft,
+                    AutoRenew = subscription.AutoRenew
+                };
+            }
+        }
+
+        return null;
+    }
+
+    public async Task<bool> ToggleAutoRenewAsync(int companyId, bool enabled)
+    {
+        var subscription = await _context.Subscriptions
+            .Where(s => s.CompanyID == companyId
+                && (s.Status == "Active" || s.Status == "Trial" || s.Status == "GracePeriod"))
+            .OrderByDescending(s => s.StartDate)
+            .FirstOrDefaultAsync();
+
+        if (subscription == null) return false;
+
+        subscription.AutoRenew = enabled;
+        if (enabled)
+        {
+            subscription.AutoRenewFailedAt = null;
+        }
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Auto-renew {State} for subscription {SubId} (company {CompanyId})",
+            enabled ? "enabled" : "disabled", subscription.SubscriptionID, companyId);
+
+        return true;
+    }
+
+    /// <summary>
+    /// Renews a subscription after successful payment. Extends EndDate by 30 days from now,
+    /// clears grace period, re-activates company/users.
+    /// </summary>
+    public async Task<bool> RenewSubscriptionAsync(string checkoutSessionId)
+    {
+        var strategy = _context.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var payment = await _context.PaymentTransactions
+                    .Include(p => p.Subscription)
+                        .ThenInclude(s => s.Company)
+                    .FirstOrDefaultAsync(p => p.CheckoutSessionID == checkoutSessionId);
+
+                if (payment == null)
+                {
+                    _logger.LogWarning("No payment found for renewal checkout session {SessionId}", checkoutSessionId);
+                    return false;
+                }
+
+                if (payment.Status == "Paid")
+                {
+                    return true; // Idempotent
+                }
+
+                // Update payment
+                payment.Status = "Paid";
+                payment.PaidAt = DateTime.UtcNow;
+
+                // Update subscription
+                var subscription = payment.Subscription;
+                subscription.Status = "Active";
+                subscription.StartDate = DateTime.UtcNow;
+                subscription.EndDate = DateTime.UtcNow.AddDays(30);
+                subscription.GracePeriodEndDate = null;
+                subscription.AutoRenewFailedAt = null;
+
+                // Re-activate company
+                subscription.Company.Status = "Active";
+
+                // Re-activate users
+                var users = await _context.Users
+                    .Where(u => u.CompanyID == subscription.CompanyID)
+                    .ToListAsync();
+                foreach (var user in users)
+                {
+                    user.Status = "Active";
+                }
+
+                // Update invoice if exists
+                var invoice = await _context.Invoices
+                    .FirstOrDefaultAsync(i => i.SubscriptionID == subscription.SubscriptionID && i.Status == "Pending");
+                if (invoice != null)
+                {
+                    invoice.Status = "Paid";
+                    invoice.PaidDate = DateTime.UtcNow;
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                _logger.LogInformation(
+                    "Subscription {SubId} renewed for company {CompanyId} via checkout {SessionId}",
+                    subscription.SubscriptionID, subscription.CompanyID, checkoutSessionId);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Error renewing subscription for session {SessionId}", checkoutSessionId);
+                return false;
+            }
+        });
     }
 }

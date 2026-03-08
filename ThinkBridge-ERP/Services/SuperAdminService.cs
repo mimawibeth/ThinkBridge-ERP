@@ -35,7 +35,7 @@ public class SuperAdminService : ISuperAdminService
                     MaxUsers = p.MaxUsers,
                     MaxProjects = p.MaxProjects,
                     IsActive = p.IsActive,
-                    ActiveSubscriptions = p.Subscriptions.Count(s => s.Status == "Active" || s.Status == "Trial")
+                    ActiveSubscriptions = p.Subscriptions.Count(s => s.Status == "Active" || s.Status == "Trial" || s.Status == "GracePeriod")
                 })
                 .OrderBy(p => p.Price)
                 .ToListAsync();
@@ -255,7 +255,7 @@ public class SuperAdminService : ISuperAdminService
 
                 // Check if company already has an active subscription
                 var existingSub = await _context.Subscriptions
-                    .AnyAsync(s => s.CompanyID == request.CompanyID && (s.Status == "Active" || s.Status == "Trial"));
+                    .AnyAsync(s => s.CompanyID == request.CompanyID && (s.Status == "Active" || s.Status == "Trial" || s.Status == "GracePeriod"));
                 if (existingSub)
                     return new ServiceResult { Success = false, ErrorMessage = "Company already has an active subscription. Cancel or expire it first." };
 
@@ -341,6 +341,27 @@ public class SuperAdminService : ISuperAdminService
                     else if (request.Status == "Active")
                     {
                         subscription.Company.Status = "Active";
+                    }
+
+                    // Sync related payment status
+                    var pendingPayments = await _context.PaymentTransactions
+                        .Where(p => p.SubscriptionID == subscriptionId && p.Status == "Pending")
+                        .ToListAsync();
+
+                    if (request.Status == "Active")
+                    {
+                        foreach (var payment in pendingPayments)
+                        {
+                            payment.Status = "Completed";
+                            payment.PaidAt = DateTime.UtcNow;
+                        }
+                    }
+                    else if (request.Status == "Cancelled" || request.Status == "Expired")
+                    {
+                        foreach (var payment in pendingPayments)
+                        {
+                            payment.Status = "Cancelled";
+                        }
                     }
                 }
 
@@ -464,6 +485,16 @@ public class SuperAdminService : ISuperAdminService
                 // Suspend the company
                 subscription.Company.Status = "Suspended";
 
+                // Cancel any pending payments for this subscription
+                var pendingPayments = await _context.PaymentTransactions
+                    .Where(p => p.SubscriptionID == subscriptionId && p.Status == "Pending")
+                    .ToListAsync();
+
+                foreach (var payment in pendingPayments)
+                {
+                    payment.Status = "Cancelled";
+                }
+
                 // Deactivate company users
                 var companyUsers = await _context.Users
                     .Where(u => u.CompanyID == subscription.CompanyID)
@@ -504,11 +535,11 @@ public class SuperAdminService : ISuperAdminService
                 .Include(s => s.Plan)
                 .ToListAsync();
 
-            var activeSubs = allSubs.Where(s => s.Status == "Active").ToList();
+            var activeSubs = allSubs.Where(s => s.Status == "Active" || s.Status == "GracePeriod").ToList();
             var mrr = activeSubs.Sum(s => s.Plan.BillingCycle == "Annual" ? s.Plan.Price / 12 : s.Plan.Price);
 
             var planDistribution = allSubs
-                .Where(s => s.Status == "Active" || s.Status == "Trial")
+                .Where(s => s.Status == "Active" || s.Status == "Trial" || s.Status == "GracePeriod")
                 .GroupBy(s => s.Plan.PlanName)
                 .ToDictionary(g => g.Key, g => g.Count());
 
@@ -539,6 +570,23 @@ public class SuperAdminService : ISuperAdminService
     {
         try
         {
+            // Auto-sync: fix orphaned pending payments whose subscription is already cancelled/expired
+            var orphanedPayments = await _context.PaymentTransactions
+                .Include(p => p.Subscription)
+                .Where(p => p.Status == "Pending" &&
+                    (p.Subscription.Status == "Cancelled" || p.Subscription.Status == "Expired"))
+                .ToListAsync();
+
+            if (orphanedPayments.Count > 0)
+            {
+                foreach (var payment in orphanedPayments)
+                {
+                    payment.Status = "Cancelled";
+                }
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Auto-synced {Count} orphaned pending payments to Cancelled", orphanedPayments.Count);
+            }
+
             var query = _context.PaymentTransactions
                 .Include(p => p.Subscription)
                     .ThenInclude(s => s.Company)
@@ -567,6 +615,18 @@ public class SuperAdminService : ISuperAdminService
             if (filter.Month.HasValue)
             {
                 query = query.Where(p => p.CreatedAt.Month == filter.Month.Value);
+            }
+
+            if (filter.DateFrom.HasValue)
+            {
+                var from = filter.DateFrom.Value.Date;
+                query = query.Where(p => p.CreatedAt >= from);
+            }
+
+            if (filter.DateTo.HasValue)
+            {
+                var to = filter.DateTo.Value.Date.AddDays(1);
+                query = query.Where(p => p.CreatedAt < to);
             }
 
             var totalCount = await query.CountAsync();
@@ -640,18 +700,45 @@ public class SuperAdminService : ISuperAdminService
         }
     }
 
-    public async Task<PaymentStatsResult> GetPaymentStatsAsync(int? year = null, int? month = null)
+    public async Task<PaymentStatsResult> GetPaymentStatsAsync(int? year = null, int? month = null, DateTime? dateFrom = null, DateTime? dateTo = null)
     {
         try
         {
-            var now = DateTime.UtcNow;
-            var targetYear = year ?? now.Year;
-            var targetMonth = month ?? now.Month;
-            var startOfMonth = new DateTime(targetYear, targetMonth, 1, 0, 0, 0, DateTimeKind.Utc);
-            var endOfMonth = startOfMonth.AddMonths(1);
+            // Auto-sync: fix orphaned pending invoices whose subscription is cancelled/expired
+            var orphanedInvoices = await _context.Invoices
+                .Include(i => i.Subscription)
+                .Where(i => i.Status == "Pending" &&
+                    (i.Subscription.Status == "Cancelled" || i.Subscription.Status == "Expired"))
+                .ToListAsync();
 
-            var monthPayments = await _context.PaymentTransactions
-                .Where(p => p.CreatedAt >= startOfMonth && p.CreatedAt < endOfMonth)
+            if (orphanedInvoices.Count > 0)
+            {
+                foreach (var invoice in orphanedInvoices)
+                {
+                    invoice.Status = "Cancelled";
+                }
+                await _context.SaveChangesAsync();
+            }
+
+            var now = DateTime.UtcNow;
+
+            // Determine the date window for payments
+            DateTime startDate, endDate;
+            if (dateFrom.HasValue && dateTo.HasValue)
+            {
+                startDate = dateFrom.Value.Date;
+                endDate = dateTo.Value.Date.AddDays(1);
+            }
+            else
+            {
+                var targetYear = year ?? now.Year;
+                var targetMonth = month ?? now.Month;
+                startDate = new DateTime(targetYear, targetMonth, 1, 0, 0, 0, DateTimeKind.Utc);
+                endDate = startDate.AddMonths(1);
+            }
+
+            var periodPayments = await _context.PaymentTransactions
+                .Where(p => p.CreatedAt >= startDate && p.CreatedAt < endDate)
                 .ToListAsync();
 
             var pendingInvoices = await _context.Invoices
@@ -665,14 +752,14 @@ public class SuperAdminService : ISuperAdminService
             return new PaymentStatsResult
             {
                 Success = true,
-                TotalRevenue = monthPayments.Where(p => p.Status == "Completed").Sum(p => p.Amount),
+                TotalRevenue = periodPayments.Where(p => p.Status == "Completed" || p.Status == "Paid").Sum(p => p.Amount),
                 PendingAmount = pendingInvoices.Sum(i => i.Amount),
                 OverdueAmount = overdueInvoices.Sum(i => i.Amount),
-                CollectedAmount = monthPayments.Where(p => p.Status == "Completed").Sum(p => p.Amount),
+                CollectedAmount = periodPayments.Where(p => p.Status == "Completed" || p.Status == "Paid").Sum(p => p.Amount),
                 PendingCount = pendingInvoices.Count,
                 OverdueCount = overdueInvoices.Count,
-                CompletedCount = monthPayments.Count(p => p.Status == "Completed"),
-                FailedCount = monthPayments.Count(p => p.Status == "Failed")
+                CompletedCount = periodPayments.Count(p => p.Status == "Completed" || p.Status == "Paid"),
+                FailedCount = periodPayments.Count(p => p.Status == "Failed")
             };
         }
         catch (Exception ex)
@@ -897,7 +984,7 @@ public class SuperAdminService : ISuperAdminService
             var previousMonthStart = currentMonthStart.AddMonths(-1);
 
             var allCompletedPayments = await _context.PaymentTransactions
-                .Where(p => p.Status == "Completed")
+                .Where(p => p.Status == "Completed" || p.Status == "Paid")
                 .ToListAsync();
 
             var totalRevenue = allCompletedPayments.Sum(p => p.Amount);
@@ -984,7 +1071,7 @@ public class SuperAdminService : ISuperAdminService
             var cancelledSubs = subscriptions.Count(s => s.Status == "Cancelled");
 
             var mrr = subscriptions
-                .Where(s => s.Status == "Active" && s.Plan != null)
+                .Where(s => (s.Status == "Active" || s.Status == "GracePeriod") && s.Plan != null)
                 .Sum(s => s.Plan!.BillingCycle == "Annual" ? s.Plan.Price / 12m : s.Plan.Price);
 
             var planDistribution = subscriptions
@@ -994,14 +1081,14 @@ public class SuperAdminService : ISuperAdminService
                 {
                     PlanName = g.Key,
                     Count = g.Count(),
-                    Revenue = g.Where(s => s.Status == "Active").Sum(s => s.Plan!.Price)
+                    Revenue = g.Where(s => s.Status == "Active" || s.Status == "GracePeriod").Sum(s => s.Plan!.Price)
                 })
                 .OrderByDescending(p => p.Count)
                 .ToList();
 
             // ---- Payment Overview ----
             var payments = await _context.PaymentTransactions.ToListAsync();
-            var completedPayments = payments.Where(p => p.Status == "Completed").ToList();
+            var completedPayments = payments.Where(p => p.Status == "Completed" || p.Status == "Paid").ToList();
             var totalRevenue = completedPayments.Sum(p => p.Amount);
             var pendingAmount = payments.Where(p => p.Status == "Pending").Sum(p => p.Amount);
             var completedCount = completedPayments.Count;
@@ -1059,7 +1146,7 @@ public class SuperAdminService : ISuperAdminService
             var topCompaniesByUsers = companyUsers.Select(cu =>
             {
                 var comp = topCompanyEntities.FirstOrDefault(c => c.CompanyID == cu.CompanyID);
-                var sub = topCompanySubs.FirstOrDefault(s => s.CompanyID == cu.CompanyID && s.Status == "Active");
+                var sub = topCompanySubs.FirstOrDefault(s => s.CompanyID == cu.CompanyID && (s.Status == "Active" || s.Status == "GracePeriod"));
                 return new TopCompanyItem
                 {
                     CompanyID = cu.CompanyID,
@@ -1072,7 +1159,7 @@ public class SuperAdminService : ISuperAdminService
 
             // Top companies by revenue
             var companyRevenue = await _context.PaymentTransactions
-                .Where(p => p.Status == "Completed")
+                .Where(p => p.Status == "Completed" || p.Status == "Paid")
                 .Join(_context.Subscriptions, p => p.SubscriptionID, s => s.SubscriptionID, (p, s) => new { s.CompanyID, p.Amount })
                 .GroupBy(x => x.CompanyID)
                 .Select(g => new { CompanyID = g.Key, TotalRevenue = g.Sum(x => x.Amount) })
@@ -1093,7 +1180,7 @@ public class SuperAdminService : ISuperAdminService
             var topCompaniesByRevenue = companyRevenue.Select(cr =>
             {
                 var comp = revenueCompanyEntities.FirstOrDefault(c => c.CompanyID == cr.CompanyID);
-                var sub = revenueCompanySubs.FirstOrDefault(s => s.CompanyID == cr.CompanyID && s.Status == "Active");
+                var sub = revenueCompanySubs.FirstOrDefault(s => s.CompanyID == cr.CompanyID && (s.Status == "Active" || s.Status == "GracePeriod"));
                 var userCount = companyUsers.FirstOrDefault(u => u.CompanyID == cr.CompanyID)?.UserCount ?? 0;
                 return new TopCompanyItem
                 {

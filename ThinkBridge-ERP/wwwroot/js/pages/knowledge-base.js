@@ -253,7 +253,7 @@
             <article class="article-card" data-id="${a.documentID}" onclick="window.kbViewArticle(${a.documentID})">
                 <div class="article-header">
                     <span class="article-category cat-default">${escapeHtml(a.categoryName || 'Uncategorized')}</span>
-                    <span class="article-status-badge status-${(a.approvalStatus || '').toLowerCase()}">${escapeHtml(a.approvalStatus)}</span>
+                    ${a.approvalStatus && a.approvalStatus !== 'Approved' ? `<span class="article-status-badge status-${(a.approvalStatus).toLowerCase()}">${escapeHtml(a.approvalStatus)}</span>` : ''}
                 </div>
                 <div class="article-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -312,10 +312,15 @@
             document.getElementById('view-article-date').textContent = formatDate(a.createdAt);
             document.getElementById('view-article-description').textContent = a.description || 'No description provided.';
 
-            // Status badge
+            // Status badge — hide for Approved articles (clean look)
             const statusBadge = document.getElementById('view-article-status-badge');
-            statusBadge.className = `badge article-status-badge status-${(a.approvalStatus || '').toLowerCase()}`;
-            statusBadge.textContent = a.approvalStatus;
+            if (a.approvalStatus && a.approvalStatus !== 'Approved') {
+                statusBadge.className = `badge article-status-badge status-${(a.approvalStatus).toLowerCase()}`;
+                statusBadge.textContent = a.approvalStatus;
+                statusBadge.style.display = '';
+            } else {
+                statusBadge.style.display = 'none';
+            }
 
             // Content - convert newlines to paragraphs
             const contentDiv = document.getElementById('view-article-content');
@@ -778,17 +783,20 @@
         return div.innerHTML;
     }
 
+    function toUtcDate(dateStr) {
+        if (!dateStr) return new Date();
+        const s = String(dateStr);
+        return new Date(s.endsWith('Z') || s.includes('+') ? s : s + 'Z');
+    }
+
     function formatDate(dateStr) {
         if (!dateStr) return '-';
-        const d = new Date(dateStr);
-        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        return toUtcDate(dateStr).toLocaleDateString('en-US', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' });
     }
 
     function formatDateRelative(dateStr) {
         if (!dateStr) return '';
-        const d = new Date(dateStr);
-        const now = new Date();
-        const diff = Math.floor((now - d) / 1000);
+        const diff = Math.floor((Date.now() - toUtcDate(dateStr).getTime()) / 1000);
 
         if (diff < 60) return 'just now';
         if (diff < 3600) return Math.floor(diff / 60) + 'm ago';

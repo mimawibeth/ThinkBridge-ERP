@@ -180,14 +180,14 @@
         document.getElementById('btn-change-password')?.addEventListener('click', changePassword);
         document.getElementById('btn-cancel-password')?.addEventListener('click', cancelPassword);
 
-        // Real-time strength
+        // Real-time checklist
         document.getElementById('new-password')?.addEventListener('input', (e) => {
-            updatePasswordStrength(e.target.value);
+            updatePasswordChecklist(e.target.value);
+            checkPasswordMatch();
         });
 
         // Match check
         document.getElementById('confirm-password')?.addEventListener('input', checkPasswordMatch);
-        document.getElementById('new-password')?.addEventListener('input', checkPasswordMatch);
     }
 
     async function changePassword() {
@@ -199,8 +199,24 @@
             showToast('Current password is required.', 'error');
             return;
         }
-        if (!newPassword || newPassword.length < 8) {
-            showToast('New password must be at least 8 characters.', 'error');
+        if (!newPassword || newPassword.length < 12) {
+            showToast('Password must be at least 12 characters.', 'error');
+            return;
+        }
+        if (!/[A-Z]/.test(newPassword)) {
+            showToast('Password must include an uppercase letter.', 'error');
+            return;
+        }
+        if (!/[a-z]/.test(newPassword)) {
+            showToast('Password must include a lowercase letter.', 'error');
+            return;
+        }
+        if (!/[0-9]/.test(newPassword)) {
+            showToast('Password must include a number.', 'error');
+            return;
+        }
+        if (!/[^a-zA-Z0-9]/.test(newPassword)) {
+            showToast('Password must include a special character.', 'error');
             return;
         }
         if (newPassword !== confirmPassword) {
@@ -239,54 +255,41 @@
         document.getElementById('current-password').value = '';
         document.getElementById('new-password').value = '';
         document.getElementById('confirm-password').value = '';
-        resetPasswordStrength();
+        resetPasswordChecklist();
         const hint = document.getElementById('password-match-hint');
         if (hint) { hint.style.display = 'none'; hint.textContent = ''; }
     }
 
     // ------------------------------------------
-    // Password strength meter
+    // Password checklist
     // ------------------------------------------
-    function updatePasswordStrength(password) {
-        const bars = document.querySelectorAll('#password-strength .strength-bar');
-        const text = document.getElementById('strength-text');
+    function updatePasswordChecklist(password) {
+        const checklist = document.getElementById('passwordChecklist');
+        if (!checklist) return;
 
-        if (!password) {
-            resetPasswordStrength();
-            return;
-        }
+        checklist.style.display = password.length > 0 ? 'block' : 'none';
 
-        let score = 0;
-        if (password.length >= 8) score++;
-        if (/[A-Z]/.test(password)) score++;
-        if (/[0-9]/.test(password)) score++;
-        if (/[^A-Za-z0-9]/.test(password)) score++;
+        const update = (id, pass) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.toggle('valid', pass);
+            el.classList.toggle('invalid', !pass);
+        };
 
-        const levels = [
-            { label: 'Weak', color: '#ef4444' },
-            { label: 'Fair', color: '#f59e0b' },
-            { label: 'Good', color: '#3b82f6' },
-            { label: 'Strong', color: '#10b981' }
-        ];
-
-        bars.forEach((bar, i) => {
-            if (i < score) {
-                bar.style.background = levels[score - 1].color;
-            } else {
-                bar.style.background = 'var(--border)';
-            }
-        });
-
-        text.textContent = score > 0 ? levels[score - 1].label : '';
-        text.style.color = score > 0 ? levels[score - 1].color : '';
+        update('check-length', password.length >= 12);
+        update('check-lowercase', /[a-z]/.test(password));
+        update('check-uppercase', /[A-Z]/.test(password));
+        update('check-number', /[0-9]/.test(password));
+        update('check-special', /[^a-zA-Z0-9]/.test(password));
     }
 
-    function resetPasswordStrength() {
-        document.querySelectorAll('#password-strength .strength-bar').forEach(b => {
-            b.style.background = 'var(--border)';
+    function resetPasswordChecklist() {
+        const checklist = document.getElementById('passwordChecklist');
+        if (checklist) checklist.style.display = 'none';
+        ['check-length', 'check-lowercase', 'check-uppercase', 'check-number', 'check-special'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.classList.remove('valid', 'invalid'); }
         });
-        const text = document.getElementById('strength-text');
-        if (text) text.textContent = '';
     }
 
     function checkPasswordMatch() {
@@ -420,17 +423,23 @@
         return desc[role] || 'Standard user role.';
     }
 
+    function toUtcDate(dateStr) {
+        if (!dateStr) return new Date();
+        const s = String(dateStr);
+        return new Date(s.endsWith('Z') || s.includes('+') ? s : s + 'Z');
+    }
+
     function formatDate(dateStr) {
         if (!dateStr) return '—';
-        return new Date(dateStr).toLocaleDateString('en-US', {
-            year: 'numeric', month: 'long', day: 'numeric'
+        return toUtcDate(dateStr).toLocaleDateString('en-US', {
+            timeZone: 'Asia/Manila', year: 'numeric', month: 'long', day: 'numeric'
         });
     }
 
     function formatDateTime(dateStr) {
         if (!dateStr) return '—';
-        return new Date(dateStr).toLocaleString('en-US', {
-            year: 'numeric', month: 'short', day: 'numeric',
+        return toUtcDate(dateStr).toLocaleString('en-US', {
+            timeZone: 'Asia/Manila', year: 'numeric', month: 'short', day: 'numeric',
             hour: 'numeric', minute: '2-digit'
         });
     }

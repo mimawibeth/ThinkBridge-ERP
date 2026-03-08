@@ -97,8 +97,8 @@ namespace ThinkBridge_ERP.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Location")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Priority")
                         .IsRequired()
@@ -352,8 +352,7 @@ namespace ThinkBridge_ERP.Migrations
 
                     b.Property<string>("FilePath")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long?>("FileSize")
                         .HasColumnType("bigint");
@@ -854,6 +853,9 @@ namespace ThinkBridge_ERP.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("ProjectID");
 
                     b.HasIndex("CompanyID");
@@ -861,6 +863,32 @@ namespace ThinkBridge_ERP.Migrations
                     b.HasIndex("CreatedBy");
 
                     b.ToTable("Project");
+                });
+
+            modelBuilder.Entity("ThinkBridge_ERP.Models.Entities.ProjectCategory", b =>
+                {
+                    b.Property<int>("CategoryID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryID"));
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("CompanyID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("CategoryID");
+
+                    b.HasIndex("CompanyID");
+
+                    b.ToTable("ProjectCategory");
                 });
 
             modelBuilder.Entity("ThinkBridge_ERP.Models.Entities.ProjectMember", b =>
@@ -1011,11 +1039,25 @@ namespace ThinkBridge_ERP.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubscriptionID"));
 
+                    b.Property<bool>("AutoRenew")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("AutoRenewFailedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("CompanyID")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("date");
+
+                    b.Property<int>("GracePeriodDays")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(7);
+
+                    b.Property<DateTime?>("GracePeriodEndDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("PlanID")
                         .HasColumnType("int");
@@ -1212,6 +1254,9 @@ namespace ThinkBridge_ERP.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("TaskID");
 
                     b.HasIndex("CreatedBy");
@@ -1345,6 +1390,9 @@ namespace ThinkBridge_ERP.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
+                    b.Property<int>("FailedLoginAttempts")
+                        .HasColumnType("int");
+
                     b.Property<string>("Fname")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -1363,6 +1411,9 @@ namespace ThinkBridge_ERP.Migrations
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTime?>("LockoutEnd")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("MustChangePassword")
                         .HasColumnType("bit");
@@ -1398,6 +1449,7 @@ namespace ThinkBridge_ERP.Migrations
                             AvatarColor = "#0B4F6C",
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "superadmin@thinkbridge.com",
+                            FailedLoginAttempts = 0,
                             Fname = "Super",
                             HasCompletedOnboarding = false,
                             IsSuperAdmin = true,
@@ -1809,6 +1861,17 @@ namespace ThinkBridge_ERP.Migrations
                     b.Navigation("Company");
 
                     b.Navigation("Creator");
+                });
+
+            modelBuilder.Entity("ThinkBridge_ERP.Models.Entities.ProjectCategory", b =>
+                {
+                    b.HasOne("ThinkBridge_ERP.Models.Entities.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Company");
                 });
 
             modelBuilder.Entity("ThinkBridge_ERP.Models.Entities.ProjectMember", b =>

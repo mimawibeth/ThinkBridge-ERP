@@ -21,4 +21,5 @@ public class AuthResult
     public IList<string> Roles { get; set; } = new List<string>();
     public string? RedirectUrl { get; set; }
     public bool MustChangePassword { get; set; }
+    public int LockoutSeconds { get; set; }
 }

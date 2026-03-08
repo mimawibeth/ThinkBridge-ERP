@@ -5,26 +5,210 @@
 
 @section PageStyles {
     <link rel="stylesheet" href="~/css/pages/superadmin-reports.css" asp-append-version="true" />
+    <style>
+        /* ── Section Spacing ── */
+        .report-section {
+            margin-bottom: var(--spacing-xl);
+        }
+        .report-section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 var(--spacing-md) 0;
+        }
+        .report-section-sub {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* ── Doughnut + Legend ── */
+        .doughnut-legend {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 24px;
+            margin-top: var(--spacing-md);
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+        .legend-left { display: flex; align-items: center; gap: 8px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .legend-count { font-weight: 700; color: var(--text-primary); font-size: 0.88rem; }
+
+        /* ── Project Breakdown Table ── */
+        .breakdown-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .breakdown-table th {
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .breakdown-table td {
+            padding: 14px 16px;
+            font-size: 0.88rem;
+            border-bottom: 1px solid var(--border-light);
+            vertical-align: middle;
+        }
+        .breakdown-table tbody tr:last-child td { border-bottom: none; }
+        .breakdown-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        .breakdown-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .breakdown-count { font-weight: 700; font-size: 1rem; }
+        .breakdown-pct { color: var(--text-secondary); }
+
+        /* ── Team Table ── */
+        .team-perf-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .team-perf-table th {
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .team-perf-table td {
+            padding: 12px 16px;
+            font-size: 0.88rem;
+            border-bottom: 1px solid var(--border-light);
+            vertical-align: middle;
+        }
+        .team-perf-table tbody tr:last-child td { border-bottom: none; }
+        .team-member-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .team-avatar-sm {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+        .progress-bar-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .progress-track {
+            height: 6px;
+            background: var(--background);
+            border-radius: 3px;
+            overflow: hidden;
+            flex: 1;
+            min-width: 60px;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+        }
+        .progress-label-sm {
+            font-size: 0.82rem;
+            font-weight: 600;
+            min-width: 36px;
+            text-align: right;
+        }
+
+        /* ── User Activity Table ── */
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .user-table th {
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .user-table td {
+            padding: 12px 16px;
+            font-size: 0.88rem;
+            border-bottom: 1px solid var(--border-light);
+            vertical-align: middle;
+        }
+        .user-table tbody tr:last-child td { border-bottom: none; }
+        .status-active { color: #16a34a; font-weight: 600; }
+        .status-inactive { color: #dc2626; font-weight: 600; }
+        .role-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--background);
+            color: var(--text-secondary);
+        }
+
+        /* ── Filter row ── */
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+        }
+
+        /* ── Responsive ── */
+        @@media (max-width: 768px) {
+            .doughnut-legend { grid-template-columns: 1fr; }
+            .team-perf-table, .user-table, .breakdown-table { font-size: 0.82rem; }
+        }
+    </style>
 }
 
 <div class="page-reports">
-    <!-- Header -->
-    <div class="report-header">
-        <h1>Company Reports</h1>
+    <!-- Header actions -->
+    <div class="report-header" style="justify-content:flex-end;">
         <div class="report-header-actions">
-            <button class="btn-generate" onclick="generateReport()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                </svg>
-                Generate
-            </button>
+            <div class="filter-row">
+                <div class="date-filter">
+                    <label for="dateFrom">From</label>
+                    <input type="date" id="dateFrom" class="filter-select" />
+                    <label for="dateTo">To</label>
+                    <input type="date" id="dateTo" class="filter-select" />
+                </div>
+                <button class="btn-generate" onclick="applyFilter()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                    Filter
+                </button>
+            </div>
             <button class="btn-print" onclick="printReport()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="6 9 6 2 18 2 18 9"></polyline>
                     <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
                     <rect x="6" y="14" width="12" height="8"></rect>
                 </svg>
-                Print Report
+                Print
             </button>
             <button class="btn-print" onclick="downloadPDF()">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -32,49 +216,87 @@
                     <polyline points="7 10 12 15 17 10"></polyline>
                     <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
-                Download PDF
+                PDF
             </button>
         </div>
     </div>
 
-    <!-- Report Meta -->
-    <div class="report-meta" id="report-meta">
-        <span><strong>Report:</strong> Company Overview</span>
-        <span><strong>Generated:</strong> <span id="meta-generated">—</span></span>
-    </div>
-
     <!-- Loading -->
-    <div class="report-loading" id="report-loading">
-        Loading report data...
-    </div>
+    <div class="report-loading" id="report-loading">Loading report data...</div>
 
-    <!-- Report Content -->
+    <!-- All-in-one Report Content -->
     <div id="report-content" style="display:none;">
 
-        <!-- KPI Summary -->
+        <!-- ── KPI Summary Cards ── -->
         <div class="report-kpi-grid" id="kpi-grid"></div>
 
-        <!-- Role Distribution + Subscription Info -->
-        <div class="report-chart-grid">
-            <div class="report-chart-card">
-                <h3>Users by Role</h3>
-                <div class="report-chart-container">
-                    <canvas id="role-chart"></canvas>
+        <!-- ── Project Overview ── -->
+        <div class="report-section">
+            <div class="report-chart-grid">
+                <div class="report-chart-card">
+                    <h3 class="report-section-title">Project Status</h3>
+                    <div class="report-section-sub" id="project-count-label">Distribution of projects</div>
+                    <div class="report-chart-container" style="height:220px;margin-top:var(--spacing-md);">
+                        <canvas id="project-status-chart"></canvas>
+                    </div>
+                    <div class="doughnut-legend" id="project-legend"></div>
                 </div>
-            </div>
-            <div class="report-chart-card">
-                <h3>Subscription Details</h3>
-                <div id="subscription-details" style="padding: var(--spacing-md) 0;"></div>
+                <div class="report-chart-card">
+                    <h3 class="report-section-title">Task Summary</h3>
+                    <div class="report-section-sub">Breakdown of all tasks by current status</div>
+                    <div class="report-chart-container" style="height:220px;margin-top:var(--spacing-md);">
+                        <canvas id="task-chart"></canvas>
+                    </div>
+                    <div class="doughnut-legend" id="task-legend"></div>
+                </div>
             </div>
         </div>
 
-        <!-- Active Users Table -->
-        <section class="report-section">
-            <div class="report-section-header">
-                <h2>Team Members</h2>
+        <!-- ── Project Breakdown ── -->
+        <div class="report-section">
+            <div class="report-chart-card">
+                <h3 class="report-section-title">Project Breakdown</h3>
+                <div class="report-section-sub" style="margin-bottom:var(--spacing-md);">All projects grouped by status with progress</div>
+                <table class="breakdown-table" id="breakdown-table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Projects</th>
+                            <th>% of Total</th>
+                            <th>Avg. Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
-            <div class="report-section-body" style="padding:0;">
-                <table class="report-table" id="users-table">
+        </div>
+
+        <!-- ── Team Performance ── -->
+        <div class="report-section">
+            <div class="report-chart-card">
+                <h3 class="report-section-title">Team Performance</h3>
+                <div class="report-section-sub" style="margin-bottom:var(--spacing-md);">Individual member task stats and completion rates</div>
+                <table class="team-perf-table" id="team-table">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Assigned</th>
+                            <th>Completed</th>
+                            <th>Completion Rate</th>
+                            <th>On-Time</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ── User Management ── -->
+        <div class="report-section">
+            <div class="report-chart-card">
+                <h3 class="report-section-title">User Management</h3>
+                <div class="report-section-sub" style="margin-bottom:var(--spacing-md);">Recent users and account status</div>
+                <table class="user-table" id="users-table">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -88,235 +310,344 @@
                     <tbody></tbody>
                 </table>
             </div>
-        </section>
+        </div>
+
     </div>
 </div>
 
 @section PageScripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', generateReport);
+    // ── State ──
+    let companyData = null;
+    let dashboardData = null;
+    let projectsData = [];
+    let taskData = null;
+    let teamData = [];
+    let charts = {};
 
-        let roleChart = null;
+    document.addEventListener('DOMContentLoaded', () => generateReport());
 
-        async function generateReport() {
+    function applyFilter() { generateReport(); }
+
+    // ── Load All Data ──
+    async function generateReport() {
         const loading = document.getElementById('report-loading');
         const content = document.getElementById('report-content');
         loading.style.display = 'flex';
         content.style.display = 'none';
 
-        document.getElementById('meta-generated').textContent =
-        new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+        const dateFrom = document.getElementById('dateFrom').value;
+        const dateTo = document.getElementById('dateTo').value;
+        let dateParams = '';
+        if (dateFrom) dateParams += `&dateFrom=${dateFrom}`;
+        if (dateTo) dateParams += `&dateTo=${dateTo}`;
 
         try {
-        const res = await fetch('/api/reports/company-overview', { credentials: 'same-origin' });
-        const json = await res.json();
+            const [companyRes, dashRes, projRes, taskRes, teamRes] = await Promise.all([
+                fetch('/api/reports/company-overview', { credentials: 'same-origin' }).then(r => r.json()),
+                fetch(`/api/reports/dashboard?_=1${dateParams}`, { credentials: 'same-origin' }).then(r => r.json()),
+                fetch(`/api/reports/project-progress?_=1${dateParams}`, { credentials: 'same-origin' }).then(r => r.json()),
+                fetch(`/api/reports/task-distribution?_=1${dateParams}`, { credentials: 'same-origin' }).then(r => r.json()),
+                fetch(`/api/reports/team-performance?_=1${dateParams}`, { credentials: 'same-origin' }).then(r => r.json())
+            ]);
 
-        if (json.success) {
-        renderReport(json.data);
-        loading.style.display = 'none';
-        content.style.display = 'block';
-        } else {
-        loading.textContent = 'Error: ' + (json.message || 'Unknown error');
-        }
+            if (companyRes.success) companyData = companyRes.data;
+            if (dashRes.success) dashboardData = dashRes.data;
+            if (projRes.success) projectsData = projRes.data || [];
+            if (taskRes.success) taskData = taskRes.data;
+            if (teamRes.success) teamData = teamRes.data || [];
+
+            renderAll();
+            loading.style.display = 'none';
+            content.style.display = 'block';
         } catch (err) {
-        console.error('Report error:', err);
-        loading.textContent = 'Failed to load report data.';
+            console.error('Report error:', err);
+            loading.textContent = 'Failed to load report data.';
         }
-        }
+    }
 
-        function renderReport(d) {
-        renderKPIs(d);
-        renderRoleChart(d.usersByRole || []);
-        renderSubscriptionDetails(d);
-        renderUsersTable(d.recentUsers || []);
-        }
+    function renderAll() {
+        renderKPIs();
+        renderProjectStatusChart();
+        renderTaskChart();
+        renderBreakdownTable();
+        renderTeamTable();
+        renderUsersTable();
+    }
 
-        function renderKPIs(d) {
-        const usagePct = d.maxUsers ? Math.round(d.activeUsers / d.maxUsers * 100) : 0;
+    // ═══════════════════════════════════════════════
+    // KPI CARDS
+    // ═══════════════════════════════════════════════
+    function renderKPIs() {
+        const d = companyData || {};
+        const db = dashboardData || {};
+        const td = taskData || {};
+        const totalProjects = projectsData.length;
+        const completedProjects = projectsData.filter(p => p.status === 'Completed').length;
+        const activeMembers = teamData.filter(m => m.tasksAssigned > 0).length;
+
         document.getElementById('kpi-grid').innerHTML = `
-        <div class="report-kpi-card">
-        <div class="kpi-label">Total Users</div>
-        <div class="kpi-value">${d.totalUsers}</div>
-        <div class="kpi-sub"><span class="text-success">${d.activeUsers} active</span> · ${d.inactiveUsers} inactive</div>
-        </div>
-        <div class="report-kpi-card">
-        <div class="kpi-label">Active Logins (30 days)</div>
-        <div class="kpi-value">${d.recentLoginsLast30Days}</div>
-        <div class="kpi-sub">${d.totalUsers > 0 ? Math.round(d.recentLoginsLast30Days / d.totalUsers * 100) : 0}% of total users</div>
-        </div>
-        <div class="report-kpi-card">
-        <div class="kpi-label">Current Plan</div>
-        <div class="kpi-value">${esc(d.planName)}</div>
-        <div class="kpi-sub">${esc(d.subscriptionStatus)}</div>
-        </div>
-        <div class="report-kpi-card">
-        <div class="kpi-label">Seat Usage</div>
-        <div class="kpi-value">${d.activeUsers} / ${d.maxUsers || '∞'}</div>
-        <div class="kpi-sub">${d.maxUsers ? usagePct + '% capacity used' : 'Unlimited seats'}</div>
-        </div>
-        `;
-        }
+            <div class="report-kpi-card">
+                <div class="kpi-label">Total Users</div>
+                <div class="kpi-value">${d.totalUsers || 0}</div>
+                <div class="kpi-sub"><span class="text-success">${d.activeUsers || 0} active</span> · ${d.inactiveUsers || 0} inactive</div>
+            </div>
+            <div class="report-kpi-card">
+                <div class="kpi-label">Projects</div>
+                <div class="kpi-value">${totalProjects}</div>
+                <div class="kpi-sub"><span class="text-success">${completedProjects} completed</span> · ${totalProjects - completedProjects} ongoing</div>
+            </div>
+            <div class="report-kpi-card">
+                <div class="kpi-label">Tasks</div>
+                <div class="kpi-value">${td.completed || 0} / ${td.total || 0}</div>
+                <div class="kpi-sub">${td.total > 0 ? Math.round((td.completed || 0) / td.total * 100) : 0}% completed</div>
+            </div>
+            <div class="report-kpi-card">
+                <div class="kpi-label">Active Members</div>
+                <div class="kpi-value">${activeMembers}</div>
+                <div class="kpi-sub">${activeMembers} of ${teamData.length} members with tasks</div>
+            </div>`;
+    }
 
-        function renderRoleChart(roles) {
-        const ctx = document.getElementById('role-chart').getContext('2d');
-        if (roleChart) roleChart.destroy();
+    // ═══════════════════════════════════════════════
+    // PROJECT STATUS DOUGHNUT
+    // ═══════════════════════════════════════════════
+    function renderProjectStatusChart() {
+        const ctx = document.getElementById('project-status-chart');
+        if (!ctx) return;
+        if (charts.projectStatus) charts.projectStatus.destroy();
 
-        if (!roles.length) {
-        ctx.canvas.parentElement.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-secondary);">No role data</div>';
-        return;
-        }
-
-        const roleColors = {
-        'CompanyAdmin': '#7C3AED',
-        'ProjectManager': '#2563EB',
-        'TeamMember': '#22C55E'
-        };
-
-        const labels = roles.map(r => r.roleName);
-        const values = roles.map(r => r.count);
-        const bgColors = labels.map(l => roleColors[l] || '#94A3B8');
-
-        roleChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-        labels: labels,
-        datasets: [{
-        data: values,
-        backgroundColor: bgColors,
-        borderWidth: 2,
-        borderColor: '#fff'
-        }]
-        },
-        options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '55%',
-        plugins: {
-        legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 16, usePointStyle: true } }
-        }
-        }
+        const statusMap = {};
+        projectsData.forEach(p => {
+            const s = p.status || 'Planning';
+            statusMap[s] = (statusMap[s] || 0) + 1;
         });
+
+        const statusDefs = [
+            { key: 'Completed', color: '#22c55e' },
+            { key: 'In Progress', color: '#0d6e8a' },
+            { key: 'Planning', color: '#f59e0b' },
+            { key: 'Delayed', color: '#ef4444' }
+        ];
+
+        const labels = [], values = [], colors = [];
+        statusDefs.forEach(s => { labels.push(s.key); values.push(statusMap[s.key] || 0); colors.push(s.color); });
+        Object.keys(statusMap).forEach(k => {
+            if (!statusDefs.find(s => s.key === k)) { labels.push(k); values.push(statusMap[k]); colors.push('#94A3B8'); }
+        });
+
+        const total = projectsData.length;
+        document.getElementById('project-count-label').textContent = `Distribution of ${total} project${total !== 1 ? 's' : ''}`;
+        document.getElementById('project-legend').innerHTML = labels.map((l, i) => `
+            <div class="legend-item">
+                <div class="legend-left"><span class="legend-dot" style="background:${colors[i]}"></span><span>${esc(l)}</span></div>
+                <span class="legend-count">${values[i]}</span>
+            </div>`).join('');
+
+        charts.projectStatus = new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } } }
+        });
+    }
+
+    // ═══════════════════════════════════════════════
+    // TASK DISTRIBUTION DOUGHNUT
+    // ═══════════════════════════════════════════════
+    function renderTaskChart() {
+        const ctx = document.getElementById('task-chart');
+        if (!ctx) return;
+        if (charts.task) charts.task.destroy();
+
+        const td = taskData || {};
+        const labels = ['Completed', 'In Progress', 'In Review', 'To Do'];
+        const values = [td.completed || 0, td.inProgress || 0, td.inReview || 0, td.notStarted || 0];
+        const colors = ['#22c55e', '#0d6e8a', '#7c3aed', '#94A3B8'];
+
+        document.getElementById('task-legend').innerHTML = labels.map((l, i) => `
+            <div class="legend-item">
+                <div class="legend-left"><span class="legend-dot" style="background:${colors[i]}"></span><span>${esc(l)}</span></div>
+                <span class="legend-count">${values[i]}</span>
+            </div>`).join('');
+
+        charts.task = new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } } }
+        });
+    }
+
+    // ═══════════════════════════════════════════════
+    // PROJECT BREAKDOWN TABLE
+    // ═══════════════════════════════════════════════
+    function renderBreakdownTable() {
+        const tbody = document.querySelector('#breakdown-table tbody');
+        const total = projectsData.length || 1;
+
+        const statusDefs = [
+            { key: 'Completed', color: '#22c55e' },
+            { key: 'In Progress', color: '#0d6e8a' },
+            { key: 'Planning', color: '#f59e0b' },
+            { key: 'Delayed', color: '#ef4444' }
+        ];
+
+        const statusMap = {};
+        const progressMap = {};
+        projectsData.forEach(p => {
+            const s = p.status || 'Planning';
+            statusMap[s] = (statusMap[s] || 0) + 1;
+            if (!progressMap[s]) progressMap[s] = [];
+            progressMap[s].push(p.progress || 0);
+        });
+
+        if (!projectsData.length) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--text-secondary);">No projects found</td></tr>';
+            return;
         }
 
-        function renderSubscriptionDetails(d) {
-        const container = document.getElementById('subscription-details');
+        tbody.innerHTML = statusDefs.map(s => {
+            const count = statusMap[s.key] || 0;
+            if (count === 0) return '';
+            const pct = (count / total * 100).toFixed(1);
+            const avgProg = progressMap[s.key]
+                ? Math.round(progressMap[s.key].reduce((a, b) => a + b, 0) / progressMap[s.key].length)
+                : 0;
+            return `
+            <tr>
+                <td>
+                    <span class="breakdown-status">
+                        <span class="breakdown-dot" style="background:${s.color}"></span>
+                        ${esc(s.key)}
+                    </span>
+                </td>
+                <td class="breakdown-count">${count}</td>
+                <td class="breakdown-pct">${pct}%</td>
+                <td>
+                    <div class="progress-bar-cell">
+                        <div class="progress-track"><div class="progress-fill" style="width:${avgProg}%;background:${s.color};"></div></div>
+                        <span class="progress-label-sm">${avgProg}%</span>
+                    </div>
+                </td>
+            </tr>`;
+        }).filter(r => r).join('');
+    }
 
-        const statusColors = {
-        'Active': 'var(--success)',
-        'Trial': '#7C3AED',
-        'Expired': 'var(--danger)',
-        'Cancelled': '#B45309'
-        };
-        const statusColor = statusColors[d.subscriptionStatus] || 'var(--text-secondary)';
+    // ═══════════════════════════════════════════════
+    // TEAM PERFORMANCE TABLE
+    // ═══════════════════════════════════════════════
+    function renderTeamTable() {
+        const tbody = document.querySelector('#team-table tbody');
 
-        container.innerHTML = `
-        <div style="display:flex;flex-direction:column;gap:var(--spacing-md);">
-        <div class="stat-bar-row">
-        <span class="stat-bar-label">Plan</span>
-        <span class="stat-bar-value" style="flex:1;text-align:left;font-size:0.9rem;">${esc(d.planName)}</span>
-        </div>
-        <div class="stat-bar-row">
-        <span class="stat-bar-label">Status</span>
-        <span style="flex:1;font-weight:600;font-size:0.85rem;color:${statusColor};">${esc(d.subscriptionStatus)}</span>
-        </div>
-        <div class="stat-bar-row">
-        <span class="stat-bar-label">Price</span>
-        <span class="stat-bar-value" style="flex:1;text-align:left;font-size:0.9rem;">₱${formatNumber(d.planPrice)} / ${esc(d.billingCycle || 'month')}</span>
-        </div>
-        <div class="stat-bar-row">
-        <span class="stat-bar-label">Start Date</span>
-        <span class="stat-bar-value" style="flex:1;text-align:left;font-size:0.85rem;">${d.subscriptionStart ? formatDate(d.subscriptionStart) : '—'}</span>
-        </div>
-        <div class="stat-bar-row">
-        <span class="stat-bar-label">End Date</span>
-        <span class="stat-bar-value" style="flex:1;text-align:left;font-size:0.85rem;">${d.subscriptionEnd ? formatDate(d.subscriptionEnd) : '—'}</span>
-        </div>
-        <div class="stat-bar-row">
-        <span class="stat-bar-label">Max Users</span>
-        <span class="stat-bar-value" style="flex:1;text-align:left;font-size:0.85rem;">${d.maxUsers || 'Unlimited'}</span>
-        </div>
-        <div class="stat-bar-row">
-        <span class="stat-bar-label">Max Projects</span>
-        <span class="stat-bar-value" style="flex:1;text-align:left;font-size:0.85rem;">${d.maxProjects || 'Unlimited'}</span>
-        </div>
-        </div>
-        `;
+        if (!teamData.length) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text-secondary);">No team data available</td></tr>';
+            return;
         }
 
-        function renderUsersTable(users) {
+        // Sort by completion rate desc
+        const sorted = [...teamData].sort((a, b) => b.completionRate - a.completionRate);
+
+        tbody.innerHTML = sorted.map(m => {
+            const rate = Math.round(m.completionRate || 0);
+            const onTime = Math.round(m.onTimePercent || 0);
+            const rateColor = rate >= 80 ? '#22c55e' : rate >= 50 ? '#f59e0b' : '#ef4444';
+            const onTimeColor = onTime >= 80 ? '#22c55e' : onTime >= 50 ? '#f59e0b' : '#ef4444';
+            return `
+            <tr>
+                <td>
+                    <div class="team-member-cell">
+                        <div class="team-avatar-sm" style="background:${m.avatarColor || '#0B4F6C'}">${esc(m.initials)}</div>
+                        <span style="font-weight:500;">${esc(m.fullName)}</span>
+                    </div>
+                </td>
+                <td>${m.tasksAssigned || 0}</td>
+                <td>${m.tasksCompleted || 0}</td>
+                <td>
+                    <div class="progress-bar-cell">
+                        <div class="progress-track"><div class="progress-fill" style="width:${rate}%;background:${rateColor};"></div></div>
+                        <span class="progress-label-sm" style="color:${rateColor}">${rate}%</span>
+                    </div>
+                </td>
+                <td><span style="font-weight:600;color:${onTimeColor}">${onTime}%</span></td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ═══════════════════════════════════════════════
+    // USER MANAGEMENT TABLE
+    // ═══════════════════════════════════════════════
+    function renderUsersTable() {
         const tbody = document.querySelector('#users-table tbody');
+        const users = companyData?.recentUsers || [];
+
         if (!users.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-secondary);">No user data available</td></tr>';
-        return;
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-secondary);">No user data available</td></tr>';
+            return;
         }
 
-        const statusColors = { 'Active': 'var(--success)', 'Inactive': 'var(--danger)' };
+        const roleLabels = { 'CompanyAdmin': 'Admin', 'ProjectManager': 'PM', 'TeamMember': 'Member' };
 
-        tbody.innerHTML = users.map((u, i) => `
-        <tr>
-        <td>${i + 1}</td>
-        <td><strong>${esc(u.fullName)}</strong></td>
-        <td>${esc(u.email)}</td>
-        <td>${esc(u.roleName)}</td>
-        <td><span style="color:${statusColors[u.status] || 'var(--text-secondary)'};font-weight:600;font-size:0.82rem;">${esc(u.status)}</span></td>
-        <td>${u.lastLoginAt ? formatDate(u.lastLoginAt) : 'Never'}</td>
-        </tr>
-        `).join('');
-        }
+        tbody.innerHTML = users.map((u, i) => {
+            const isActive = u.status === 'Active';
+            return `
+            <tr>
+                <td>${i + 1}</td>
+                <td style="font-weight:500;">${esc(u.fullName)}</td>
+                <td>${esc(u.email)}</td>
+                <td><span class="role-badge">${roleLabels[u.roleName] || esc(u.roleName)}</span></td>
+                <td><span class="${isActive ? 'status-active' : 'status-inactive'}">${esc(u.status)}</span></td>
+                <td>${u.lastLoginAt ? formatDate(u.lastLoginAt) : 'Never'}</td>
+            </tr>`;
+        }).join('');
+    }
 
-        // ── Print / PDF ──────────────────────────────
-        function printReport() {
-        window.print();
-        }
+    // ── Print / PDF ──
+    function printReport() { window.print(); }
 
-        async function downloadPDF() {
+    async function downloadPDF() {
         const btn = event.currentTarget;
         const originalText = btn.innerHTML;
         btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> Generating...';
         btn.disabled = true;
-
         try {
-        const res = await fetch('/api/reports/company-overview/download-pdf', { credentials: 'same-origin' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Company-Report-${new Date().toISOString().slice(0, 10)}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
+            const res = await fetch('/api/reports/company-overview/download-pdf', { credentials: 'same-origin' });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Company-Report-${new Date().toISOString().slice(0, 10)}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
         } catch (err) {
-        console.error('PDF generation error:', err);
-        alert('Failed to generate PDF. Please try Print Report instead.');
+            console.error('PDF generation error:', err);
+            alert('Failed to generate PDF. Please try Print Report instead.');
         } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
+            btn.innerHTML = originalText;
+            btn.disabled = false;
         }
-        }
+    }
 
-        // ── Helpers ──────────────────────────────────
-        function esc(text) {
+    // ── Helpers ──
+    function esc(text) {
         if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
-        }
+    }
 
-        function formatNumber(num) {
-        if (num == null) return '0';
-        return Number(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-
-        function formatDate(dateStr) {
+    function formatDate(dateStr) {
         if (!dateStr) return '—';
-        return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        if (!dateStr.endsWith('Z') && !dateStr.includes('+')) {
+            return new Date(dateStr + 'Z').toLocaleDateString('en-US', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' });
         }
+        return new Date(dateStr).toLocaleDateString('en-US', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' });
+    }
 
-        window.generateReport = generateReport;
-        window.printReport = printReport;
-        window.downloadPDF = downloadPDF;
+    window.printReport = printReport;
+    window.downloadPDF = downloadPDF;
+    window.applyFilter = applyFilter;
     </script>
 }

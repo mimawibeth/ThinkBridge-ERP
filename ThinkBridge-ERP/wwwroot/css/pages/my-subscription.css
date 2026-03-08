@@ -10,6 +10,109 @@
     gap: var(--spacing-lg);
 }
 
+/* Subscription Alert Banner */
+.sub-alert-banner {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.sub-alert-banner.alert-danger {
+    background: #fee2e2;
+    border-color: #ef4444;
+}
+
+.sub-alert-content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 0.875rem;
+    color: #92400e;
+}
+
+.sub-alert-banner.alert-danger .sub-alert-content {
+    color: #991b1b;
+}
+
+.sub-alert-content svg {
+    flex-shrink: 0;
+    color: #f59e0b;
+}
+
+.sub-alert-banner.alert-danger .sub-alert-content svg {
+    color: #ef4444;
+}
+
+/* Auto-Renew & Renewal Actions */
+.plan-renewal-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color, #e5e7eb);
+    margin-top: var(--spacing-sm);
+}
+
+.auto-renew-toggle {
+    display: flex;
+    align-items: center;
+}
+
+.toggle-label {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.toggle-text {
+    font-weight: 500;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 40px;
+    height: 22px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: #cbd5e1;
+    border-radius: 22px;
+    transition: 0.2s;
+    cursor: pointer;
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 3px;
+    bottom: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: 0.2s;
+}
+
+.toggle-switch input:checked+.toggle-slider {
+    background: var(--primary-blue, #3b82f6);
+}
+
+.toggle-switch input:checked+.toggle-slider::before {
+    transform: translateX(18px);
+}
+
 /* Loading / Empty State */
 .subscription-loading,
 .subscription-empty {
@@ -93,6 +196,11 @@
 .plan-badge.pending {
     background: var(--warning-light);
     color: var(--warning);
+}
+
+.plan-badge.graceperiod {
+    background: #fee2e2;
+    color: #dc2626;
 }
 
 .plan-name {

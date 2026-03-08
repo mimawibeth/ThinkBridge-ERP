@@ -175,26 +175,16 @@
                         <input type="datetime-local" class="form-input" id="event-end" required />
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="event-priority">Priority</label>
-                        <select class="form-select" id="event-priority">
-                            <option value="Low">Low</option>
-                            <option value="Medium" selected>Medium</option>
-                            <option value="High">High</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="event-project">Project</label>
-                        <select class="form-select" id="event-project">
-                            <option value="">No Project</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label for="event-project">Project</label>
+                    <select class="form-select" id="event-project">
+                        <option value="">No Project</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label for="event-location">Location</label>
-                    <input type="text" class="form-input" id="event-location" placeholder="Location (optional)"
-                           maxlength="50" />
+                    <label for="event-location">Meeting Link (optional)</label>
+                    <input type="text" class="form-input" id="event-location" placeholder="https://zoom.us/j/... or https://meet.google.com/..."
+                           maxlength="500" />
                 </div>
                 <div class="form-group">
                     <label for="event-color">Color</label>

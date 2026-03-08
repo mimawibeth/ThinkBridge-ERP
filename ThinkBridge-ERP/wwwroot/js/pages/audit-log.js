@@ -8,15 +8,19 @@
     const pageSize = 15;
     let currentSearch = '';
     let currentAction = 'All';
-    let currentDateRange = '';
+    let currentEntity = 'All';
+    let currentDateRange = 'today';
     let totalPages = 1;
+    let autoRefreshInterval = null;
 
     // ─── Init ────────────────────────────────────
 
     document.addEventListener('DOMContentLoaded', function () {
         initSearch();
         initFilters();
+        initRefreshButton();
         loadAuditLogs();
+        startAutoRefresh();
     });
 
     // ─── API Helper ──────────────────────────────
@@ -62,8 +66,8 @@
         if (actionBtn && actionDropdown) {
             actionBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
+                closeAllDropdownsExcept('action-filter');
                 actionDropdown.classList.toggle('open');
-                document.getElementById('date-filter')?.classList.remove('open');
             });
 
             actionItems.forEach(item => {
@@ -71,6 +75,29 @@
                     currentAction = this.dataset.value;
                     actionBtn.querySelector('.filter-text').textContent = this.textContent;
                     actionDropdown.classList.remove('open');
+                    currentPage = 1;
+                    loadAuditLogs();
+                });
+            });
+        }
+
+        // Entity filter dropdown
+        const entityDropdown = document.getElementById('entity-filter');
+        const entityBtn = document.getElementById('entity-filter-btn');
+        const entityItems = document.querySelectorAll('.entity-filter-item');
+
+        if (entityBtn && entityDropdown) {
+            entityBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                closeAllDropdownsExcept('entity-filter');
+                entityDropdown.classList.toggle('open');
+            });
+
+            entityItems.forEach(item => {
+                item.addEventListener('click', function () {
+                    currentEntity = this.dataset.value;
+                    entityBtn.querySelector('.filter-text').textContent = this.textContent;
+                    entityDropdown.classList.remove('open');
                     currentPage = 1;
                     loadAuditLogs();
                 });
@@ -85,8 +112,8 @@
         if (dateBtn && dateDropdown) {
             dateBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
+                closeAllDropdownsExcept('date-filter');
                 dateDropdown.classList.toggle('open');
-                document.getElementById('action-filter')?.classList.remove('open');
             });
 
             dateItems.forEach(item => {
@@ -106,13 +133,42 @@
         });
     }
 
+    function closeAllDropdownsExcept(keepId) {
+        document.querySelectorAll('.filter-dropdown.open').forEach(d => {
+            if (d.id !== keepId) d.classList.remove('open');
+        });
+    }
+
+    function initRefreshButton() {
+        const refreshBtn = document.getElementById('refresh-btn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function () {
+                loadAuditLogs();
+            });
+        }
+    }
+
+    function startAutoRefresh() {
+        // Auto-refresh every 60 seconds
+        if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+        autoRefreshInterval = setInterval(() => {
+            loadAuditLogs();
+        }, 60000);
+    }
+
     // ─── Load Audit Logs ─────────────────────────
+
+    function toUtcDate(dateStr) {
+        if (!dateStr) return new Date();
+        const s = String(dateStr);
+        return new Date(s.endsWith('Z') || s.includes('+') ? s : s + 'Z');
+    }
 
     async function loadAuditLogs() {
         const tbody = document.getElementById('audit-log-body');
         if (!tbody) return;
 
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">Loading audit logs...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem; color:var(--text-muted);">Loading audit logs...</td></tr>';
 
         const params = new URLSearchParams({
             page: currentPage,
@@ -121,12 +177,13 @@
 
         if (currentSearch) params.append('search', currentSearch);
         if (currentAction && currentAction !== 'All') params.append('action', currentAction);
+        if (currentEntity && currentEntity !== 'All') params.append('entity', currentEntity);
         if (currentDateRange) params.append('dateRange', currentDateRange);
 
         const result = await apiGet(`/api/companyadmin/auditlogs?${params}`);
 
         if (!result.success) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--danger);">${escapeHtml(result.message)}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:2rem; color:var(--danger);">${escapeHtml(result.message)}</td></tr>`;
             return;
         }
 
@@ -135,18 +192,17 @@
         const totalCount = result.pagination?.totalCount || 0;
 
         if (logs.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">No audit logs found.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem; color:var(--text-muted);">No audit logs found.</td></tr>';
             renderPagination(0);
             return;
         }
 
         let html = '';
         logs.forEach(log => {
-            const date = new Date(log.createdAt);
-            const dateStr = date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-            const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const date = toUtcDate(log.createdAt);
+            const dateStr = date.toLocaleDateString('en-US', { timeZone: 'Asia/Manila', year: 'numeric', month: 'short', day: 'numeric' });
+            const timeStr = date.toLocaleTimeString('en-US', { timeZone: 'Asia/Manila', hour: '2-digit', minute: '2-digit', second: '2-digit' });
             const initials = getInitials(log.userName);
-            const actionClass = getActionClass(log.action);
 
             html += `<tr>
                 <td class="timestamp">
@@ -162,13 +218,7 @@
                         </div>
                     </div>
                 </td>
-                <td>
-                    <span class="action-badge ${actionClass}">${escapeHtml(log.action)}</span>
-                </td>
-                <td class="resource">
-                    <span class="resource-type">${escapeHtml(log.entityName)}</span>
-                    <span class="resource-name">ID: ${log.entityId}</span>
-                </td>
+                <td class="action-text">${escapeHtml(log.action)}</td>
                 <td class="details">${escapeHtml(log.action)} on ${escapeHtml(log.entityName)}</td>
                 <td class="ip-address">${escapeHtml(log.ipAddress || '—')}</td>
             </tr>`;
@@ -248,6 +298,14 @@
         if (a.includes('create') || a.includes('add')) return 'create';
         if (a.includes('update') || a.includes('edit') || a.includes('change')) return 'update';
         if (a.includes('delete') || a.includes('remove')) return 'delete';
+        if (a.includes('archive')) return 'delete';
+        if (a.includes('restore')) return 'create';
+        if (a.includes('advance')) return 'update';
+        if (a.includes('approve')) return 'create';
+        if (a.includes('reject')) return 'delete';
+        if (a.includes('reset')) return 'update';
+        if (a.includes('activate')) return 'create';
+        if (a.includes('deactivate')) return 'delete';
         if (a.includes('upload')) return 'upload';
         if (a.includes('login') || a.includes('auth')) return 'login';
         if (a.includes('permission') || a.includes('role')) return 'permission';

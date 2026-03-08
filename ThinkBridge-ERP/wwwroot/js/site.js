@@ -18,6 +18,7 @@
         initSettingsNav();
         initTopbarDate();
         initSessionManager();
+        initSubscriptionAlert();
     });
 
     // ===========================================
@@ -247,8 +248,14 @@
         return types[type] || { cssClass: 'task', svg: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path></svg>' };
     }
 
+    function toUtcDate(dateStr) {
+        if (!dateStr) return new Date();
+        const s = String(dateStr);
+        return new Date(s.endsWith('Z') || s.includes('+') ? s : s + 'Z');
+    }
+
     function formatNotifTime(dateStr) {
-        const seconds = Math.floor((new Date() - new Date(dateStr)) / 1000);
+        const seconds = Math.floor((Date.now() - toUtcDate(dateStr).getTime()) / 1000);
         if (seconds < 60) return 'Just now';
         const minutes = Math.floor(seconds / 60);
         if (minutes < 60) return `${minutes} min ago`;
@@ -256,7 +263,7 @@
         if (hours < 24) return `${hours}h ago`;
         const days = Math.floor(hours / 24);
         if (days < 7) return `${days}d ago`;
-        return new Date(dateStr).toLocaleDateString();
+        return toUtcDate(dateStr).toLocaleDateString('en-US', { timeZone: 'Asia/Manila' });
     }
 
     window.handleNotificationClick = async function (notifId, el) {
@@ -657,6 +664,29 @@
                 return response;
             });
         };
+    }
+
+    // ===========================================
+    // Subscription Alert (Red Dot)
+    // ===========================================
+    function initSubscriptionAlert() {
+        var dot = document.getElementById('subscriptionAlertDot');
+        if (!dot) return; // Not on a page with sidebar
+
+        fetch('/api/companyadmin/subscription/alert', { credentials: 'same-origin' })
+            .then(function (resp) { return resp.ok ? resp.json() : null; })
+            .then(function (result) {
+                if (!result || !result.success || !result.data) {
+                    dot.style.display = 'none';
+                    return;
+                }
+                var alert = result.data;
+                dot.style.display = 'inline-block';
+                dot.title = alert.message;
+            })
+            .catch(function () {
+                dot.style.display = 'none';
+            });
     }
 
     // Global logout function (used by logout buttons/links)

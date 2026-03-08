@@ -23,7 +23,7 @@ public interface IKnowledgeBaseService
     Task<TagListResult> GetTagsAsync(int companyId);
 
     // Comments (feedback on articles)
-    Task<ArticleCommentListResult> GetArticleCommentsAsync(int documentId);
+    Task<ArticleCommentListResult> GetArticleCommentsAsync(int companyId, int documentId);
     Task<CreateArticleCommentResult> AddArticleCommentAsync(int companyId, int userId, int documentId, string content);
 
     // Stats

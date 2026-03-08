@@ -22,7 +22,7 @@ public interface ISuperAdminService
     // Payment Management
     Task<PaymentListResult> GetPaymentsAsync(PaymentFilterRequest filter);
     Task<PaymentDetailResult> GetPaymentByIdAsync(int paymentId);
-    Task<PaymentStatsResult> GetPaymentStatsAsync(int? year = null, int? month = null);
+    Task<PaymentStatsResult> GetPaymentStatsAsync(int? year = null, int? month = null, DateTime? dateFrom = null, DateTime? dateTo = null);
     Task<ServiceResult> RecordManualPaymentAsync(ManualPaymentRequest request, int performedByUserId);
 
     // Audit Log
@@ -217,6 +217,8 @@ public class PaymentFilterRequest
     public string? Status { get; set; }
     public int? Year { get; set; }
     public int? Month { get; set; }
+    public DateTime? DateFrom { get; set; }
+    public DateTime? DateTo { get; set; }
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 10;
 }

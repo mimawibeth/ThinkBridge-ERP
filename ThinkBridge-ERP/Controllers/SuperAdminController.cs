@@ -441,6 +441,8 @@ public class SuperAdminController : ControllerBase
         [FromQuery] string? status = null,
         [FromQuery] int? year = null,
         [FromQuery] int? month = null,
+        [FromQuery] DateTime? dateFrom = null,
+        [FromQuery] DateTime? dateTo = null,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
     {
@@ -454,6 +456,8 @@ public class SuperAdminController : ControllerBase
             Status = status,
             Year = year,
             Month = month,
+            DateFrom = dateFrom,
+            DateTo = dateTo,
             Page = page,
             PageSize = pageSize
         };
@@ -462,10 +466,29 @@ public class SuperAdminController : ControllerBase
         if (!result.Success)
             return BadRequest(new { success = false, message = result.ErrorMessage });
 
+        var pht = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
+
         return Ok(new
         {
             success = true,
-            data = result.Payments,
+            data = result.Payments.Select(p => new
+            {
+                p.PaymentID,
+                p.SubscriptionID,
+                p.InvoiceID,
+                p.InvoiceNumber,
+                p.CompanyName,
+                p.CompanyID,
+                p.Provider,
+                p.PaymentMethod,
+                p.Amount,
+                p.Currency,
+                p.Status,
+                paidAt = p.PaidAt.HasValue
+                    ? TimeZoneInfo.ConvertTimeFromUtc(p.PaidAt.Value, pht).ToString("yyyy-MM-dd hh:mm tt")
+                    : null,
+                createdAt = TimeZoneInfo.ConvertTimeFromUtc(p.CreatedAt, pht).ToString("yyyy-MM-dd hh:mm tt")
+            }),
             pagination = new
             {
                 totalCount = result.TotalCount,
@@ -483,6 +506,8 @@ public class SuperAdminController : ControllerBase
         if (!result.Success)
             return NotFound(new { success = false, message = result.ErrorMessage });
 
+        var pht = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
+
         return Ok(new
         {
             success = true,
@@ -499,8 +524,10 @@ public class SuperAdminController : ControllerBase
                     result.Payment.Amount,
                     result.Payment.Currency,
                     result.Payment.Status,
-                    paidAt = result.Payment.PaidAt?.ToString("yyyy-MM-dd HH:mm"),
-                    createdAt = result.Payment.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                    paidAt = result.Payment.PaidAt.HasValue
+                        ? TimeZoneInfo.ConvertTimeFromUtc(result.Payment.PaidAt.Value, pht).ToString("yyyy-MM-dd hh:mm tt")
+                        : null,
+                    createdAt = TimeZoneInfo.ConvertTimeFromUtc(result.Payment.CreatedAt, pht).ToString("yyyy-MM-dd hh:mm tt")
                 },
                 companyName = result.CompanyName,
                 planName = result.PlanName,
@@ -510,13 +537,33 @@ public class SuperAdminController : ControllerBase
     }
 
     [HttpGet("payments/stats")]
-    public async Task<IActionResult> GetPaymentStats([FromQuery] int? year = null, [FromQuery] int? month = null)
+    public async Task<IActionResult> GetPaymentStats(
+        [FromQuery] int? year = null, [FromQuery] int? month = null,
+        [FromQuery] DateTime? dateFrom = null, [FromQuery] DateTime? dateTo = null)
     {
-        var result = await _superAdminService.GetPaymentStatsAsync(year, month);
+        var result = await _superAdminService.GetPaymentStatsAsync(year, month, dateFrom, dateTo);
         if (!result.Success)
             return BadRequest(new { success = false, message = result.ErrorMessage });
 
         return Ok(new { success = true, data = result });
+    }
+
+    [HttpGet("payments/download-pdf")]
+    public async Task<IActionResult> DownloadPaymentPdf([FromQuery] DateTime? dateFrom, [FromQuery] DateTime? dateTo)
+    {
+        var fullName = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value ?? "Super Admin";
+
+        try
+        {
+            var pdfBytes = await _pdfReportService.GeneratePaymentReportPdfAsync(fullName, dateFrom, dateTo);
+            var fileName = $"ThinkBridge-Payment-Report-{DateTime.UtcNow:yyyy-MM-dd}.pdf";
+            return File(pdfBytes, "application/pdf", fileName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to generate Payment Report PDF.");
+            return StatusCode(500, "Failed to generate PDF report.");
+        }
     }
 
     [HttpPost("payments/manual")]

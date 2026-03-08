@@ -4,10 +4,10 @@ namespace ThinkBridge_ERP.Services.Interfaces;
 
 public interface IReportService
 {
-    Task<ReportDashboardResult> GetReportDashboardAsync(int companyId, int userId, string userRole, string period = "month");
-    Task<ProjectProgressResult> GetProjectProgressAsync(int companyId, int userId, string userRole);
-    Task<TaskDistributionResult> GetTaskDistributionAsync(int companyId, int userId, string userRole);
-    Task<TeamPerformanceResult> GetTeamPerformanceAsync(int companyId, int userId, string userRole);
+    Task<ReportDashboardResult> GetReportDashboardAsync(int companyId, int userId, string userRole, DateTime? dateFrom = null, DateTime? dateTo = null);
+    Task<ProjectProgressResult> GetProjectProgressAsync(int companyId, int userId, string userRole, DateTime? dateFrom = null, DateTime? dateTo = null);
+    Task<TaskDistributionResult> GetTaskDistributionAsync(int companyId, int userId, string userRole, DateTime? dateFrom = null, DateTime? dateTo = null);
+    Task<TeamPerformanceResult> GetTeamPerformanceAsync(int companyId, int userId, string userRole, DateTime? dateFrom = null, DateTime? dateTo = null);
     Task<SavedReportListResult> GetSavedReportsAsync(int companyId, int userId);
     Task<CreateReportResult> SaveReportAsync(int companyId, int userId, SaveReportRequest request);
     Task<ServiceResult> DeleteReportAsync(int companyId, int userId, int reportId);

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ThinkBridge_ERP.Data;
 using ThinkBridge_ERP.Services.Interfaces;
 
@@ -13,12 +14,14 @@ public class AuthController : Controller
     private readonly IAuthService _authService;
     private readonly ApplicationDbContext _context;
     private readonly ILogger<AuthController> _logger;
+    private readonly IEmailService _emailService;
 
-    public AuthController(IAuthService authService, ApplicationDbContext context, ILogger<AuthController> logger)
+    public AuthController(IAuthService authService, ApplicationDbContext context, ILogger<AuthController> logger, IEmailService emailService)
     {
         _authService = authService;
         _context = context;
         _logger = logger;
+        _emailService = emailService;
     }
 
     [HttpGet]
@@ -59,7 +62,7 @@ public class AuthController : Controller
 
             if (!result.Success)
             {
-                return Json(new { success = false, message = result.ErrorMessage });
+                return Json(new { success = false, message = result.ErrorMessage, lockoutSeconds = result.LockoutSeconds });
             }
 
             // Create claims for the authenticated user
@@ -81,6 +84,23 @@ public class AuthController : Controller
             {
                 claims.Add(new Claim("CompanyID", result.User.CompanyID.Value.ToString()));
                 claims.Add(new Claim("CompanyName", result.User.Company?.CompanyName ?? ""));
+
+                // Add subscription status claim for grace period awareness
+                try
+                {
+                    var subscription = await _context.Subscriptions
+                        .Where(s => s.CompanyID == result.User.CompanyID.Value)
+                        .OrderByDescending(s => s.StartDate)
+                        .FirstOrDefaultAsync();
+                    if (subscription != null)
+                    {
+                        claims.Add(new Claim("SubscriptionStatus", subscription.Status));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to load subscription status claim for user {Email}", request?.Email);
+                }
             }
 
             // Add all roles as claims
@@ -176,10 +196,22 @@ public class AuthController : Controller
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 8)
+            if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 12)
             {
-                return Json(new { success = false, message = "Password must be at least 8 characters." });
+                return Json(new { success = false, message = "Password must be at least 12 characters." });
             }
+
+            if (!request.NewPassword.Any(char.IsUpper))
+                return Json(new { success = false, message = "Password must include an uppercase letter." });
+
+            if (!request.NewPassword.Any(char.IsLower))
+                return Json(new { success = false, message = "Password must include a lowercase letter." });
+
+            if (!request.NewPassword.Any(char.IsDigit))
+                return Json(new { success = false, message = "Password must include a number." });
+
+            if (!System.Text.RegularExpressions.Regex.IsMatch(request.NewPassword, @"[^a-zA-Z0-9]"))
+                return Json(new { success = false, message = "Password must include a special character." });
 
             if (request.NewPassword != request.ConfirmPassword)
             {
@@ -225,6 +257,54 @@ public class AuthController : Controller
         }
     }
 
+    [HttpPost]
+    [IgnoreAntiforgeryToken]
+    [Route("/Auth/ForgotPassword")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(request?.Email))
+            {
+                return Json(new { success = false, message = "Please enter your email address." });
+            }
+
+            var user = await _context.Users
+                .Include(u => u.Company)
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == request.Email.ToLower().Trim() && !u.IsSuperAdmin);
+
+            if (user == null)
+            {
+                // Return generic message to prevent email enumeration
+                return Json(new { success = true, message = "If an account exists with that email, a password reset has been sent." });
+            }
+
+            // Generate temporary password
+            var companyName = user.Company?.CompanyName ?? "ThinkBridge";
+            var tempPassword = $"{companyName.Replace(" ", "")}_{Guid.NewGuid().ToString("N")[..6]}!";
+            user.Password = BCrypt.Net.BCrypt.HashPassword(tempPassword);
+            user.MustChangePassword = true;
+            await _context.SaveChangesAsync();
+
+            // Send email with temporary password
+            var emailSent = await _emailService.SendPasswordResetEmailAsync(user.Email, user.Fname, tempPassword);
+
+            if (!emailSent)
+            {
+                _logger.LogWarning("Failed to send password reset email to {Email}", user.Email);
+            }
+
+            _logger.LogInformation("Password reset for user {Email} via forgot password", user.Email);
+
+            return Json(new { success = true, message = "If an account exists with that email, a password reset has been sent." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing forgot password for {Email}", request?.Email);
+            return Json(new { success = false, message = "An error occurred. Please try again." });
+        }
+    }
+
     [HttpGet]
     public IActionResult AccessDenied()
     {
@@ -244,4 +324,9 @@ public class ChangePasswordRequest
     public string CurrentPassword { get; set; } = string.Empty;
     public string NewPassword { get; set; } = string.Empty;
     public string ConfirmPassword { get; set; } = string.Empty;
+}
+
+public class ForgotPasswordRequest
+{
+    public string Email { get; set; } = string.Empty;
 }

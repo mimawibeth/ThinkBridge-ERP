@@ -32,7 +32,7 @@ public class CalendarEvent
 
     public bool AllDay { get; set; } = false;
 
-    [StringLength(50)]
+    [StringLength(500)]
     public string? Location { get; set; }
 
     /// <summary>

@@ -6,7 +6,7 @@ public interface IProjectService
     Task<ProjectDetailResult> GetProjectByIdAsync(int companyId, int userId, string userRole, int projectId);
     Task<CreateProjectResult> CreateProjectAsync(int companyId, int userId, CreateProjectRequest request);
     Task<ServiceResult> UpdateProjectAsync(int companyId, int userId, int projectId, UpdateProjectRequest request);
-    Task<ServiceResult> ArchiveOrRestoreProjectAsync(int companyId, int projectId, string status);
+    Task<ServiceResult> ArchiveOrRestoreProjectAsync(int companyId, int userId, int projectId, string status);
     Task<ServiceResult> DeleteProjectAsync(int companyId, int userId, int projectId);
     Task<ProjectStatsResult> GetProjectStatsAsync(int companyId, int userId, string userRole);
     Task<List<TeamMemberOption>> GetTeamMembersForCompanyAsync(int companyId);
@@ -43,6 +43,11 @@ public class UpdateProjectRequest
     public DateTime? StartDate { get; set; }
     public DateTime? DueDate { get; set; }
     public List<int>? TeamMemberIds { get; set; }
+}
+
+public class CreateProjectCategoryRequest
+{
+    public string CategoryName { get; set; } = string.Empty;
 }
 
 // Response DTOs

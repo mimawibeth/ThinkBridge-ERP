@@ -12,9 +12,23 @@
 <div class="page-dashboard companyadmin-dashboard">
     <!-- Welcome Section -->
     <section class="welcome-section">
-        <h1 class="welcome-title">Welcome back, <span id="dash-username">@firstName</span>!</h1>
+        <h1 class="welcome-title">Welcome, <span id="dash-username">@firstName</span>!</h1>
         <p class="welcome-subtitle">Here's an overview of your projects and activities.</p>
     </section>
+
+    <!-- Subscription Alert Banner -->
+    <div class="subscription-alert-banner" id="subscriptionAlertBanner" style="display:none;">
+        <div class="alert-banner-content">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z">
+                </path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <span id="subscriptionAlertMessage"></span>
+            <a href="@Url.Action("MySubscription", "Web")" class="alert-banner-action">Manage Subscription</a>
+        </div>
+    </div>
 
     <!-- KPI Stat Cards -->
     <section class="kpi-section" id="kpi-section">
@@ -167,6 +181,7 @@
         loadRecentProjects();
         loadTeamMembers();
         scheduleMonthlyKpiRefresh();
+        loadSubscriptionBanner();
         });
 
         async function loadKpiCards() {
@@ -478,6 +493,23 @@
         const d = new Date(dateStr);
         return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         }
+
+        async function loadSubscriptionBanner() {
+        try {
+        const res = await fetch('/api/companyadmin/subscription/alert', { credentials: 'same-origin' });
+        const result = await res.json();
+        const banner = document.getElementById('subscriptionAlertBanner');
+        if (!banner) return;
+        if (!result.success || !result.data) { banner.style.display = 'none'; return; }
+        var a = result.data;
+        document.getElementById('subscriptionAlertMessage').textContent = a.message;
+        if (a.alertType === 'grace-period' || a.alertType === 'auto-renew-failed') {
+        banner.classList.add('alert-danger');
+        }
+        banner.style.display = 'block';
+        } catch (e) { /* silent */ }
+        }
+
         })();
     </script>
 }

@@ -46,6 +46,10 @@ public class User
 
     public bool HasCompletedOnboarding { get; set; } = false;
 
+    public int FailedLoginAttempts { get; set; } = 0;
+
+    public DateTime? LockoutEnd { get; set; }
+
     public DateTime? LastLoginAt { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

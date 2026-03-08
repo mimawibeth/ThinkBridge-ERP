@@ -45,10 +45,20 @@ public class PdfReportService
         int companyId, int userId, string userRole,
         string fullName, string companyName, string period = "month")
     {
-        var dashboard = await _reportService.GetReportDashboardAsync(companyId, userId, userRole, period);
-        var projects = await _reportService.GetProjectProgressAsync(companyId, userId, userRole);
-        var tasks = await _reportService.GetTaskDistributionAsync(companyId, userId, userRole);
-        var team = await _reportService.GetTeamPerformanceAsync(companyId, userId, userRole);
+        var now = DateTime.UtcNow;
+        DateTime dateFrom = period switch
+        {
+            "week" => now.AddDays(-7),
+            "quarter" => now.AddMonths(-3),
+            "year" => now.AddYears(-1),
+            _ => now.AddMonths(-1)
+        };
+        DateTime dateTo = now;
+
+        var dashboard = await _reportService.GetReportDashboardAsync(companyId, userId, userRole, dateFrom, dateTo);
+        var projects = await _reportService.GetProjectProgressAsync(companyId, userId, userRole, dateFrom, dateTo);
+        var tasks = await _reportService.GetTaskDistributionAsync(companyId, userId, userRole, dateFrom, dateTo);
+        var team = await _reportService.GetTeamPerformanceAsync(companyId, userId, userRole, dateFrom, dateTo);
 
         var periodLabel = period switch
         {
@@ -410,6 +420,96 @@ public class PdfReportService
                 });
 
                 // ── FOOTER ──
+                page.Footer().Element(f => ComposeFooter(f));
+            });
+        });
+
+        return doc.GeneratePdf();
+    }
+
+    // ═══════════════════════════════════════════════════
+    //  PAYMENT REPORT PDF
+    // ═══════════════════════════════════════════════════
+
+    public async Task<byte[]> GeneratePaymentReportPdfAsync(
+        string fullName, DateTime? dateFrom, DateTime? dateTo)
+    {
+        var from = dateFrom ?? DateTime.UtcNow.AddMonths(-1);
+        var to = dateTo ?? DateTime.UtcNow;
+        var pht = TimeZoneInfo.FindSystemTimeZoneById("Asia/Manila");
+
+        var stats = await _superAdminService.GetPaymentStatsAsync(null, null, from, to);
+        var payments = await _superAdminService.GetPaymentsAsync(new PaymentFilterRequest
+        {
+            DateFrom = from,
+            DateTo = to,
+            Page = 1,
+            PageSize = 500
+        });
+
+        const string sysCompany = "ThinkBridge ERP";
+
+        var doc = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                ConfigurePage(page);
+
+                page.Header().Element(h =>
+                    ComposeHeader(h, sysCompany,
+                        $"{sysCompany} \u2013 Payment Report",
+                        fullName, "Super Admin"));
+
+                page.Content().PaddingVertical(8).Column(col =>
+                {
+                    col.Spacing(10);
+
+                    // Period info
+                    col.Item().Text($"Period: {from:MMM dd, yyyy} \u2014 {to:MMM dd, yyyy}  \u2022  Generated: {TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, pht):MMM dd, yyyy hh:mm tt} PHT")
+                        .FontSize(8).FontColor(Muted);
+
+                    if (stats.Success)
+                    {
+                        col.Item().Element(c => SectionHeading(c, "Payment Summary"));
+                        col.Item().Row(row =>
+                        {
+                            row.Spacing(6);
+                            row.RelativeItem().Element(c => MetricCard(c, "Total Revenue",
+                                $"\u20b1{stats.TotalRevenue:N2}",
+                                $"{stats.CompletedCount} completed", Success));
+                            row.RelativeItem().Element(c => MetricCard(c, "Pending",
+                                $"\u20b1{stats.PendingAmount:N2}",
+                                $"{stats.PendingCount} invoices", Warning));
+                            row.RelativeItem().Element(c => MetricCard(c, "Overdue",
+                                $"\u20b1{stats.OverdueAmount:N2}",
+                                $"{stats.OverdueCount} invoices", Danger));
+                            row.RelativeItem().Element(c => MetricCard(c, "Failed",
+                                stats.FailedCount.ToString(),
+                                "transactions", Danger));
+                        });
+                    }
+
+                    if (payments.Success && payments.Payments.Count > 0)
+                    {
+                        col.Item().Element(c => SectionHeading(c, $"Payment Transactions ({payments.TotalCount})"));
+                        col.Item().Element(c => ComposeTable(c,
+                            new[] { "#", "Company", "Invoice", "Amount", "Method", "Status", "Date (PHT)" },
+                            new[] { 20f, 0f, 70f, 65f, 60f, 55f, 90f },
+                            payments.Payments.Select((p, i) => new[]
+                            {
+                                (i + 1).ToString(),
+                                p.CompanyName,
+                                p.InvoiceNumber ?? "N/A",
+                                $"\u20b1{p.Amount:N2}",
+                                p.PaymentMethod ?? p.Provider,
+                                p.Status,
+                                p.PaidAt.HasValue
+                                    ? TimeZoneInfo.ConvertTimeFromUtc(p.PaidAt.Value, pht).ToString("MMM dd, yyyy hh:mm tt")
+                                    : TimeZoneInfo.ConvertTimeFromUtc(p.CreatedAt, pht).ToString("MMM dd, yyyy hh:mm tt")
+                            }).ToList()));
+                    }
+                });
+
                 page.Footer().Element(f => ComposeFooter(f));
             });
         });

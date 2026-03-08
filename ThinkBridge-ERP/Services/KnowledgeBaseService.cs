@@ -708,10 +708,19 @@ public class KnowledgeBaseService : IKnowledgeBaseService
     // Comments on Articles
     // ──────────────────────────────────────────────
 
-    public async Task<ArticleCommentListResult> GetArticleCommentsAsync(int documentId)
+    public async Task<ArticleCommentListResult> GetArticleCommentsAsync(int companyId, int documentId)
     {
         try
         {
+            // Verify the document belongs to the caller's company
+            var docCompanyId = await _context.Documents
+                .Where(d => d.DocumentID == documentId)
+                .Select(d => d.CompanyID)
+                .FirstOrDefaultAsync();
+
+            if (docCompanyId == 0 || docCompanyId != companyId)
+                return new ArticleCommentListResult { Success = true, Comments = new List<ArticleCommentItem>() };
+
             // Find the post associated with this document
             var postDoc = await _context.PostDocuments
                 .Include(pd => pd.Post)

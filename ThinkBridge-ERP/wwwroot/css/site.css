@@ -494,6 +494,29 @@ body.sidebar-collapsed .sidebar .sign-out-link .nav-text {
   white-space: nowrap;
 }
 
+/* Subscription Alert Red Dot */
+.subscription-alert-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger, #ef4444);
+  margin-left: auto;
+  flex-shrink: 0;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+}
+
 /* Sidebar Navigation Sections */
 .nav-section {
   margin-bottom: var(--spacing-md);

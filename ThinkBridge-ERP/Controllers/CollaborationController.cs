@@ -123,8 +123,11 @@ public class CollaborationController : ControllerBase
     [HttpGet("posts/{postId}/comments")]
     public async Task<IActionResult> GetComments(int postId)
     {
+        var companyId = GetCurrentCompanyId();
+        if (companyId == 0) return BadRequest(new { success = false, message = "Invalid user context." });
+
         var role = GetCurrentUserRole();
-        var result = await _collaborationService.GetCommentsAsync(postId, role);
+        var result = await _collaborationService.GetCommentsAsync(companyId, postId, role);
         if (!result.Success) return BadRequest(new { success = false, message = result.ErrorMessage });
 
         return Ok(new { success = true, data = result.Comments });
@@ -155,10 +158,11 @@ public class CollaborationController : ControllerBase
     [HttpDelete("comments/{commentId}")]
     public async Task<IActionResult> DeleteComment(int commentId)
     {
+        var companyId = GetCurrentCompanyId();
         var userId = GetCurrentUserId();
-        if (userId == 0) return BadRequest(new { success = false, message = "Invalid user context." });
+        if (companyId == 0 || userId == 0) return BadRequest(new { success = false, message = "Invalid user context." });
 
-        var result = await _collaborationService.DeleteCommentAsync(userId, commentId);
+        var result = await _collaborationService.DeleteCommentAsync(companyId, userId, commentId);
         if (!result.Success) return BadRequest(new { success = false, message = result.ErrorMessage });
 
         return Ok(new { success = true });
@@ -175,6 +179,8 @@ public class CollaborationController : ControllerBase
     public async Task<IActionResult> GetActivityFeed(
         [FromQuery] string? type,
         [FromQuery] string? search,
+        [FromQuery] DateTime? dateFrom,
+        [FromQuery] DateTime? dateTo,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 30)
     {
@@ -191,6 +197,8 @@ public class CollaborationController : ControllerBase
         {
             ActivityType = type,
             SearchTerm = search,
+            DateFrom = dateFrom,
+            DateTo = dateTo,
             Page = page,
             PageSize = pageSize
         };
@@ -202,6 +210,7 @@ public class CollaborationController : ControllerBase
         {
             success = true,
             data = result.Activities,
+            currentUserId = userId,
             pagination = new { page = result.Page, pageSize = result.PageSize, totalCount = result.TotalCount }
         });
     }

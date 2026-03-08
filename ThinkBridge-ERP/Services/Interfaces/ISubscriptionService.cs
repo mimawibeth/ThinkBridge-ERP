@@ -10,6 +10,9 @@ public interface ISubscriptionService
     Task<bool> ActivateSubscriptionAsync(string checkoutSessionId);
     Task<int> ExpireOverdueSubscriptionsAsync();
     Task<Subscription?> GetActiveSubscriptionAsync(int companyId);
+    Task<SubscriptionAlertResult?> GetSubscriptionAlertAsync(int companyId);
+    Task<bool> ToggleAutoRenewAsync(int companyId, bool enabled);
+    Task<bool> RenewSubscriptionAsync(string checkoutSessionId);
 }
 
 public class CompanyRegistrationRequest
@@ -34,4 +37,15 @@ public class CompanyRegistrationResult
     public string TempPassword { get; set; } = string.Empty;
     public decimal Amount { get; set; }
     public string PlanName { get; set; } = string.Empty;
+}
+
+public class SubscriptionAlertResult
+{
+    public string AlertType { get; set; } = string.Empty; // "expiring-soon", "grace-period", "auto-renew-failed"
+    public string Message { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
+    public DateTime? EndDate { get; set; }
+    public DateTime? GracePeriodEndDate { get; set; }
+    public int DaysRemaining { get; set; }
+    public bool AutoRenew { get; set; }
 }

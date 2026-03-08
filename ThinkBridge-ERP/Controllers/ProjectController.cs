@@ -1,6 +1,9 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using ThinkBridge_ERP.Data;
+using ThinkBridge_ERP.Models.Entities;
 using ThinkBridge_ERP.Services.Interfaces;
 
 namespace ThinkBridge_ERP.Controllers;
@@ -12,11 +15,13 @@ public class ProjectController : ControllerBase
 {
     private readonly IProjectService _projectService;
     private readonly ILogger<ProjectController> _logger;
+    private readonly ApplicationDbContext _context;
 
-    public ProjectController(IProjectService projectService, ILogger<ProjectController> logger)
+    public ProjectController(IProjectService projectService, ILogger<ProjectController> logger, ApplicationDbContext context)
     {
         _projectService = projectService;
         _logger = logger;
+        _context = context;
     }
 
     private int GetCurrentUserId()
@@ -184,7 +189,7 @@ public class ProjectController : ControllerBase
                 return Forbid();
             }
             // Allow CompanyAdmin to archive/restore - pass to service with admin flag
-            var result = await _projectService.ArchiveOrRestoreProjectAsync(companyId, id, request.Status);
+            var result = await _projectService.ArchiveOrRestoreProjectAsync(companyId, userId, id, request.Status);
             if (!result.Success) return BadRequest(new { success = false, message = result.ErrorMessage });
             return Ok(new { success = true });
         }
@@ -196,6 +201,73 @@ public class ProjectController : ControllerBase
 
         var updateResult = await _projectService.UpdateProjectAsync(companyId, userId, id, request);
         if (!updateResult.Success) return BadRequest(new { success = false, message = updateResult.ErrorMessage });
+
+        return Ok(new { success = true });
+    }
+
+    // ---- Project Categories ----
+
+    [HttpGet("categories")]
+    public async Task<IActionResult> GetCategories()
+    {
+        var companyId = GetCurrentCompanyId();
+        if (companyId == 0) return BadRequest(new { success = false, message = "Invalid company context." });
+
+        var categories = await _context.ProjectCategories
+            .Where(c => c.CompanyID == companyId)
+            .OrderBy(c => c.CategoryName)
+            .Select(c => new { c.CategoryID, c.CategoryName })
+            .ToListAsync();
+
+        return Ok(new { success = true, data = categories });
+    }
+
+    [HttpPost("categories")]
+    [Authorize(Policy = "ProjectManagerOnly")]
+    public async Task<IActionResult> CreateCategory([FromBody] CreateProjectCategoryRequest request)
+    {
+        var companyId = GetCurrentCompanyId();
+        if (companyId == 0) return BadRequest(new { success = false, message = "Invalid company context." });
+
+        if (string.IsNullOrWhiteSpace(request.CategoryName))
+            return BadRequest(new { success = false, message = "Category name is required." });
+
+        var name = request.CategoryName.Trim();
+        if (name.Length > 50)
+            return BadRequest(new { success = false, message = "Category name must be 50 characters or less." });
+
+        var exists = await _context.ProjectCategories
+            .AnyAsync(c => c.CompanyID == companyId && c.CategoryName.ToLower() == name.ToLower());
+        if (exists)
+            return BadRequest(new { success = false, message = "Category already exists." });
+
+        var category = new ProjectCategory
+        {
+            CompanyID = companyId,
+            CategoryName = name,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _context.ProjectCategories.Add(category);
+        await _context.SaveChangesAsync();
+
+        return Ok(new { success = true, data = new { category.CategoryID, category.CategoryName } });
+    }
+
+    [HttpDelete("categories/{id}")]
+    [Authorize(Policy = "ProjectManagerOnly")]
+    public async Task<IActionResult> DeleteCategory(int id)
+    {
+        var companyId = GetCurrentCompanyId();
+        if (companyId == 0) return BadRequest(new { success = false, message = "Invalid company context." });
+
+        var category = await _context.ProjectCategories
+            .FirstOrDefaultAsync(c => c.CategoryID == id && c.CompanyID == companyId);
+        if (category == null)
+            return NotFound(new { success = false, message = "Category not found." });
+
+        _context.ProjectCategories.Remove(category);
+        await _context.SaveChangesAsync();
 
         return Ok(new { success = true });
     }

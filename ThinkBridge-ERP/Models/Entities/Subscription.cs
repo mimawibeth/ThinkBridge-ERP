@@ -26,6 +26,14 @@ public class Subscription
     [Column(TypeName = "date")]
     public DateTime? EndDate { get; set; }
 
+    public int GracePeriodDays { get; set; } = 7;
+
+    public DateTime? GracePeriodEndDate { get; set; }
+
+    public bool AutoRenew { get; set; } = false;
+
+    public DateTime? AutoRenewFailedAt { get; set; }
+
     // Navigation properties
     [ForeignKey("CompanyID")]
     public virtual Company Company { get; set; } = null!;

@@ -128,7 +128,7 @@
                             <label for="new-password">New Password</label>
                             <div class="password-field-wrapper">
                                 <input type="password" id="new-password" class="form-input"
-                                       placeholder="Minimum 8 characters" required minlength="8" />
+                                       placeholder="Minimum 12 characters" required minlength="12" />
                                 <button type="button" class="password-toggle-btn"
                                         onclick="togglePasswordVisibility('new-password', this)">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -138,197 +138,198 @@
                                     </svg>
                                 </button>
                             </div>
-                            <div class="password-strength" id="password-strength">
-                                <div class="strength-bars">
-                                    <div class="strength-bar"></div>
-                                    <div class="strength-bar"></div>
-                                    <div class="strength-bar"></div>
-                                    <div class="strength-bar"></div>
+                            <ul class="password-checklist" id="passwordChecklist" style="display:none;">
+                                <li id="check-length"><span class="check-icon-pw"></span> Min. 12 characters</li>
+                                <li id="check-lowercase"><span class="check-icon-pw"></span> Min. one lowercase
+                                    character</li>
+                                    <li id="check-uppercase"><span class="check-icon-pw"></span> Min. one uppercase
+                                        character</li>
+                                        <li id="check-number"><span class="check-icon-pw"></span> Min. one number</li>
+                                        <li id="check-special"><span class="check-icon-pw"></span> Min. one special character
+                                        </li>
+                                    </ul>
                                 </div>
-                                <span class="strength-text" id="strength-text"></span>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="confirm-password">Confirm New Password</label>
-                            <div class="password-field-wrapper">
-                                <input type="password" id="confirm-password" class="form-input"
-                                       placeholder="Re-enter new password" required />
-                                <button type="button" class="password-toggle-btn"
-                                        onclick="togglePasswordVisibility('confirm-password', this)">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                         stroke-width="2">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                        <circle cx="12" cy="12" r="3"></circle>
-                                    </svg>
-                                </button>
-                            </div>
-                            <span class="form-hint password-match-hint" id="password-match-hint"
-                                  style="display:none;"></span>
-                        </div>
-                        <div class="form-actions">
-                            <button type="button" class="btn btn-secondary" id="btn-cancel-password">Cancel</button>
-                            <button type="button" class="btn btn-primary" id="btn-change-password">
-                                <span class="btn-text">Update Password</span>
-                                <span class="btn-spinner" style="display:none;">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                         stroke-width="2" class="spin">
-                                        <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
-                                    </svg>
-                                </span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </section>
-
-            <!-- Account Section -->
-            <section id="account" class="settings-section">
-                <div class="section-header">
-                    <h2 class="section-title">Account Information</h2>
-                    <p class="section-description">View your account details and role.</p>
-                </div>
-                <div class="settings-card">
-                    <h3 class="card-title">Your Role</h3>
-                    <div class="role-display">
-                        <div class="role-badge-display">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="2">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                            </svg>
-                            <span id="account-role"></span>
-                        </div>
-                        <p class="role-description" id="account-role-desc">Loading role information...</p>
-                    </div>
-                </div>
-                <div class="settings-card">
-                    <h3 class="card-title">Account Details</h3>
-                    <div class="account-details-grid">
-                        <div class="detail-item">
-                            <span class="detail-label">Email</span>
-                            <span class="detail-value" id="account-email"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Company</span>
-                            <span class="detail-value" id="account-company"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Status</span>
-                            <span class="detail-value" id="account-status"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Member Since</span>
-                            <span class="detail-value" id="account-created"></span>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Last Login</span>
-                            <span class="detail-value" id="account-last-login"></span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Customization Section -->
-            <section id="customization" class="settings-section">
-                <div class="section-header">
-                    <h2 class="section-title">Customization</h2>
-                    <p class="section-description">Personalize your interface preferences.</p>
-                </div>
-                <div class="settings-card">
-                    <h3 class="card-title">Theme Mode</h3>
-                    <p class="theme-section-intro">Choose your preferred appearance. Your selection is saved
-                        automatically.</p>
-                        <div class="theme-options">
-                            <!-- Light Theme Option -->
-                            <div class="theme-option selected" id="theme-light" data-theme="light">
-                                <div class="check-indicator">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                         stroke-width="3">
-                                        <polyline points="20 6 9 17 4 12"></polyline>
-                                    </svg>
-                                </div>
-                                <div class="theme-preview theme-preview-light">
-                                    <div class="preview-sidebar"></div>
-                                    <div class="preview-content">
-                                        <div class="preview-topbar"></div>
-                                        <div class="preview-card"></div>
+                                <div class="form-group">
+                                    <label for="confirm-password">Confirm New Password</label>
+                                    <div class="password-field-wrapper">
+                                        <input type="password" id="confirm-password" class="form-input"
+                                               placeholder="Re-enter new password" required />
+                                        <button type="button" class="password-toggle-btn"
+                                                onclick="togglePasswordVisibility('confirm-password', this)">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="2">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                            </svg>
+                                        </button>
                                     </div>
+                                    <span class="form-hint password-match-hint" id="password-match-hint"
+                                          style="display:none;"></span>
                                 </div>
-                                <div class="theme-icon">
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                         stroke-width="2">
-                                        <circle cx="12" cy="12" r="5"></circle>
-                                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                                    </svg>
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-secondary" id="btn-cancel-password">Cancel</button>
+                                    <button type="button" class="btn btn-primary" id="btn-change-password">
+                                        <span class="btn-text">Update Password</span>
+                                        <span class="btn-spinner" style="display:none;">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="2" class="spin">
+                                                <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+                                            </svg>
+                                        </span>
+                                    </button>
                                 </div>
-                                <span class="theme-label">Light</span>
-                                <span class="theme-description">Clean and bright interface for daytime use.</span>
-                            </div>
+                            </form>
+                        </div>
+                    </section>
 
-                            <!-- Dark Theme Option -->
-                            <div class="theme-option" id="theme-dark" data-theme="dark">
-                                <div class="check-indicator">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                         stroke-width="3">
-                                        <polyline points="20 6 9 17 4 12"></polyline>
-                                    </svg>
-                                </div>
-                                <div class="theme-preview theme-preview-dark">
-                                    <div class="preview-sidebar"></div>
-                                    <div class="preview-content">
-                                        <div class="preview-topbar"></div>
-                                        <div class="preview-card"></div>
-                                    </div>
-                                </div>
-                                <div class="theme-icon">
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    <!-- Account Section -->
+                    <section id="account" class="settings-section">
+                        <div class="section-header">
+                            <h2 class="section-title">Account Information</h2>
+                            <p class="section-description">View your account details and role.</p>
+                        </div>
+                        <div class="settings-card">
+                            <h3 class="card-title">Your Role</h3>
+                            <div class="role-display">
+                                <div class="role-badge-display">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                          stroke-width="2">
-                                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                                     </svg>
+                                    <span id="account-role"></span>
                                 </div>
-                                <span class="theme-label">Dark</span>
-                                <span class="theme-description">Easy on the eyes, great for low-light environments.</span>
+                                <p class="role-description" id="account-role-desc">Loading role information...</p>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Avatar Color -->
-                    <div class="settings-card" style="margin-top: 24px;">
-                        <h3 class="card-title">Avatar Color</h3>
-                        <p class="theme-section-intro">Choose a color for your avatar. This color will be applied across the
-                            entire system.</p>
-                            <div class="avatar-color-options" id="avatar-color-options">
-                                <button type="button" class="avatar-color-swatch" data-color="#0B4F6C"
-                                        style="background:#0B4F6C;" title="Blue"></button>
-                                <button type="button" class="avatar-color-swatch" data-color="#7c3aed"
-                                        style="background:#7c3aed;" title="Purple"></button>
-                                <button type="button" class="avatar-color-swatch" data-color="#059669"
-                                        style="background:#059669;" title="Green"></button>
-                                <button type="button" class="avatar-color-swatch" data-color="#d97706"
-                                        style="background:#d97706;" title="Orange"></button>
-                                <button type="button" class="avatar-color-swatch" data-color="#dc2626"
-                                        style="background:#dc2626;" title="Red"></button>
-                                <button type="button" class="avatar-color-swatch" data-color="#0891b2"
-                                        style="background:#0891b2;" title="Teal"></button>
+                        <div class="settings-card">
+                            <h3 class="card-title">Account Details</h3>
+                            <div class="account-details-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">Email</span>
+                                    <span class="detail-value" id="account-email"></span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Company</span>
+                                    <span class="detail-value" id="account-company"></span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Status</span>
+                                    <span class="detail-value" id="account-status"></span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Member Since</span>
+                                    <span class="detail-value" id="account-created"></span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Last Login</span>
+                                    <span class="detail-value" id="account-last-login"></span>
+                                </div>
                             </div>
                         </div>
                     </section>
+
+                    <!-- Customization Section -->
+                    <section id="customization" class="settings-section">
+                        <div class="section-header">
+                            <h2 class="section-title">Customization</h2>
+                            <p class="section-description">Personalize your interface preferences.</p>
+                        </div>
+                        <div class="settings-card">
+                            <h3 class="card-title">Theme Mode</h3>
+                            <p class="theme-section-intro">Choose your preferred appearance. Your selection is saved
+                                automatically.</p>
+                                <div class="theme-options">
+                                    <!-- Light Theme Option -->
+                                    <div class="theme-option selected" id="theme-light" data-theme="light">
+                                        <div class="check-indicator">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="3">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                        </div>
+                                        <div class="theme-preview theme-preview-light">
+                                            <div class="preview-sidebar"></div>
+                                            <div class="preview-content">
+                                                <div class="preview-topbar"></div>
+                                                <div class="preview-card"></div>
+                                            </div>
+                                        </div>
+                                        <div class="theme-icon">
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="2">
+                                                <circle cx="12" cy="12" r="5"></circle>
+                                                <line x1="12" y1="1" x2="12" y2="3"></line>
+                                                <line x1="12" y1="21" x2="12" y2="23"></line>
+                                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                                                <line x1="1" y1="12" x2="3" y2="12"></line>
+                                                <line x1="21" y1="12" x2="23" y2="12"></line>
+                                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                                            </svg>
+                                        </div>
+                                        <span class="theme-label">Light</span>
+                                        <span class="theme-description">Clean and bright interface for daytime use.</span>
+                                    </div>
+
+                                    <!-- Dark Theme Option -->
+                                    <div class="theme-option" id="theme-dark" data-theme="dark">
+                                        <div class="check-indicator">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="3">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                        </div>
+                                        <div class="theme-preview theme-preview-dark">
+                                            <div class="preview-sidebar"></div>
+                                            <div class="preview-content">
+                                                <div class="preview-topbar"></div>
+                                                <div class="preview-card"></div>
+                                            </div>
+                                        </div>
+                                        <div class="theme-icon">
+                                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                 stroke-width="2">
+                                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                                            </svg>
+                                        </div>
+                                        <span class="theme-label">Dark</span>
+                                        <span class="theme-description">Easy on the eyes, great for low-light environments.</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Avatar Color -->
+                            <div class="settings-card" style="margin-top: 24px;">
+                                <h3 class="card-title">Avatar Color</h3>
+                                <p class="theme-section-intro">Choose a color for your avatar. This color will be applied across the
+                                    entire system.</p>
+                                    <div class="avatar-color-options" id="avatar-color-options">
+                                        <button type="button" class="avatar-color-swatch" data-color="#0B4F6C"
+                                                style="background:#0B4F6C;" title="Blue"></button>
+                                        <button type="button" class="avatar-color-swatch" data-color="#7c3aed"
+                                                style="background:#7c3aed;" title="Purple"></button>
+                                        <button type="button" class="avatar-color-swatch" data-color="#059669"
+                                                style="background:#059669;" title="Green"></button>
+                                        <button type="button" class="avatar-color-swatch" data-color="#d97706"
+                                                style="background:#d97706;" title="Orange"></button>
+                                        <button type="button" class="avatar-color-swatch" data-color="#dc2626"
+                                                style="background:#dc2626;" title="Red"></button>
+                                        <button type="button" class="avatar-color-swatch" data-color="#0891b2"
+                                                style="background:#0891b2;" title="Teal"></button>
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Toast notification -->
-        <div class="settings-toast" id="settings-toast">
-            <div class="toast-icon" id="toast-icon"></div>
-            <span class="toast-message" id="toast-message"></span>
-        </div>
+                <!-- Toast notification -->
+                <div class="settings-toast" id="settings-toast">
+                    <div class="toast-icon" id="toast-icon"></div>
+                    <span class="toast-message" id="toast-message"></span>
+                </div>
 
-        @section PageScripts {
-            <script src="~/js/pages/settings.js" asp-append-version="true"></script>
-        }
+                @section PageScripts {
+                    <script src="~/js/pages/settings.js" asp-append-version="true"></script>
+                }

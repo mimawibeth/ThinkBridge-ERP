@@ -42,6 +42,8 @@ public class Project
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
     // Navigation properties
     [ForeignKey("CompanyID")]
     public virtual Company Company { get; set; } = null!;

@@ -102,7 +102,7 @@ public class DashboardStatsResult : ServiceResult
 {
     public int TotalCompanies { get; set; }
     public int ActiveSubscriptions { get; set; }
-    public int PendingPayments { get; set; }
+    public int TotalUsers { get; set; }
     public decimal MonthlyRevenue { get; set; }
     public int NewCompaniesThisMonth { get; set; }
     public List<CompanyListItem> RecentCompanies { get; set; } = new();

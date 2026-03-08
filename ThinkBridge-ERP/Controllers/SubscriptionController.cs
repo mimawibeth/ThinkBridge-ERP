@@ -273,13 +273,35 @@ public class SubscriptionController : Controller
                 return Ok(); // Return 200 to prevent retries
             }
 
-            // If payment was confirmed, activate the subscription
+            // If payment was confirmed, activate or renew the subscription
             if (result.EventType == "checkout_session.payment.paid" && !string.IsNullOrEmpty(result.CheckoutSessionId))
             {
-                var activated = await _subscriptionService.ActivateSubscriptionAsync(result.CheckoutSessionId);
-                if (activated)
+                // Check if this is a renewal or initial activation
+                var payment = await _context.PaymentTransactions
+                    .Include(p => p.Subscription)
+                    .FirstOrDefaultAsync(p => p.CheckoutSessionID == result.CheckoutSessionId);
+
+                if (payment != null)
                 {
-                    _logger.LogInformation("Subscription activated via webhook for session {SessionId}", result.CheckoutSessionId);
+                    var subStatus = payment.Subscription.Status;
+                    if (subStatus == "GracePeriod" || subStatus == "Expired" || subStatus == "Active")
+                    {
+                        // Renewal
+                        var renewed = await _subscriptionService.RenewSubscriptionAsync(result.CheckoutSessionId);
+                        if (renewed)
+                        {
+                            _logger.LogInformation("Subscription renewed via webhook for session {SessionId}", result.CheckoutSessionId);
+                        }
+                    }
+                    else
+                    {
+                        // Initial activation
+                        var activated = await _subscriptionService.ActivateSubscriptionAsync(result.CheckoutSessionId);
+                        if (activated)
+                        {
+                            _logger.LogInformation("Subscription activated via webhook for session {SessionId}", result.CheckoutSessionId);
+                        }
+                    }
                 }
             }
 
@@ -369,6 +391,81 @@ public class SubscriptionController : Controller
 
         return Json(new { success = false, isActive = false, message = "Payment not yet confirmed. Please wait a moment." });
     }
+
+    /// <summary>
+    /// Create a renewal checkout session for an existing subscription.
+    /// Called by authenticated CompanyAdmin users.
+    /// </summary>
+    [HttpPost]
+    [Route("/api/subscription/renew")]
+    [IgnoreAntiforgeryToken]
+    [Microsoft.AspNetCore.Authorization.Authorize(Policy = "CompanyAdminOnly")]
+    public async Task<IActionResult> RenewSubscription([FromBody] RenewSubscriptionRequest request)
+    {
+        if (request?.SubscriptionId <= 0)
+            return Json(new { success = false, message = "Invalid subscription." });
+
+        var companyIdClaim = User.Claims.FirstOrDefault(c => c.Type == "CompanyID")?.Value;
+        if (!int.TryParse(companyIdClaim, out var companyId) || companyId == 0)
+            return Json(new { success = false, message = "Invalid company context." });
+
+        var subscription = await _context.Subscriptions
+            .Include(s => s.Plan)
+            .Include(s => s.Company)
+            .FirstOrDefaultAsync(s => s.SubscriptionID == request.SubscriptionId
+                && s.CompanyID == companyId);
+
+        if (subscription == null)
+            return Json(new { success = false, message = "Subscription not found." });
+
+        if (subscription.Plan.Price == 0)
+            return Json(new { success = false, message = "Free trial plans cannot be renewed via payment." });
+
+        var checkoutResult = await _payMongoService.CreateCheckoutSessionAsync(new PayMongoCheckoutRequest
+        {
+            SubscriptionId = subscription.SubscriptionID,
+            Amount = subscription.Plan.Price,
+            Description = $"ThinkBridge ERP - {subscription.Plan.PlanName} Plan Renewal (Monthly)",
+            CompanyName = subscription.Company.CompanyName,
+            CustomerEmail = "",
+            BaseUrl = $"{Request.Scheme}://{Request.Host}"
+        });
+
+        if (!checkoutResult.Success)
+            return Json(new { success = false, message = checkoutResult.ErrorMessage });
+
+        return Json(new
+        {
+            success = true,
+            checkoutUrl = checkoutResult.CheckoutUrl,
+            message = "Redirecting to payment..."
+        });
+    }
+
+    /// <summary>
+    /// Payment success callback for renewals
+    /// </summary>
+    [HttpGet]
+    [Route("/Subscription/RenewalSuccess")]
+    public async Task<IActionResult> RenewalSuccess(int? subscription_id)
+    {
+        if (subscription_id.HasValue)
+        {
+            // Try to activate the renewal
+            var payment = await _context.PaymentTransactions
+                .Where(p => p.SubscriptionID == subscription_id.Value && p.Status == "Pending")
+                .OrderByDescending(p => p.CreatedAt)
+                .FirstOrDefaultAsync();
+
+            if (payment?.CheckoutSessionID != null)
+            {
+                await _subscriptionService.RenewSubscriptionAsync(payment.CheckoutSessionID);
+            }
+        }
+
+        // Redirect to MySubscription page
+        return Redirect("/Web/MySubscription");
+    }
 }
 
 // Request DTOs
@@ -385,6 +482,11 @@ public class RegisterRequest
 }
 
 public class VerifyPaymentRequest
+{
+    public int SubscriptionId { get; set; }
+}
+
+public class RenewSubscriptionRequest
 {
     public int SubscriptionId { get; set; }
 }

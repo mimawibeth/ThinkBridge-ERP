@@ -41,6 +41,12 @@
                     <button class="filter-option" data-type="comment">Comments</button>
                 </div>
             </div>
+            <div class="date-filter" style="display:flex;align-items:center;gap:6px;">
+                <label for="date-from" style="font-size:0.82rem;color:var(--text-secondary);white-space:nowrap;">From</label>
+                <input type="date" id="date-from" class="filter-select" style="padding:6px 8px;font-size:0.82rem;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);color:var(--text-primary);" />
+                <label for="date-to" style="font-size:0.82rem;color:var(--text-secondary);white-space:nowrap;">To</label>
+                <input type="date" id="date-to" class="filter-select" style="padding:6px 8px;font-size:0.82rem;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);color:var(--text-primary);" />
+            </div>
         </div>
     </div>
 
@@ -50,7 +56,7 @@
             <div class="loading-state">Loading activity...</div>
         </div>
         <div class="load-more" id="loadMoreFeed" style="display:none;">
-            <button class="btn btn-secondary" onclick="loadMoreActivities()">Load More Activity</button>
+            <button class="btn btn-secondary" onclick="loadMoreActivities()">View All Activities</button>
         </div>
     </div>
 
@@ -83,6 +89,10 @@
     let feedTotalCount = 0;
     let postTotalCount = 0;
     let currentPostId = null;
+    let currentUserId = 0;
+    let dateFrom = '';
+    let dateTo = '';
+    let viewAll = false;
 
     const ICONS = {
         task: { svg: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>' },
@@ -119,6 +129,7 @@
             clearTimeout(timer);
             timer = setTimeout(() => {
                 searchTerm = e.target.value.trim();
+                viewAll = false;
                 if (currentTab === 'feed') { feedPage = 1; loadActivityFeed(); }
                 else { postPage = 1; loadPosts(); }
             }, 400);
@@ -139,6 +150,7 @@
                 document.getElementById('filterLabel').textContent = opt.textContent;
                 document.getElementById('filterMenu').classList.remove('show');
                 feedPage = 1;
+                viewAll = false;
                 loadActivityFeed();
             });
         });
@@ -146,6 +158,20 @@
         // Close filter on outside click
         document.addEventListener('click', () => {
             document.getElementById('filterMenu').classList.remove('show');
+        });
+
+        // Date filter inputs
+        document.getElementById('date-from').addEventListener('change', e => {
+            dateFrom = e.target.value;
+            feedPage = 1;
+            viewAll = false;
+            loadActivityFeed();
+        });
+        document.getElementById('date-to').addEventListener('change', e => {
+            dateTo = e.target.value;
+            feedPage = 1;
+            viewAll = false;
+            loadActivityFeed();
         });
 
         // Comment input enter key
@@ -190,9 +216,12 @@
         const container = document.getElementById('activityTimeline');
         if (!append) container.innerHTML = '<div class="loading-state">Loading activity...</div>';
 
-        const params = new URLSearchParams({ page: feedPage, pageSize: 30 });
+        const pageSize = viewAll ? 100 : 10;
+        const params = new URLSearchParams({ page: feedPage, pageSize });
         if (activityFilter !== 'all') params.set('type', activityFilter);
         if (searchTerm) params.set('search', searchTerm);
+        if (dateFrom) params.set('dateFrom', dateFrom);
+        if (dateTo) params.set('dateTo', dateTo);
 
         const json = await apiFetch(`/api/collaboration/activity?${params}`);
         if (!json.success) {
@@ -200,6 +229,7 @@
             return;
         }
 
+        if (json.currentUserId) currentUserId = json.currentUserId;
         feedTotalCount = json.pagination.totalCount;
         const activities = json.data || [];
 
@@ -214,7 +244,7 @@
         // Group by date
         const groups = {};
         activities.forEach(a => {
-            const dateKey = new Date(a.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: '2-digit' });
+            const dateKey = toUtcDate(a.createdAt).toLocaleDateString('en-US', { timeZone: 'Asia/Manila', year: 'numeric', month: 'short', day: '2-digit' });
             if (!groups[dateKey]) groups[dateKey] = [];
             groups[dateKey].push(a);
         });
@@ -236,8 +266,9 @@
             items.forEach(a => container.appendChild(renderActivityItem(a)));
         });
 
+        const loaded = feedPage * pageSize;
         document.getElementById('loadMoreFeed').style.display =
-            (feedPage * 30 < feedTotalCount) ? '' : 'none';
+            (!viewAll && loaded < feedTotalCount) ? '' : 'none';
     }
 
     function renderActivityItem(a) {
@@ -252,7 +283,7 @@
             <div class="activity-content">
                 <div class="activity-header">
                     <p class="activity-text">
-                        <strong>${escHtml(a.userName)}</strong> ${escHtml(a.description)}
+                        <strong>${a.userId === currentUserId ? 'You' : escHtml(a.userName)}</strong> ${escHtml(a.description)}
                         ${a.entityName ? `<span class="activity-link">${escHtml(a.entityName)}</span>` : ''}
                     </p>
                     <span class="activity-avatar" style="background:${a.userAvatarColor || '#0B4F6C'}">${escHtml(a.userInitials)}</span>
@@ -266,8 +297,9 @@
     }
 
     function loadMoreActivities() {
-        feedPage++;
-        loadActivityFeed(true);
+        viewAll = true;
+        feedPage = 1;
+        loadActivityFeed();
     }
 
     // ── Discussions (Posts) ──
@@ -443,12 +475,18 @@
         return d.innerHTML;
     }
 
+    function toUtcDate(dateStr) {
+        if (!dateStr) return new Date();
+        const s = String(dateStr);
+        return new Date(s.endsWith('Z') || s.includes('+') ? s : s + 'Z');
+    }
+
     function timeAgo(dateStr) {
-        const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
+        const diff = (Date.now() - toUtcDate(dateStr).getTime()) / 1000;
         if (diff < 60) return 'just now';
         if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
         if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
         if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-        return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return toUtcDate(dateStr).toLocaleDateString('en-US', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric' });
     }
 </script>

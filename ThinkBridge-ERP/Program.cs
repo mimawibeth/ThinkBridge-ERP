@@ -46,6 +46,7 @@ builder.Services.AddScoped<ICalendarService, CalendarService>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<ISuperAdminService, SuperAdminService>();
 builder.Services.AddScoped<IPayMongoService, PayMongoService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<PdfReportService>();
 builder.Services.AddHttpClient();
 builder.Services.AddHostedService<SubscriptionExpirationService>();
@@ -141,5 +142,12 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Auth}/{action=Login}/{id?}");
+
+// Fix existing subscriptions with GracePeriodDays = 0 (migration default mismatch)
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ThinkBridge_ERP.Data.ApplicationDbContext>();
+    await db.Database.ExecuteSqlRawAsync("UPDATE [Subscription] SET GracePeriodDays = 7 WHERE GracePeriodDays = 0");
+}
 
 app.Run();

@@ -141,8 +141,20 @@ public class SettingsController : ControllerBase
             if (string.IsNullOrWhiteSpace(request.CurrentPassword))
                 return BadRequest(new { message = "Current password is required." });
 
-            if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 8)
-                return BadRequest(new { message = "New password must be at least 8 characters." });
+            if (string.IsNullOrWhiteSpace(request.NewPassword) || request.NewPassword.Length < 12)
+                return BadRequest(new { message = "Password must be at least 12 characters." });
+
+            if (!request.NewPassword.Any(char.IsUpper))
+                return BadRequest(new { message = "Password must include an uppercase letter." });
+
+            if (!request.NewPassword.Any(char.IsLower))
+                return BadRequest(new { message = "Password must include a lowercase letter." });
+
+            if (!request.NewPassword.Any(char.IsDigit))
+                return BadRequest(new { message = "Password must include a number." });
+
+            if (!System.Text.RegularExpressions.Regex.IsMatch(request.NewPassword, @"[^a-zA-Z0-9]"))
+                return BadRequest(new { message = "Password must include a special character." });
 
             if (request.NewPassword != request.ConfirmPassword)
                 return BadRequest(new { message = "New passwords do not match." });

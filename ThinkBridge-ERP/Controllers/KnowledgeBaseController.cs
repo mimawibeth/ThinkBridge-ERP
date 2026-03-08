@@ -341,7 +341,11 @@ public class KnowledgeBaseController : ControllerBase
     [HttpGet("articles/{id}/comments")]
     public async Task<IActionResult> GetComments(int id)
     {
-        var result = await _kbService.GetArticleCommentsAsync(id);
+        var companyId = GetCurrentCompanyId();
+        if (companyId == 0)
+            return BadRequest(new { success = false, message = "Invalid user context." });
+
+        var result = await _kbService.GetArticleCommentsAsync(companyId, id);
         if (!result.Success)
             return BadRequest(new { success = false, message = result.ErrorMessage });
 

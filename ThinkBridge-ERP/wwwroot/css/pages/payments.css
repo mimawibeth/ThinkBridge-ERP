@@ -169,10 +169,18 @@
 }
 
 .overdue-row {
-    background: rgba(239, 68, 68, 0.03);
+    background: rgba(234, 179, 8, 0.05);
 }
 
 .overdue-row:hover {
+    background: rgba(234, 179, 8, 0.10) !important;
+}
+
+.failed-row {
+    background: rgba(239, 68, 68, 0.03);
+}
+
+.failed-row:hover {
     background: rgba(239, 68, 68, 0.06) !important;
 }
 
