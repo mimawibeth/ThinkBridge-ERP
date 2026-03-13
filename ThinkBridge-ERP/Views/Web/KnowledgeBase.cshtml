@@ -30,6 +30,7 @@
                         <option value="Pending">Pending Approval</option>
                         <option value="Draft">Drafts</option>
                         <option value="Rejected">Rejected</option>
+                        <option value="Archived">Archived</option>
                     </select>
                 </div>
             }
@@ -42,6 +43,7 @@
                         <option value="Pending">Pending Approval</option>
                         <option value="Draft">My Drafts</option>
                         <option value="Rejected">Rejected</option>
+                        <option value="Archived">Archived</option>
                     </select>
                 </div>
             }
@@ -253,8 +255,16 @@
                         <span class="detail-value" id="view-article-author">-</span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Published</span>
+                        <span class="detail-label">Created Date</span>
                         <span class="detail-value" id="view-article-date">-</span>
+                    </div>
+                    <div class="detail-item" id="view-article-updated-section">
+                        <span class="detail-label">Last Updated</span>
+                        <span class="detail-value" id="view-article-updated">-</span>
+                    </div>
+                    <div class="detail-item" id="view-article-published-section" style="display:none;">
+                        <span class="detail-label">Published Date</span>
+                        <span class="detail-value" id="view-article-published">-</span>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Status</span>
@@ -341,15 +351,22 @@
                 </svg>
                 Archive
             </button>
+            <button class="btn btn-success" id="view-restore-btn" style="display:none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="1 4 1 10 7 10"></polyline>
+                    <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                </svg>
+                Restore
+            </button>
         </div>
     </div>
 </div>
 
-<!-- Approval Reason Modal -->
-<div class="modal-overlay" id="approval-reason-modal">
+<!-- Archive Confirmation Modal -->
+<div class="modal-overlay" id="archive-confirm-modal">
     <div class="modal modal-sm">
         <div class="modal-header">
-            <h2 id="approval-reason-title">Provide Reason</h2>
+            <h2>Archive Article</h2>
             <button class="modal-close" data-modal-close>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -358,47 +375,77 @@
             </button>
         </div>
         <div class="modal-body">
-            <div class="form-group">
-                <label for="approval-reason-text">Reason / Feedback</label>
-                <textarea id="approval-reason-text" class="form-textarea" rows="4"
-                          placeholder="Provide a reason or feedback..."></textarea>
+            <p style="color: var(--text-secondary); line-height: 1.6;">Are you sure you want to archive this article?
+                You can restore it later by contacting an administrator.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-modal-close>Cancel</button>
+                <button class="btn btn-warning" id="confirm-archive-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="21 8 21 21 3 21 3 8"></polyline>
+                        <rect x="1" y="3" width="22" height="5"></rect>
+                        <line x1="10" y1="12" x2="14" y2="12"></line>
+                    </svg>
+                    Archive
+                </button>
             </div>
         </div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" data-modal-close>Cancel</button>
-            <button class="btn btn-primary" id="approval-reason-submit">Submit</button>
-        </div>
     </div>
-</div>
 
-<!-- Add Category Modal -->
-<div class="modal-overlay" id="add-category-modal">
-    <div class="modal modal-sm">
-        <div class="modal-header">
-            <h2>Add Category</h2>
-            <button class="modal-close" data-modal-close>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-            </button>
-        </div>
-        <div class="modal-body">
-            <div class="form-group">
-                <label for="new-category-name">Category Name <span class="required">*</span></label>
-                <input type="text" id="new-category-name" class="form-input" placeholder="Enter category name"
-                       required />
+    <!-- Approval Reason Modal -->
+    <div class="modal-overlay" id="approval-reason-modal">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2 id="approval-reason-title">Provide Reason</h2>
+                <button class="modal-close" data-modal-close>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="approval-reason-text">Reason / Feedback</label>
+                    <textarea id="approval-reason-text" class="form-textarea" rows="4"
+                              placeholder="Provide a reason or feedback..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-modal-close>Cancel</button>
+                <button class="btn btn-primary" id="approval-reason-submit">Submit</button>
             </div>
         </div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" data-modal-close>Cancel</button>
-            <button class="btn btn-primary" id="save-category-btn">Create Category</button>
+    </div>
+
+    <!-- Add Category Modal -->
+    <div class="modal-overlay" id="add-category-modal">
+        <div class="modal modal-sm">
+            <div class="modal-header">
+                <h2>Add Category</h2>
+                <button class="modal-close" data-modal-close>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="new-category-name">Category Name <span class="required">*</span></label>
+                    <input type="text" id="new-category-name" class="form-input" placeholder="Enter category name"
+                           required />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-modal-close>Cancel</button>
+                <button class="btn btn-primary" id="save-category-btn">Create Category</button>
+            </div>
         </div>
     </div>
-</div>
 
-<input type="hidden" id="current-user-role" value="@userRole" />
+    <input type="hidden" id="current-user-role" value="@userRole" />
 
-@section PageScripts {
-    <script src="~/js/pages/knowledge-base.js" asp-append-version="true"></script>
-}
+    @section PageScripts {
+        <script src="~/js/pages/knowledge-base.js" asp-append-version="true"></script>
+    }

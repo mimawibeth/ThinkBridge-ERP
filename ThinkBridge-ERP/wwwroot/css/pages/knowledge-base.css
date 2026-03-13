@@ -39,10 +39,21 @@
     letter-spacing: 0.5px;
 }
 
-.kb-stats-bar .stat-approved .stat-value { color: var(--success); }
-.kb-stats-bar .stat-pending .stat-value { color: var(--warning, #f59e0b); }
-.kb-stats-bar .stat-draft .stat-value { color: var(--text-secondary); }
-.kb-stats-bar .stat-categories .stat-value { color: var(--primary-blue); }
+.kb-stats-bar .stat-approved .stat-value {
+    color: var(--success);
+}
+
+.kb-stats-bar .stat-pending .stat-value {
+    color: var(--warning, #f59e0b);
+}
+
+.kb-stats-bar .stat-draft .stat-value {
+    color: var(--text-secondary);
+}
+
+.kb-stats-bar .stat-categories .stat-value {
+    color: var(--primary-blue);
+}
 
 /*  Header status filter  */
 .header-status-filter {
@@ -184,7 +195,9 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .kb-empty h3 {
@@ -215,6 +228,8 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .article-card:hover {
@@ -293,6 +308,7 @@
     color: var(--text-primary);
     margin-bottom: var(--spacing-sm);
     line-height: 1.4;
+    min-height: 2.8em;
 }
 
 .article-description {
@@ -304,6 +320,8 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    min-height: 2.625em;
+    flex: 1;
 }
 
 /* Article Meta */
@@ -315,14 +333,28 @@
     border-top: 1px solid var(--border-light);
     font-size: 0.75rem;
     color: var(--text-muted);
+    margin-top: auto;
 }
 
-.meta-author,
+.meta-author {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    white-space: nowrap;
+}
+
+.meta-right {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
 .meta-date,
 .meta-comments {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
+    white-space: nowrap;
 }
 
 /*  View Article : Comments Section  */
@@ -475,6 +507,15 @@
 #view-admin-actions {
     display: inline-flex;
     gap: var(--spacing-sm);
+}
+
+#view-article-modal .modal-footer {
+    flex-wrap: wrap;
+}
+
+#view-article-modal .modal-footer .btn {
+    font-size: 0.8rem;
+    padding: 6px 12px;
 }
 
 .btn-warning {

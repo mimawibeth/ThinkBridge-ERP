@@ -165,6 +165,12 @@ public class ProjectService : IProjectService
     {
         try
         {
+            // Validate dates
+            if (request.StartDate.HasValue && request.DueDate.HasValue && request.DueDate.Value < request.StartDate.Value)
+            {
+                return new CreateProjectResult { Success = false, ErrorMessage = "Invalid date: Due date cannot be earlier than the start date." };
+            }
+
             // Generate project code
             var projectCount = await _context.Projects.CountAsync(p => p.CompanyID == companyId);
             var projectCode = $"PRJ-{(projectCount + 1):D3}";
@@ -272,6 +278,14 @@ public class ProjectService : IProjectService
             if (project.CreatedBy != userId)
             {
                 return new ServiceResult { Success = false, ErrorMessage = "Only the project creator can edit this project." };
+            }
+
+            // Validate dates
+            var effectiveStart = request.StartDate ?? project.StartDate;
+            var effectiveDue = request.DueDate ?? project.DueDate;
+            if (effectiveStart.HasValue && effectiveDue.HasValue && effectiveDue.Value < effectiveStart.Value)
+            {
+                return new ServiceResult { Success = false, ErrorMessage = "Invalid date: Due date cannot be earlier than the start date." };
             }
 
             if (!string.IsNullOrWhiteSpace(request.ProjectName)) project.ProjectName = request.ProjectName;

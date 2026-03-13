@@ -280,12 +280,16 @@ body.sidebar-collapsed .main-wrapper {
 
 body.sidebar-collapsed .sidebar {
   width: var(--sidebar-collapsed-width);
+  overflow: visible;
 }
 
 body.sidebar-collapsed .sidebar .sidebar-header {
   flex-direction: column;
   align-items: center;
-  padding: var(--spacing-md);
+  justify-content: center;
+  padding: 0;
+  height: var(--topbar-height);
+  min-height: var(--topbar-height);
 }
 
 body.sidebar-collapsed .sidebar .sidebar-logo {
@@ -293,7 +297,6 @@ body.sidebar-collapsed .sidebar .sidebar-logo {
 }
 
 body.sidebar-collapsed .sidebar .logo-text,
-body.sidebar-collapsed .sidebar .nav-text,
 body.sidebar-collapsed .sidebar .user-info {
   opacity: 0;
   visibility: hidden;
@@ -301,6 +304,49 @@ body.sidebar-collapsed .sidebar .user-info {
   height: 0;
   overflow: hidden;
   position: absolute;
+}
+
+/* Collapsed sidebar: nav-text becomes a tooltip on hover */
+body.sidebar-collapsed .sidebar .nav-text {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: max-content;
+  height: auto;
+  overflow: visible;
+  background: var(--neutral-900, #1e293b);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+body.sidebar-collapsed .sidebar .nav-text::before {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-right-color: var(--neutral-900, #1e293b);
+}
+
+body.sidebar-collapsed .sidebar .nav-link:hover .nav-text {
+  opacity: 1;
+  visibility: visible;
+}
+
+body.sidebar-collapsed .sidebar .sidebar-nav {
+  overflow: visible;
 }
 
 body.sidebar-collapsed .sidebar .sidebar-collapse-btn {
@@ -314,6 +360,7 @@ body.sidebar-collapsed .sidebar .sidebar-collapse-btn svg {
 body.sidebar-collapsed .sidebar .nav-link {
   justify-content: center;
   padding: var(--spacing-sm);
+  position: relative;
 }
 
 body.sidebar-collapsed .sidebar .nav-icon {
@@ -329,7 +376,7 @@ body.sidebar-collapsed .sidebar .sign-out-link {
 }
 
 body.sidebar-collapsed .sidebar .sign-out-link .nav-text {
-  display: none;
+  /* Inherits tooltip behavior from .nav-text rules above */
 }
 
 /* ===========================================
@@ -372,7 +419,9 @@ body.sidebar-collapsed .sidebar .sign-out-link .nav-text {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-md) var(--spacing-lg);
+  height: var(--topbar-height);
+  min-height: var(--topbar-height);
+  padding: 0 var(--spacing-lg);
   border-bottom: 1px solid var(--border);
 }
 

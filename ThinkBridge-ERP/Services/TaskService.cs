@@ -187,6 +187,14 @@ public class TaskService : ITaskService
             if (project == null)
                 return new CreateTaskResult { Success = false, ErrorMessage = "Project not found." };
 
+            // Validate task dates
+            if (request.StartDate.HasValue && request.DueDate.HasValue && request.DueDate.Value < request.StartDate.Value)
+                return new CreateTaskResult { Success = false, ErrorMessage = "Invalid date: Due date cannot be earlier than the start date." };
+            if (request.DueDate.HasValue && project.DueDate.HasValue && request.DueDate.Value > project.DueDate.Value)
+                return new CreateTaskResult { Success = false, ErrorMessage = "Invalid date: Due date must be within the project timeline." };
+            if (request.StartDate.HasValue && project.StartDate.HasValue && request.StartDate.Value < project.StartDate.Value)
+                return new CreateTaskResult { Success = false, ErrorMessage = "Invalid date: Start date cannot be earlier than the project start date." };
+
             var task = new Task
             {
                 ProjectID = request.ProjectID,
@@ -273,6 +281,16 @@ public class TaskService : ITaskService
             // PM can only edit tasks in projects they created; CompanyAdmin can edit any task in their company
             if (userRole.Equals("ProjectManager", StringComparison.OrdinalIgnoreCase) && task.Project.CreatedBy != userId)
                 return new ServiceResult { Success = false, ErrorMessage = "Only the project creator can edit tasks." };
+
+            // Validate task dates
+            var effectiveStart = request.StartDate ?? task.StartDate;
+            var effectiveDue = request.DueDate ?? task.DueDate;
+            if (effectiveStart.HasValue && effectiveDue.HasValue && effectiveDue.Value < effectiveStart.Value)
+                return new ServiceResult { Success = false, ErrorMessage = "Invalid date: Due date cannot be earlier than the start date." };
+            if (effectiveDue.HasValue && task.Project.DueDate.HasValue && effectiveDue.Value > task.Project.DueDate.Value)
+                return new ServiceResult { Success = false, ErrorMessage = "Invalid date: Due date must be within the project timeline." };
+            if (effectiveStart.HasValue && task.Project.StartDate.HasValue && effectiveStart.Value < task.Project.StartDate.Value)
+                return new ServiceResult { Success = false, ErrorMessage = "Invalid date: Start date cannot be earlier than the project start date." };
 
             string? oldStatus = null;
             if (!string.IsNullOrWhiteSpace(request.Title)) task.Title = request.Title;

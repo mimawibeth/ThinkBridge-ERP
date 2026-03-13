@@ -38,6 +38,10 @@ public class Document
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public DateTime? UpdatedAt { get; set; }
+
+    public DateTime? PublishedAt { get; set; }
+
     // Navigation properties
     [ForeignKey("CompanyID")]
     public virtual Company Company { get; set; } = null!;

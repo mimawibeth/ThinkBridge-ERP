@@ -16,6 +16,7 @@
     let approvalAction = ''; // 'reject' or 'revision'
     let categories = [];
     let userRole = '';
+    let pendingArchiveId = null;
 
     //  Initialization 
     document.addEventListener('DOMContentLoaded', function () {
@@ -121,6 +122,20 @@
         if (archiveBtn) {
             archiveBtn.addEventListener('click', function () {
                 archiveArticle(currentArticleId);
+            });
+        }
+
+        const confirmArchiveBtn = document.getElementById('confirm-archive-btn');
+        if (confirmArchiveBtn) {
+            confirmArchiveBtn.addEventListener('click', function () {
+                confirmArchive();
+            });
+        }
+
+        const restoreBtn = document.getElementById('view-restore-btn');
+        if (restoreBtn) {
+            restoreBtn.addEventListener('click', function () {
+                restoreArticle(currentArticleId);
             });
         }
 
@@ -273,20 +288,22 @@
                         </svg>
                         <span>${escapeHtml(a.authorName)}</span>
                     </div>
-                    <div class="meta-date">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                            <line x1="3" y1="10" x2="21" y2="10"></line>
-                        </svg>
-                        <span>${formatDate(a.createdAt)}</span>
-                    </div>
-                    <div class="meta-comments">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                        </svg>
-                        <span>${a.commentCount || 0}</span>
+                    <div class="meta-right">
+                        <div class="meta-date" title="${a.publishedAt ? 'Published' : 'Created'}" style="${a.publishedAt ? 'color:var(--success, #10b981);' : ''}">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            <span>${formatDate(a.publishedAt || a.createdAt)}</span>
+                        </div>
+                        <div class="meta-comments">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <span>${a.commentCount || 0}</span>
+                        </div>
                     </div>
                 </div>
             </article>
@@ -310,6 +327,25 @@
             document.getElementById('view-article-category').textContent = a.categoryName || 'Uncategorized';
             document.getElementById('view-article-author').textContent = a.authorName;
             document.getElementById('view-article-date').textContent = formatDate(a.createdAt);
+
+            // Last Updated date
+            const updatedSection = document.getElementById('view-article-updated-section');
+            if (a.updatedAt) {
+                updatedSection.style.display = '';
+                document.getElementById('view-article-updated').textContent = formatDate(a.updatedAt);
+            } else {
+                updatedSection.style.display = 'none';
+            }
+
+            // Published date
+            const publishedSection = document.getElementById('view-article-published-section');
+            if (a.publishedAt) {
+                publishedSection.style.display = '';
+                document.getElementById('view-article-published').textContent = formatDate(a.publishedAt);
+            } else {
+                publishedSection.style.display = 'none';
+            }
+
             document.getElementById('view-article-description').textContent = a.description || 'No description provided.';
 
             // Status badge — hide for Approved articles (clean look)
@@ -348,16 +384,22 @@
             // Show/hide action buttons based on role
             const editBtn = document.getElementById('view-edit-btn');
             const archiveBtn = document.getElementById('view-archive-btn');
+            const restoreBtn = document.getElementById('view-restore-btn');
             const adminActions = document.getElementById('view-admin-actions');
 
             // Reset
             if (editBtn) editBtn.style.display = 'none';
             if (archiveBtn) archiveBtn.style.display = 'none';
+            if (restoreBtn) restoreBtn.style.display = 'none';
             if (adminActions) adminActions.style.display = 'none';
 
             if (userRole === 'companyadmin') {
                 if (editBtn) editBtn.style.display = '';
-                if (archiveBtn && a.approvalStatus !== 'Archived') archiveBtn.style.display = '';
+                if (a.approvalStatus === 'Archived') {
+                    if (restoreBtn) restoreBtn.style.display = '';
+                } else {
+                    if (archiveBtn) archiveBtn.style.display = '';
+                }
                 if (a.approvalStatus === 'Pending' && adminActions) {
                     adminActions.style.display = '';
                 }
@@ -399,6 +441,9 @@
                 document.getElementById('article-summary').value = a.description || '';
                 document.getElementById('article-content').value = a.content || '';
                 document.getElementById('article-tags').value = (a.tags || []).join(', ');
+                await populateProjectDropdown(a.projectID);
+            } else {
+                await populateProjectDropdown();
             }
         } else {
             titleEl.textContent = 'Create New Article';
@@ -408,9 +453,35 @@
             document.getElementById('article-summary').value = '';
             document.getElementById('article-content').value = '';
             document.getElementById('article-tags').value = '';
+            await populateProjectDropdown();
         }
 
         openModal('article-form-modal');
+    }
+
+    async function populateProjectDropdown(selectedProjectId) {
+        const select = document.getElementById('article-project');
+        if (!select) return;
+
+        select.innerHTML = '<option value="">No Project</option>';
+
+        try {
+            const result = await apiGet('/api/projects?pageSize=100');
+            if (result.success && result.data) {
+                result.data.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.projectID;
+                    opt.textContent = p.projectName;
+                    select.appendChild(opt);
+                });
+            }
+        } catch (err) {
+            console.error('Failed to load projects', err);
+        }
+
+        if (selectedProjectId) {
+            select.value = selectedProjectId;
+        }
     }
 
     async function populateCategoryDropdown() {
@@ -440,6 +511,8 @@
         const content = document.getElementById('article-content').value.trim();
         const tagsRaw = document.getElementById('article-tags').value.trim();
         const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(t => t) : [];
+        const projectIdVal = document.getElementById('article-project')?.value;
+        const projectId = projectIdVal ? parseInt(projectIdVal) : null;
 
         if (!title) { showToast('Article title is required', 'error'); return; }
         if (!folderId) { showToast('Please select a category', 'error'); return; }
@@ -451,12 +524,14 @@
                 // Update
                 result = await apiPut(`${API_BASE}/articles/${formId}`, {
                     title, description, content, folderId, tags,
+                    projectId,
                     submitForApproval: !asDraft
                 });
             } else {
                 // Create
                 result = await apiPost(`${API_BASE}/articles`, {
                     title, description, content, folderId, tags,
+                    projectId,
                     fileType: 'Article',
                     saveAsDraft: asDraft
                 });
@@ -470,6 +545,10 @@
                 loadArticles();
                 loadStats();
                 loadCategories();
+                // If editing, reopen the view modal to show updated dates
+                if (formId > 0) {
+                    setTimeout(() => window.kbViewArticle(formId), 300);
+                }
             } else {
                 showToast(result.message || 'Failed to save article', 'error');
             }
@@ -479,8 +558,16 @@
         }
     }
 
-    async function archiveArticle(docId) {
-        if (!confirm('Are you sure you want to archive this article? You can restore it later.')) return;
+    function archiveArticle(docId) {
+        pendingArchiveId = docId;
+        openModal('archive-confirm-modal');
+    }
+
+    async function confirmArchive() {
+        if (!pendingArchiveId) return;
+        const docId = pendingArchiveId;
+        pendingArchiveId = null;
+        closeModal('archive-confirm-modal');
 
         try {
             const result = await apiPost(`${API_BASE}/articles/${docId}/archive`, {});
@@ -499,16 +586,35 @@
         }
     }
 
+    async function restoreArticle(docId) {
+        try {
+            const result = await apiPost(`${API_BASE}/articles/${docId}/restore`, {});
+            if (result.success) {
+                closeModal('view-article-modal');
+                showToast('Article restored successfully', 'success');
+                loadArticles();
+                loadStats();
+                loadCategories();
+            } else {
+                showToast(result.message || 'Failed to restore article', 'error');
+            }
+        } catch (err) {
+            showToast('Failed to restore article', 'error');
+            console.error(err);
+        }
+    }
+
     //  Approval Workflow 
 
     async function approveArticle(docId) {
         try {
             const result = await apiPost(`${API_BASE}/articles/${docId}/approve`, {});
             if (result.success) {
-                closeModal('view-article-modal');
                 showToast('Article approved and published!', 'success');
                 loadArticles();
                 loadStats();
+                // Refresh the view modal in-place to show the Published Date
+                await window.kbViewArticle(docId);
             } else {
                 showToast(result.message || 'Failed to approve article', 'error');
             }

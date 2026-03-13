@@ -9,6 +9,8 @@ using ThinkBridge_ERP.Services.Interfaces;
 
 // QuestPDF community license (free for < $1M annual revenue)
 QuestPDF.Settings.License = LicenseType.Community;
+QuestPDF.Settings.UseEnvironmentFonts = false;
+QuestPDF.Settings.CheckIfAllTextGlyphsAreAvailable = false;
 
 var builder = WebApplication.CreateBuilder(args);
 

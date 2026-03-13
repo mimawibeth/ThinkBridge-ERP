@@ -8,6 +8,7 @@ public interface IKnowledgeBaseService
     Task<CreateArticleResult> CreateArticleAsync(int companyId, int userId, string userRole, CreateArticleRequest request);
     Task<ServiceResult> UpdateArticleAsync(int companyId, int userId, string userRole, int documentId, UpdateArticleRequest request);
     Task<ServiceResult> ArchiveArticleAsync(int companyId, int userId, string userRole, int documentId);
+    Task<ServiceResult> RestoreArticleAsync(int companyId, int userId, string userRole, int documentId);
 
     // Approval Workflow
     Task<ArticleListResult> GetPendingArticlesAsync(int companyId, int userId, string userRole, ArticleFilterRequest filter);
@@ -89,6 +90,8 @@ public class ArticleItem
     public string AuthorAvatarColor { get; set; } = "#0B4F6C";
     public string? ApproverName { get; set; }
     public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+    public DateTime? PublishedAt { get; set; }
     public List<string> Tags { get; set; } = new();
     public int CommentCount { get; set; }
 }

@@ -395,6 +395,68 @@
             });
         });
 
+        // Date picker constraints: due date >= start date (Create modal)
+        const createStartDate = document.getElementById('start-date');
+        const createDueDate = document.getElementById('due-date');
+        if (createStartDate && createDueDate) {
+            createStartDate.addEventListener('change', function() {
+                const dateErr = document.getElementById('project-date-error');
+                if (this.value) {
+                    createDueDate.min = this.value;
+                    if (createDueDate.value && createDueDate.value < this.value) {
+                        createDueDate.value = '';
+                        dateErr.textContent = 'Invalid date: Due date cannot be earlier than the start date.';
+                        dateErr.style.display = 'block';
+                    } else {
+                        dateErr.style.display = 'none';
+                    }
+                } else {
+                    createDueDate.removeAttribute('min');
+                    dateErr.style.display = 'none';
+                }
+            });
+            createDueDate.addEventListener('change', function() {
+                const dateErr = document.getElementById('project-date-error');
+                if (createStartDate.value && this.value && this.value < createStartDate.value) {
+                    dateErr.textContent = 'Invalid date: Due date cannot be earlier than the start date.';
+                    dateErr.style.display = 'block';
+                } else {
+                    dateErr.style.display = 'none';
+                }
+            });
+        }
+
+        // Date picker constraints: due date >= start date (Edit modal)
+        const editStartDate = document.getElementById('edit-start-date');
+        const editDueDate = document.getElementById('edit-due-date');
+        if (editStartDate && editDueDate) {
+            editStartDate.addEventListener('change', function() {
+                const dateErr = document.getElementById('edit-project-date-error');
+                if (this.value) {
+                    editDueDate.min = this.value;
+                    if (editDueDate.value && editDueDate.value < this.value) {
+                        editDueDate.value = '';
+                        dateErr.textContent = 'Invalid date: Due date cannot be earlier than the start date.';
+                        dateErr.style.display = 'block';
+                    } else {
+                        dateErr.style.display = 'none';
+                    }
+                } else {
+                    editDueDate.removeAttribute('min');
+                    dateErr.style.display = 'none';
+                }
+            });
+            editDueDate.addEventListener('change', function() {
+                const dateErr = document.getElementById('edit-project-date-error');
+                if (editStartDate.value && this.value && this.value < editStartDate.value) {
+                    dateErr.textContent = 'Invalid date: Due date cannot be earlier than the start date.';
+                    dateErr.style.display = 'block';
+                } else {
+                    dateErr.style.display = 'none';
+                }
+            });
+        }
+
         // New project modal
         if (CAN_CREATE) {
             document.getElementById('new-project-btn')?.addEventListener('click', () => openModal('new-project-modal'));
@@ -563,8 +625,8 @@
         const startVal = document.getElementById('start-date').value;
         const dueVal = document.getElementById('due-date').value;
         if (startVal && dueVal) {
-            if (dueVal <= startVal) {
-                dateErr.textContent = 'Due Date cannot be the same as Start Date. Select a Due Date at least 1 day later than the Start Date.';
+            if (dueVal < startVal) {
+                dateErr.textContent = 'Invalid date: Due date cannot be earlier than the start date.';
                 dateErr.style.display = 'block';
                 return;
             }
@@ -623,8 +685,17 @@
             document.getElementById('edit-project-id').value = p.projectID;
             document.getElementById('edit-project-name').value = p.projectName;
             document.getElementById('edit-project-description').value = p.description || '';
-            document.getElementById('edit-start-date').value = p.startDate ? p.startDate.split('T')[0] : '';
-            document.getElementById('edit-due-date').value = p.dueDate ? p.dueDate.split('T')[0] : '';
+            const editStartInput = document.getElementById('edit-start-date');
+            const editDueInput = document.getElementById('edit-due-date');
+            editStartInput.value = p.startDate ? p.startDate.split('T')[0] : '';
+            editDueInput.value = p.dueDate ? p.dueDate.split('T')[0] : '';
+            // Set min constraint on due date based on start date
+            if (editStartInput.value) {
+                editDueInput.min = editStartInput.value;
+            } else {
+                editDueInput.removeAttribute('min');
+            }
+            document.getElementById('edit-project-date-error').style.display = 'none';
             document.getElementById('edit-project-status').value = p.status;
             const catSelect = document.getElementById('edit-project-category');
             if (p.category && !Array.from(catSelect.options).some(o => o.value === p.category)) {
@@ -650,8 +721,8 @@
         const editStartVal = document.getElementById('edit-start-date').value;
         const editDueVal = document.getElementById('edit-due-date').value;
         if (editStartVal && editDueVal) {
-            if (editDueVal <= editStartVal) {
-                editDateErr.textContent = 'Due Date cannot be the same as Start Date. Select a Due Date at least 1 day later than the Start Date.';
+            if (editDueVal < editStartVal) {
+                editDateErr.textContent = 'Invalid date: Due date cannot be earlier than the start date.';
                 editDateErr.style.display = 'block';
                 return;
             }

@@ -606,6 +606,7 @@
             // Clear all client-side storage
             sessionStorage.clear();
             localStorage.removeItem('sidebarCollapsed');
+            localStorage.removeItem('tb_onboarding_done');
 
             // Server-side sign out via GET
             window.location.href = '/Auth/Logout';
@@ -695,6 +696,7 @@
             // Clear all client-side storage
             sessionStorage.clear();
             localStorage.removeItem('sidebarCollapsed');
+            localStorage.removeItem('tb_onboarding_done');
 
             // Call server logout
             const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;

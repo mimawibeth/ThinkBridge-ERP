@@ -181,7 +181,7 @@
 }
 
 .audit-log-table tbody tr:hover {
-    background: var(--blue-lightest);
+    background: transparent;
 }
 
 .audit-log-table td {

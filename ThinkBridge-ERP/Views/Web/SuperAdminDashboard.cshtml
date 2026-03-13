@@ -167,6 +167,17 @@
         // === Revenue Trend Chart ===
         if (revResult.success) {
         const rev = revResult.data;
+
+        // Update revenue KPI sub-label with growth %
+        const growthPct = rev.revenueGrowthPercent || 0;
+        const revSubEl = document.getElementById('kpi-revenue-sub');
+        if (growthPct !== 0) {
+        revSubEl.textContent = (growthPct >= 0 ? '+' : '') + growthPct + '% vs last month';
+        revSubEl.className = 'kpi-change ' + (growthPct >= 0 ? 'positive' : 'negative');
+        } else {
+        revSubEl.textContent = 'No change vs last month';
+        revSubEl.className = 'kpi-change';
+        }
         const trend = rev.monthlyTrend || [];
         const labels = trend.map(m => m.label);
         const revenueData = trend.map(m => m.revenue);
@@ -255,8 +266,7 @@
         const planColors = {
         'Enterprise': '#7C3AED',
         'Professional': '#0B4F6C',
-        'Starter': '#f97316',
-        'Trial': '#94a3b8'
+        'Starter': '#f97316'
         };
         const colors = planLabels.map(p => planColors[p] || '#64748b');
 

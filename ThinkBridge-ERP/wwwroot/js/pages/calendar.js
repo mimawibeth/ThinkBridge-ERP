@@ -547,7 +547,38 @@
             document.getElementById('event-end').value = toLocalDatetimeString(dEnd);
         }
 
+        // Attach real-time date validation listeners
+        const startInput = document.getElementById('event-start');
+        const endInput = document.getElementById('event-end');
+        startInput.removeEventListener('change', validateEventDates);
+        endInput.removeEventListener('change', validateEventDates);
+        startInput.addEventListener('change', validateEventDates);
+        endInput.addEventListener('change', validateEventDates);
+        // Clear any previous error
+        document.getElementById('event-date-error').style.display = 'none';
+        endInput.style.removeProperty('border-color');
+
         window.openModal('event-form-modal');
+    }
+
+    function validateEventDates() {
+        const startVal = document.getElementById('event-start').value;
+        const endVal = document.getElementById('event-end').value;
+        const errorEl = document.getElementById('event-date-error');
+        const endInput = document.getElementById('event-end');
+
+        // Update min attribute on end input
+        if (startVal) {
+            endInput.min = startVal;
+        }
+
+        if (startVal && endVal && new Date(endVal) < new Date(startVal)) {
+            errorEl.style.display = 'block';
+            endInput.style.borderColor = '#ef4444';
+        } else {
+            errorEl.style.display = 'none';
+            endInput.style.removeProperty('border-color');
+        }
     }
 
     // ─── Save Event ──────────────────────────────
@@ -571,7 +602,10 @@
         let endDate = new Date(endVal);
 
         if (endDate < startDate) {
-            showToast('End date must be after start date.', 'warning');
+            const errorEl = document.getElementById('event-date-error');
+            errorEl.style.display = 'block';
+            document.getElementById('event-end').style.borderColor = '#ef4444';
+            showToast('End date/time must be equal to or after the start date/time.', 'warning');
             return;
         }
 

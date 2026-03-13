@@ -486,6 +486,9 @@
                                                                                         sessionStorage.setItem('userName', result.user.name);
                                                                                         sessionStorage.setItem('userEmail', result.user.email);
 
+                                                                                        // Clear stale onboarding state so new user gets fresh tour
+                                                                                        localStorage.removeItem('tb_onboarding_done');
+
                                                                                         // Redirect to appropriate dashboard
                                                                                         window.location.href = result.redirectUrl;
                                                                                     } else {

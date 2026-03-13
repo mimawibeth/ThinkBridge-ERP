@@ -60,6 +60,11 @@ public class KnowledgeBaseService : IKnowledgeBaseService
             {
                 query = query.Where(d => d.ApprovalStatus == filter.Status);
             }
+            else
+            {
+                // Exclude archived articles from default view
+                query = query.Where(d => d.ApprovalStatus != "Archived");
+            }
 
             if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
             {
@@ -93,6 +98,8 @@ public class KnowledgeBaseService : IKnowledgeBaseService
                     AuthorAvatarColor = d.Uploader.AvatarColor,
                     ApproverName = d.Approver != null ? d.Approver.Fname + " " + d.Approver.Lname : null,
                     CreatedAt = d.CreatedAt,
+                    UpdatedAt = d.UpdatedAt,
+                    PublishedAt = d.PublishedAt,
                     Tags = d.DocumentTags.Select(dt => dt.Tag.TagName).ToList(),
                     CommentCount = _context.Comments.Count(c => c.Post.PostDocuments.Any(pd => pd.DocumentID == d.DocumentID))
                 })
@@ -159,6 +166,8 @@ public class KnowledgeBaseService : IKnowledgeBaseService
                 AuthorAvatarColor = doc.Uploader.AvatarColor,
                 ApproverName = doc.Approver != null ? doc.Approver.Fname + " " + doc.Approver.Lname : null,
                 CreatedAt = doc.CreatedAt,
+                UpdatedAt = doc.UpdatedAt,
+                PublishedAt = doc.PublishedAt,
                 Tags = doc.DocumentTags.Select(dt => dt.Tag.TagName).ToList(),
                 CommentCount = commentCount,
                 ProjectID = doc.ProjectID,
@@ -220,7 +229,8 @@ public class KnowledgeBaseService : IKnowledgeBaseService
                 UploadedBy = userId,
                 ApprovalStatus = approvalStatus,
                 ApprovedBy = approvedBy,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                PublishedAt = approvalStatus == "Approved" ? DateTime.UtcNow : null
             };
 
             _context.Documents.Add(document);
@@ -334,6 +344,8 @@ public class KnowledgeBaseService : IKnowledgeBaseService
             if (request.ProjectId.HasValue)
                 doc.ProjectID = request.ProjectId.Value;
 
+            doc.UpdatedAt = DateTime.UtcNow;
+
             // Handle content update via new version
             if (!string.IsNullOrWhiteSpace(request.Content))
             {
@@ -362,6 +374,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
                 // Admin can auto-approve when editing a draft
                 doc.ApprovalStatus = "Approved";
                 doc.ApprovedBy = userId;
+                doc.PublishedAt = DateTime.UtcNow;
             }
 
             // Handle tags
@@ -453,6 +466,45 @@ public class KnowledgeBaseService : IKnowledgeBaseService
         }
     }
 
+    public async Task<ServiceResult> RestoreArticleAsync(int companyId, int userId, string userRole, int documentId)
+    {
+        try
+        {
+            var doc = await _context.Documents
+                .FirstOrDefaultAsync(d => d.DocumentID == documentId && d.CompanyID == companyId);
+
+            if (doc == null)
+                return new ServiceResult { Success = false, ErrorMessage = "Article not found." };
+
+            if (userRole != "CompanyAdmin")
+                return new ServiceResult { Success = false, ErrorMessage = "Only administrators can restore archived articles." };
+
+            if (doc.ApprovalStatus != "Archived")
+                return new ServiceResult { Success = false, ErrorMessage = "Article is not archived." };
+
+            doc.ApprovalStatus = "Draft";
+            await _context.SaveChangesAsync();
+
+            _context.AuditLogs.Add(new AuditLog
+            {
+                CompanyID = companyId,
+                UserID = userId,
+                Action = "Restored",
+                EntityName = "Document",
+                EntityID = documentId,
+                CreatedAt = DateTime.UtcNow
+            });
+            await _context.SaveChangesAsync();
+
+            return new ServiceResult { Success = true };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error restoring article {DocumentId}", documentId);
+            return new ServiceResult { Success = false, ErrorMessage = "Failed to restore article." };
+        }
+    }
+
     // ──────────────────────────────────────────────
     // Approval Workflow
     // ──────────────────────────────────────────────
@@ -493,6 +545,7 @@ public class KnowledgeBaseService : IKnowledgeBaseService
 
             doc.ApprovalStatus = "Approved";
             doc.ApprovedBy = userId;
+            doc.PublishedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
             // Notify the author

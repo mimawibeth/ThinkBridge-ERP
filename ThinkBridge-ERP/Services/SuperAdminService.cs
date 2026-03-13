@@ -539,7 +539,7 @@ public class SuperAdminService : ISuperAdminService
             var mrr = activeSubs.Sum(s => s.Plan.BillingCycle == "Annual" ? s.Plan.Price / 12 : s.Plan.Price);
 
             var planDistribution = allSubs
-                .Where(s => s.Status == "Active" || s.Status == "Trial" || s.Status == "GracePeriod")
+                .Where(s => s.Status == "Active" || s.Status == "GracePeriod")
                 .GroupBy(s => s.Plan.PlanName)
                 .ToDictionary(g => g.Key, g => g.Count());
 
@@ -1075,7 +1075,7 @@ public class SuperAdminService : ISuperAdminService
                 .Sum(s => s.Plan!.BillingCycle == "Annual" ? s.Plan.Price / 12m : s.Plan.Price);
 
             var planDistribution = subscriptions
-                .Where(s => s.Plan != null)
+                .Where(s => s.Plan != null && s.Plan.PlanName != "Trial")
                 .GroupBy(s => s.Plan!.PlanName)
                 .Select(g => new PlanDistributionItem
                 {
@@ -1089,7 +1089,12 @@ public class SuperAdminService : ISuperAdminService
             // ---- Payment Overview ----
             var payments = await _context.PaymentTransactions.ToListAsync();
             var completedPayments = payments.Where(p => p.Status == "Completed" || p.Status == "Paid").ToList();
-            var totalRevenue = completedPayments.Sum(p => p.Amount);
+
+            // Total Revenue (Yearly) - sum of completed payments in the current calendar year
+            var yearStart = new DateTime(now.Year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var totalRevenue = completedPayments
+                .Where(p => p.CreatedAt >= yearStart)
+                .Sum(p => p.Amount);
             var pendingAmount = payments.Where(p => p.Status == "Pending").Sum(p => p.Amount);
             var completedCount = completedPayments.Count;
             var pendingCount = payments.Count(p => p.Status == "Pending");

@@ -169,6 +169,26 @@ public class KnowledgeBaseController : ControllerBase
         return Ok(new { success = true });
     }
 
+    /// <summary>
+    /// Restore an archived article (CompanyAdmin only)
+    /// </summary>
+    [HttpPost("articles/{id}/restore")]
+    [Authorize(Policy = "CompanyAdminOnly")]
+    public async Task<IActionResult> RestoreArticle(int id)
+    {
+        var companyId = GetCurrentCompanyId();
+        var userId = GetCurrentUserId();
+        var role = GetCurrentUserRole();
+        if (companyId == 0 || userId == 0)
+            return BadRequest(new { success = false, message = "Invalid user context." });
+
+        var result = await _kbService.RestoreArticleAsync(companyId, userId, role, id);
+        if (!result.Success)
+            return BadRequest(new { success = false, message = result.ErrorMessage });
+
+        return Ok(new { success = true });
+    }
+
     // ──────────────────────────────────────────────
     // Approval Workflow (CompanyAdmin only)
     // ──────────────────────────────────────────────

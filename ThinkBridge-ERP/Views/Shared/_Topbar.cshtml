@@ -47,9 +47,9 @@
         <div class="topbar-item topbar-user-info">
             @{
                 var userName = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Name)?.Value ??
-            "User";
+                "User";
                 var userInitials = string.Join("", userName.Split(' ').Where(n => !string.IsNullOrEmpty(n)).Select(n =>
-            n[0].ToString().ToUpper()).Take(2));
+                n[0].ToString().ToUpper()).Take(2));
                 if (string.IsNullOrEmpty(userInitials)) userInitials = "U";
                 var avatarColor = User.Claims.FirstOrDefault(c => c.Type == "AvatarColor")?.Value ?? "#0B4F6C";
                 var userRole = ViewData["UserRole"]?.ToString() ?? "companyadmin";
@@ -73,7 +73,7 @@
     </div>
     <input type="hidden" id="topbar-user-role" value="@userRole" />
     @{
-        var hasCompletedOnboarding = User.Claims.FirstOrDefault(c => c.Type == "HasCompletedOnboarding")?.Value ?? "True";
+        var hasCompletedOnboarding = User.Claims.FirstOrDefault(c => c.Type == "HasCompletedOnboarding")?.Value ?? "False";
     }
     <input type="hidden" id="topbar-onboarding-done" value="@hasCompletedOnboarding" />
 </header>

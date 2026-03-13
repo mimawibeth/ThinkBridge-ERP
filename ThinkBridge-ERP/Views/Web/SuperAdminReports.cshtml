@@ -208,10 +208,10 @@
         <div class="report-kpi-card">
         <div class="kpi-label">Subscriptions</div>
         <div class="kpi-value">${data.totalSubscriptions}</div>
-        <div class="kpi-sub"><span class="text-success">${data.activeSubscriptions} active</span> · ${data.trialSubscriptions} trial</div>
+        <div class="kpi-sub"><span class="text-success">${data.activeSubscriptions} active</span></div>
         </div>
         <div class="report-kpi-card">
-        <div class="kpi-label">Total Revenue</div>
+        <div class="kpi-label">Total Revenue (Yearly)</div>
         <div class="kpi-value">₱${formatNumber(data.totalRevenue)}</div>
         <div class="kpi-sub">${data.completedPayments} completed payments</div>
         </div>
@@ -274,8 +274,7 @@
         const colors = {
         'Enterprise': '#7C3AED',
         'Professional': '#2563EB',
-        'Starter': '#D97706',
-        'Trial': '#6D28D9'
+        'Starter': '#D97706'
         };
 
         const labels = planDistribution.map(p => p.planName);
@@ -315,7 +314,6 @@
 
         const items = [
         { label: 'Active', count: data.activeSubscriptions, color: 'green' },
-        { label: 'Trial', count: data.trialSubscriptions, color: 'purple' },
         { label: 'Expired', count: data.expiredSubscriptions, color: 'orange' },
         { label: 'Cancelled', count: data.cancelledSubscriptions, color: 'red' }
         ];
